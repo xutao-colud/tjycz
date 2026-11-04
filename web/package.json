@@ -8,6 +8,7 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test:audio": "node scripts/check-audio-playback.mjs",
+    "test:password": "node scripts/check-password.mjs",
     "dev:app": "vite --mode app-dev --host 0.0.0.0 --port 15175 --strictPort",
     "build:app": "vue-tsc -b && vite build --mode app",
     "build:app:dev": "vue-tsc -b && vite build --mode app-dev",
@@ -25,11 +26,13 @@
     "@capacitor/geolocation": "8.2.4",
     "@capacitor/ios": "8.5.3",
     "lucide-vue-next": "^0.468.0",
+    "node-forge": "1.4.1",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.3",
+    "@types/node-forge": "1.3.14",
     "@vitejs/plugin-vue": "^6.0.1",
     "typescript": "~5.9.3",
     "vite": "^7.1.12",

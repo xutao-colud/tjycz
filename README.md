@@ -72,7 +72,7 @@ iOS/Android App 工程现位于 `web/ios`、`web/android`，采用同一套账�
 
 ## 密码传输加密
 
-账号登录与创建账号使用 RSA-2048 / OAEP-SHA256（MGF1-SHA256）加密密码，先获取 60 秒、一次性 challenge，再提交 `challengeId` 与 `encryptedPassword`。后端拒绝明文 `password`，过期、篡改和重放请求返回 400，错误凭据返回 401；数据库继续使用 BCrypt 存储密码。Web 使用原生 WebCrypto，小程序使用锁定版本的 node-forge 1.4.1 公钥模块和 `wx.getRandomValues`，安全随机源不可用时不降级。
+账号登录与创建账号使用 RSA-2048 / OAEP-SHA256（MGF1-SHA256）加密密码，先获取 60 秒、一次性 challenge，再提交 `challengeId` 与 `encryptedPassword`。后端拒绝明文 `password`，过期、篡改和重放请求返回 400，错误凭据返回 401；数据库继续使用 BCrypt 存储密码。Web 优先使用原生 WebCrypto；普通 HTTP/IP 页面使用按需加载的 node-forge 1.4.1 和 `crypto.getRandomValues` 完成同一加密流程。小程序使用同版本公钥模块和 `wx.getRandomValues`，安全随机源不可用时不降级。密码加密不能代替 HTTPS 对页面和会话的保护。运行 `npm --prefix web run test:password` 验证 Web 两种加密路径与后端协议的兼容性。
 
 本地 HTTP 仅用于开发。生产必须配置可信 HTTPS 合法域名，保护公钥分发、登录会话及全部业务数据；应用层 RSA 不替代 TLS。当前仓库不包含生产证书，不能将本地 HTTP 宣称为完整的传输安全部署。接口详情见 `docs/api-contract.md`。
 
