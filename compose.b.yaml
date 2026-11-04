@@ -1,0 +1,32 @@
+# Use with compose.yaml and a private .env on B: docker compose -p tjycz -f compose.yaml -f compose.b.yaml ...
+services:
+  mysql:
+    mem_limit: 768m
+    command: ["--innodb-buffer-pool-size=256M", "--max-connections=40"]
+  backend:
+    mem_limit: 768m
+    environment:
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=65
+      OCR_URL: http://ocr:18086
+      OCR_KEY_FILE: /run/secrets/ocr_key
+    secrets:
+      - ocr_key
+  web:
+    mem_limit: 128m
+  ocr:
+    build: ./ocr-service
+    environment:
+      OCR_KEY_FILE: /run/secrets/ocr_key
+      OCR_CPU_THREADS: "2"
+    secrets:
+      - ocr_key
+    volumes:
+      - ocr-models:/root/.paddlex
+    mem_limit: 2g
+    cpus: 2
+    restart: unless-stopped
+secrets:
+  ocr_key:
+    file: ./.run/ocr.key
+volumes:
+  ocr-models:
