@@ -1,1 +1,0 @@
-<view wx:if="{{files.length}}" class="files"><view wx:for="{{files}}" wx:key="id" class="file" data-index="{{index}}" bindtap="open"><text>{{item.name}}</text><text class="open">查看附件</text></view></view>

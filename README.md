@@ -15,7 +15,7 @@ compose.yaml   MySQL + Redis + 后端 + Web 部署
 
 ## 本地运行
 
-需要 Java 17+、Maven 3.9+、Node.js 20.19+ 和 Python 3.9+。
+建议使用 Java 17、Maven 3.9+、Node.js 22（`.nvmrc`）和 Python 3.11（`.python-version`）。克隆后的环境配置、小程序联调、OCR 安装与自检步骤见 [本地开发环境](docs/local-development.md)。
 
 ```bash
 bash scripts/dev.sh
@@ -64,9 +64,9 @@ npm run dev
 
 iOS/Android App 工程现位于 `web/ios`、`web/android`，采用同一套账号与业务接口；构建步骤和当前安装包限制见 [App说明](web/APP.md)，本轮验证见 [App验收记录](docs/native-app-acceptance-20261028.md)。
 
-用微信开发者工具导入 `miniprogram/`，或 `/Users/xutao/Documents/小程序代码`。两个目录已统一为同一套新版界面和三角色登录，无需安装小程序构建依赖。先选择身份，账号与密码均输入 `admin`。具体操作和页面说明见 [小程序说明](miniprogram/README.md)。
+用微信开发者工具导入本仓库的 `miniprogram/`，无需安装小程序构建依赖。本地体验支持家长、教师、校长和管理员，账号与密码均输入 `admin`。具体操作和页面说明见 [小程序说明](miniprogram/README.md)。
 
-默认接口地址在 `miniprogram/utils/config.js`，现为电脑局域网地址 `http://192.168.31.28:18080/api`，两个小程序目录均已同步。后端监听 `0.0.0.0:18080`，手机与电脑连接同一局域网即可访问；IP 变化后需更新该配置。微信局域网开发调试需关闭合法域名校验，必要时开启真机调试；正式发布仍需 HTTPS 合法域名。
+接口地址在 `miniprogram/utils/config.js`；克隆到另一台电脑后须改为该电脑的局域网 IPv4，端口为 `18080`、路径为 `/api`。后端监听 `0.0.0.0:18080`，手机需能访问电脑；IP 变化后重新配置并编译。微信局域网开发调试需关闭合法域名校验，必要时开启真机调试及手机本地网络权限；正式发布仍需 HTTPS 合法域名。
 
 小程序使用同一后端登录会话。开发模式可体验教师与家长身份；真实微信身份交换、监护人邀请绑定和订阅消息需要后续配置微信主体、AppID、密钥与模板。
 

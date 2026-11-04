@@ -1,1 +1,0 @@
-{"desc":"内部教学管理页面不参与微信搜索索引","rules":[{"action":"disallow","page":"*"}]}
