@@ -1,0 +1,36 @@
+<view wx:if="{{rows.length}}" class="files {{removable ? 'files-removable' : ''}}">
+  <view wx:for="{{rows}}" wx:key="id" class="file file-{{item.kind}} {{playingIndex === index ? 'file-playing' : ''}}" data-index="{{index}}" catchtap="open" role="button" aria-label="{{item.kindLabel}}：{{item.displayName}}">
+    <block wx:if="{{item.kind === 'image'}}">
+      <view class="image-wrap">
+        <image class="thumbnail" src="{{item.url}}" mode="aspectFill" data-index="{{index}}" binderror="imageError" />
+        <view class="image-badge">照片</view>
+      </view>
+      <view class="image-name">{{item.displayName}}</view>
+    </block>
+    <block wx:else>
+      <view class="file-icon file-icon-{{item.kind}}">
+        <image wx:if="{{item.kind === 'audio'}}" class="type-icon" src="/assets/icons/mic.png" mode="aspectFit" />
+        <view wx:elif="{{item.kind === 'video'}}" class="video-mark"></view>
+        <image wx:else class="type-icon" src="/assets/icons/homework.png" mode="aspectFit" />
+      </view>
+      <view class="file-copy">
+        <view class="file-name">{{item.displayName}}</view>
+        <view class="file-description">
+          <text class="kind-label">{{item.kindLabel}}</text>
+          <text>{{item.kind === 'audio' ? (playingIndex === index ? '正在播放 · 点击暂停' : '点击播放') : (item.kind === 'video' ? '点击观看' : '查看附件')}}</text>
+        </view>
+      </view>
+      <view wx:if="{{item.kind === 'audio' || item.kind === 'video'}}" class="play-action {{playingIndex === index ? 'play-action-active' : ''}}">
+        <view wx:if="{{playingIndex === index}}" class="sound-wave">
+          <view class="wave-bar wave-first"></view>
+          <view class="wave-bar wave-middle"></view>
+          <view class="wave-bar wave-last"></view>
+        </view>
+        <view wx:else class="play-mark"></view>
+      </view>
+      <view wx:else class="file-chevron"></view>
+    </block>
+    <button wx:if="{{removable}}" class="remove" data-id="{{item.id}}" catchtap="remove" disabled="{{disabled}}" aria-label="移除{{item.displayName}}">移除</button>
+  </view>
+</view>
+<view wx:if="{{error}}" class="playback-error">{{error}}</view>

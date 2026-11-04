@@ -1,0 +1,41 @@
+.student-hero{display:flex;align-items:center;justify-content:space-between;gap:24rpx}
+.hero-icon{width:84rpx;height:84rpx;flex-shrink:0}
+.search-card{padding:24rpx}
+.search-row{display:flex;align-items:center;gap:18rpx}
+.search-input{display:flex;align-items:center;gap:18rpx;flex:1;min-width:0;padding-left:24rpx;background:#fafafd;border-radius:26rpx}
+.search-input input{height:80rpx;padding:0 16rpx 0 0;background:transparent;border:0;font-size:26rpx}
+.search-symbol{width:24rpx;height:24rpx;border:3rpx solid #c9cdd7;border-radius:50%;position:relative;flex-shrink:0}
+.search-symbol::after{content:'';position:absolute;width:12rpx;height:3rpx;background:#0071e3;right:-9rpx;bottom:-5rpx;transform:rotate(45deg);border-radius:2rpx}
+.search-button{padding:16rpx 12rpx;background:transparent;color:#0071e3;font-size:27rpx;font-weight:600;flex-shrink:0}
+.class-filter{display:flex;align-items:center;gap:24rpx;border-top:1rpx solid #e7e8ee;margin-top:18rpx;padding-top:20rpx}
+.class-picker{flex:1;min-width:0}
+.class-picker-value{display:flex;align-items:center;justify-content:space-between;color:#1d1d1f;font-size:25rpx;gap:16rpx}
+.roster-head{margin:24rpx 2rpx 18rpx}
+.roster-count{margin-left:14rpx;color:#737783;font-size:24rpx;font-weight:400}
+.student-card{border:1rpx solid #e7e8ee;padding:24rpx;border-radius:28rpx;transition:border-color .15s}
+.student-pressed{background:#f4f8ff}
+.student-top{display:flex;align-items:center;gap:18rpx}
+.student-avatar{width:82rpx;height:82rpx;border-radius:28rpx;flex-shrink:0;font-size:34rpx;font-weight:600;display:flex;align-items:center;justify-content:center}
+.avatar-tone-0{color:#0071e3;background:#f4f4f7}
+.avatar-tone-1{color:#e29d39;background:#fff3db}
+.avatar-tone-2{color:#a17ae3;background:#f2edff}
+.avatar-tone-3{color:#25ac86;background:#e5f8f1}
+.student-info{flex:1;min-width:0}
+.student-name{font-size:31rpx;font-weight:600;color:#1d1d1f;margin-bottom:4rpx}
+.student-info .list-description{font-size:23rpx;word-break:break-all}
+.student-top .badge{font-size:21rpx;padding:5rpx 12rpx}
+.student-metrics{display:flex;background:#fafafd;border-radius:28rpx;margin-top:18rpx;padding:22rpx 8rpx}
+.student-metric{flex:1;min-width:0;text-align:center;border-right:1rpx solid #e7e8ee}
+.student-metric:last-child{border-right:0}
+.metric-number{color:#1d1d1f;font-size:32rpx;line-height:1.3;font-weight:600}
+.metric-total{font-size:23rpx;font-weight:400;color:#737783}
+.metric-unit{font-size:20rpx;font-weight:400;margin-left:7rpx;color:#737783}
+.points-number{color:#e8a33c}
+.lesson-number{color:#9295a0}
+.metric-caption{font-size:21rpx;color:#737783;margin-top:7rpx}
+.student-times{display:flex;justify-content:space-between;gap:16rpx;font-size:22rpx;color:#737783;margin-top:18rpx}
+.time-dot{display:inline-block;width:9rpx;height:9rpx;background:#25bb91;border-radius:50%;vertical-align:middle;margin-right:9rpx}
+.out-dot{background:#81a7e6}
+.parent-line{color:#737783;font-size:21rpx;border-top:1rpx solid #e7e8ee;padding-top:16rpx;margin-top:18rpx}
+
+.title { font-size: 34rpx; }

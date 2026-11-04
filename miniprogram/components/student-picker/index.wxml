@@ -1,0 +1,48 @@
+<view class="picker">
+  <view class="head" bindtap="togglePanel" role="button" aria-label="{{title}}，已选{{count}}人，{{expanded ? '收起' : '展开'}}">
+    <view class="head-icon">
+      <image class="students-icon" src="/assets/icons/students.png" mode="aspectFit" />
+    </view>
+    <view class="head-copy">
+      <view class="title">{{title}}</view>
+      <view class="count">已选 <text class="count-number">{{count}}</text> 人</view>
+    </view>
+    <view class="expand-action">
+      <text>{{expanded ? '收起' : '展开'}}</text>
+      <view class="chevron {{expanded ? 'chevron-up' : ''}}"></view>
+    </view>
+  </view>
+
+  <view wx:if="{{chosenPreview.length}}" class="selection" bindtap="togglePanel">
+    <view wx:for="{{chosenPreview}}" wx:key="id" class="selected-name">{{item.name}}</view>
+    <view wx:if="{{remainingCount}}" class="selected-more">+{{remainingCount}} 人</view>
+  </view>
+  <view wx:else class="selection-placeholder" bindtap="togglePanel">
+    {{students.length ? '点击选择学生' : '暂无授权学生'}}
+  </view>
+
+  <view wx:if="{{expanded}}" class="panel">
+    <view class="panel-head">
+      <text class="panel-hint">仅显示已授权学生</text>
+      <button wx:if="{{multiple && students.length}}" class="all" bindtap="all">
+        {{count === students.length ? '清空' : '全选'}}
+      </button>
+    </view>
+    <view wx:if="{{!students.length}}" class="empty">
+      <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit" />
+      <text>暂无可选学生，请联系机构核实授权</text>
+    </view>
+    <scroll-view wx:else class="student-scroll" scroll-y="{{true}}" style="height: {{listHeight}}rpx;">
+      <view wx:for="{{rows}}" wx:key="id" class="student {{item.checked ? 'student-selected' : ''}}" data-id="{{item.id}}" bindtap="choose" role="button" aria-label="{{item.name}}，{{item.checked ? '已选' : '未选'}}">
+        <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill" /><view wx:else class="avatar">{{item.initial}}</view>
+        <view class="student-copy">
+          <view class="name">{{item.name}}</view>
+          <view wx:if="{{item.detail}}" class="class-name">{{item.detail}}</view>
+        </view>
+        <view class="checkbox {{item.checked ? 'checkbox-checked' : ''}}">
+          <view wx:if="{{item.checked}}" class="checkmark"></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

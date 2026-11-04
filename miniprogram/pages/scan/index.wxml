@@ -1,0 +1,44 @@
+<app-nav />
+<view class="page scan-page">
+  <view class="hero row"><view class="col"><view class="title">拍照识题</view><view class="subtitle">识别印刷题干与标题，自动分题</view></view><button class="text-button" bindtap="manual">手工录题 ›</button></view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <student-picker students="{{students}}" selected="{{studentIds}}" bindchange="pickStudents" />
+    <view wx:if="{{mediaConsent && !mediaConsent.effectiveMedia}}" class="notice"><view class="card-title">先完成孩子的授权</view><view class="small-gap">请绑定监护人登录家长端，在“隐私与授权”中分别确认以下两项。</view><view class="small-gap">托管服务信息：{{mediaConsent.effectiveService ? '有效' : '待确认或已撤回'}}</view><view>图片、录音与视频：待确认或已暂停</view><view class="actions"><button class="secondary" bindtap="openMediaConsent" disabled="{{busy || uploading}}">查看授权状态</button><button class="secondary" bindtap="recheckConsent" disabled="{{busy || uploading}}">重新检查</button></view><view class="hint">老师和校区管理员只能查看状态，不能代替监护人同意。</view></view>
+    <view class="scan-toolbar"><select-picker class="col" range="{{subjects}}" value="{{subjectIndex}}" disabled="{{!!job || busy || uploading}}" bindchange="subject" label="选择科目"><view class="filter-value">{{subjects[subjectIndex]}} ⌄</view></select-picker><button class="primary" bindtap="start" loading="{{uploading}}" disabled="{{busy || uploading || !studentIds.length || !service.available || (mediaConsent && !mediaConsent.effectiveMedia)}}">{{job ? '扫描新一页' : '拍照 / 选择图片'}}</button></view>
+    <view wx:if="{{!service.available}}" class="notice">{{service.message}}<button class="text-button" bindtap="reloadService">重新检查服务 ›</button></view>
+    <view wx:if="{{pendingPhoto}}" class="notice">照片已保留，扫描任务未创建。{{mediaConsent && !mediaConsent.effectiveMedia ? '完成授权后可直接重试，无需重新拍照。' : ''}}<button class="text-button" bindtap="createScan" disabled="{{busy || (mediaConsent && !mediaConsent.effectiveMedia)}}">重试提交</button></view>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}<button wx:if="{{job}}" class="text-button" bindtap="reloadJob" disabled="{{busy}}">重新载入任务 ›</button></view>
+    <block wx:if="{{job}}">
+      <view class="scan-status row"><view class="col"><text>{{job.status === 'READY' ? '识别完成 · ' + questions.length + ' 道候选题' : job.status === 'FAILED' ? '扫描未完成' : '正在识别与分题，请稍候'}}</text><text wx:if="{{dirty}}" class="badge warn">调整未保存</text></view><button wx:if="{{job.status === 'READY'}}" class="text-button" bindtap="rescan" disabled="{{busy || uploading || (mediaConsent && !mediaConsent.effectiveMedia)}}">原图重识别</button></view>
+      <view wx:if="{{job.status === 'FAILED'}}" class="notice">{{job.errorMessage}}<view class="actions"><button class="secondary" bindtap="retryScan" disabled="{{busy}}">重新识别</button><button class="secondary" bindtap="manual">手工录题</button></view></view>
+      <view class="scan-canvas">
+        <image class="scan-page-image" src="{{pageUrl}}" mode="widthFix" bindtap="preview" aria-label="查看完整扫描图片" />
+        <view wx:if="{{job.status === 'QUEUED' || job.status === 'RECOGNIZING'}}" class="scan-progress"><view class="scan-line" /><text>识别处理中，可离开后从历史记录继续查看</text></view>
+        <block wx:if="{{job.status === 'READY'}}">
+          <block wx:for="{{questions}}" wx:for-item="question" wx:for-index="questionIndex" wx:key="key">
+            <button wx:for="{{question.regions}}" wx:for-item="rect" wx:key="regionIndex" class="question-box {{question.active ? 'active' : ''}} {{question.selected ? 'selected' : ''}} {{question.importedMistakeId ? 'imported' : ''}}" style="{{rect.style}}" data-index="{{questionIndex}}" bindtap="focus" aria-label="选择{{question.caption}}"><text class="box-label">{{question.displayNumber}}{{question.importedMistakeId ? ' · 已入库' : question.selected ? ' ✓' : ''}}</text></button>
+          </block>
+          <block wx:if="{{adjusting}}"><view wx:for="{{activeQuestion.regions}}" wx:key="regionIndex" class="edit-box {{editRegion === index ? 'editing' : ''}}" style="{{item.style}}" data-region="{{index}}" data-mode="move" catchtouchstart="dragStart" catchtouchmove="dragMove" catchtouchend="dragEnd" catchtouchcancel="dragEnd"><text class="edit-label">{{index + 1}} · 拖动移动</text><view class="resize-handle" data-region="{{index}}" data-mode="resize" catchtouchstart="dragStart" catchtouchmove="dragMove" catchtouchend="dragEnd" catchtouchcancel="dragEnd" /></view></block>
+        </block>
+      </view>
+      <block wx:if="{{job.status === 'READY'}}">
+        <view class="hint">自动提取印刷题干与标题，尽量过滤手写答案。请对照原图核对文字、附图和小问，再选择入库。</view>
+        <scroll-view class="question-tabs" scroll-x="{{true}}"><button wx:for="{{questions}}" wx:key="key" class="question-tab {{item.active ? 'active' : ''}}" data-index="{{index}}" bindtap="focus">{{item.displayNumber}} {{item.importedMistakeId ? '已入库' : item.selected ? '✓' : ''}}</button></scroll-view>
+        <view wx:if="{{activeQuestion}}" class="card question-editor">
+          <view class="row"><view class="col card-title">{{activeQuestion.caption}}</view><button class="select-question {{activeQuestion.selected ? 'chosen' : ''}}" bindtap="toggleSelected" disabled="{{busy || activeQuestion.importedMistakeId}}">{{activeQuestion.importedMistakeId ? '已入库' : activeQuestion.selected ? '✓ 已选择' : '选择此题'}}</button></view>
+          <view wx:for="{{activeQuestion.warnings}}" wx:key="*this" class="scan-warning">{{item}}</view>
+          <view class="field gap"><text class="label">题号</text><input value="{{activeQuestion.displayNumber}}" data-field="displayNumber" bindinput="editText" maxlength="80" disabled="{{busy || !!activeQuestion.importedMistakeId}}" aria-label="题号" /></view>
+          <view class="field"><text class="label">题目标题 · 自动识别，可校对</text><input value="{{activeQuestion.groupName}}" data-field="groupName" bindinput="editText" maxlength="160" disabled="{{busy || !!activeQuestion.importedMistakeId}}" placeholder="请核对题目标题" aria-label="校对题目标题" /></view>
+          <view class="field"><text class="label">印刷题干 · 自动识别，可校对</text><textarea class="{{activeQuestion.questionText ? '' : 'empty-question-text'}}" value="{{activeQuestion.questionText}}" data-field="questionText" bindinput="editText" maxlength="10000" disabled="{{busy || !!activeQuestion.importedMistakeId}}" placeholder="印刷文字将自动填入，混写或模糊处可对照原图补充" aria-label="校对题目文字" /></view>
+          <block wx:if="{{!activeQuestion.importedMistakeId}}"><view class="edit-actions"><button class="secondary" bindtap="adjust" disabled="{{busy}}">{{adjusting ? '结束调框' : '调整题框'}}</button><button class="secondary" bindtap="split" disabled="{{busy || questions.length >= 40}}">上下拆题</button><button class="secondary" bindtap="mergeNext" disabled="{{busy || activeIndex >= questions.length - 1}}">合并下一题</button><button class="danger" bindtap="removeQuestion" disabled="{{busy || questions.length < 2}}">移除此题</button></view><view wx:if="{{adjusting}}" class="hint">在图片中拖动范围移动，拖动右下角调整大小。共享题干的范围也可分别调整。</view></block>
+        </view>
+        <view class="scan-save card"><view class="row"><text class="card-title">已选 {{selectedCount}} 题</text><button class="text-button" bindtap="addQuestion" disabled="{{busy || questions.length >= 40}}">＋ 补框一题</button></view><view class="actions"><button class="secondary" bindtap="saveEdits" disabled="{{busy || !dirty}}">保存校对</button><button class="primary" bindtap="importSelected" disabled="{{busy || !selectedCount}}" loading="{{busy}}">加入错题本</button></view><view class="hint">只收录勾选的题目，重复提交不会重复入库。</view></view>
+        <view wx:if="{{results.length}}" class="card"><view wx:for="{{results}}" wx:key="id" class="small-gap {{item.success ? 'result-ok' : 'result-fail'}}">{{item.message}}</view><button class="text-button" bindtap="viewBook">查看错题本 / 生成打印文件 ›</button></view>
+      </block>
+    </block>
+    <view wx:if="{{!job && service.available}}" class="scan-empty"><image src="/assets/icons/homework.png" /><view class="card-title">拍清整页，题目自动分组</view><view class="muted">保持页面平整，拍清印刷文字。标题、题干和表格文字自动填入，图示及公式同时保留裁图。</view></view>
+    <button class="history-toggle" bindtap="history">扫描记录 · {{history.length}} <text>{{historyOpen ? '收起' : '展开'}}</text></button>
+    <view wx:if="{{historyOpen}}" class="card"><button wx:for="{{history}}" wx:key="id" class="scan-history-row" data-id="{{item.id}}" bindtap="openHistory" disabled="{{busy || uploading}}"><image src="{{item.photoUrl}}" mode="aspectFill" /><view class="col"><view>{{item.subject}} · {{item.statusText}}</view><text class="muted">{{item.dateText}} · {{item.questionCount}} 题</text></view><text class="chevron">›</text></button><view wx:if="{{!history.length}}" class="empty-inline">该孩子暂无扫描记录</view></view>
+  </block>
+</view>

@@ -1,0 +1,2 @@
+@import "../../styles/growth.wxss";
+.compose-card { margin-top:20rpx; }.compose-card .field { margin-top:22rpx; }.follow-card { display:block; width:100%; text-align:left; margin-top:20rpx; line-height:1.6; }.follow-card .card-title { word-break:break-word; }.log-card { margin-top:18rpx; }.parent-log { background:#fafafd; }.log-name { color:#1d1d1f; font-size:25rpx; font-weight:600; }.log-card .row { align-items:flex-start; flex-wrap:wrap; }.follow-page textarea { min-height:150rpx; }

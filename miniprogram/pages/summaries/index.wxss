@@ -1,0 +1,71 @@
+.summaries-date{display:flex;align-items:center;justify-content:space-between;margin-bottom:18rpx}
+.summaries-date-value{display:flex;align-items:center;gap:18rpx}
+.summaries-generator{padding:0;overflow:hidden}
+.summaries-generator-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16rpx;padding:24rpx;background:#fff;color:#1d1d1f;text-align:left;border-radius:28rpx}
+.summaries-generator-label{display:flex;align-items:center;gap:16rpx;min-width:0}
+.summaries-generator-icon{width:64rpx;height:64rpx;background:#f4f4f7;border-radius:28rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.summaries-generator-icon image{width:38rpx;height:38rpx}
+.summaries-generator-title{font-size:28rpx;font-weight:600}
+.summaries-generator-note{font-size:21rpx;color:#737783;margin-top:6rpx;font-weight:400}
+.summaries-toggle-text{font-size:23rpx;color:#0071e3;flex-shrink:0}
+.summaries-generator-body{padding:16rpx 24rpx 24rpx;border-top:1rpx solid #e7e8ee}
+.summaries-section-note{font-size:23rpx;color:#737783}
+.summary-report{padding:0;overflow:hidden}
+.summary-report-head{display:flex;align-items:center;gap:18rpx;padding:24rpx;border-bottom:1rpx solid #e7e8ee}
+.summary-avatar{width:74rpx;height:74rpx;border-radius:28rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#f4f4f7;color:#0071e3;font-size:31rpx;font-weight:600}
+.summary-student-name{font-size:29rpx;font-weight:600;color:#1d1d1f;line-height:1.4;word-break:break-all}
+.summary-report-date{font-size:22rpx;color:#737783;margin-top:7rpx}
+.summary-report-head .badge{flex-shrink:0}
+.summary-content{padding:0 24rpx}
+.summary-section{padding:24rpx 0;border-bottom:1rpx solid #e7e8ee}
+.summary-section:last-child{border-bottom:0}
+.summary-section-heading{display:flex;align-items:center;gap:12rpx}
+.summary-section-icon{width:44rpx;height:44rpx;border-radius:13rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.summary-section-icon image{width:27rpx;height:27rpx}
+.summary-tone-green{background:#e7f8f1}
+.summary-tone-blue{background:#f4f4f7}
+.summary-tone-purple{background:#f0edff}
+.summary-tone-orange{background:#fff2e4}
+.summary-section-name{font-size:26rpx;font-weight:600;color:#50535d}
+.summary-section-text{font-size:25rpx;line-height:1.85;color:#737783;margin-top:13rpx;white-space:pre-wrap;word-break:break-word}
+.summary-teacher-comment{margin:6rpx 24rpx 18rpx;padding:24rpx;background:#f4f4f7;border-radius:28rpx}
+.summary-comment-title{font-size:25rpx;font-weight:600;color:#0071e3;margin-bottom:10rpx}
+.summary-comment-text{font-size:25rpx;color:#737783;line-height:1.85;white-space:pre-wrap;word-break:break-word}
+.summary-edit-form{margin:8rpx 24rpx 24rpx;padding-top:22rpx;border-top:1rpx solid #e7e8ee}
+.summary-edit-form .label{margin-top:18rpx}
+.summary-edit-form .hint{margin-bottom:14rpx}
+.summary-content-input{height:380rpx}
+.summary-actions{padding:0 24rpx 24rpx;margin-top:10rpx}
+.summary-actions:empty{display:none}
+.badge.review-pending{color:#9c722e;background:#fff7e9}
+.badge.review-rejected{color:#b85b48;background:#fff0eb}
+.summary-review-note{margin:12rpx 24rpx 22rpx;padding:22rpx 24rpx;background:#f3f5f9;border-radius:24rpx;color:#737783;font-size:23rpx;line-height:1.8}
+.summary-review-title{font-weight:600;color:#465b76;margin-bottom:8rpx}
+.summary-review-returned{background:#fff3ef}
+.summary-review-returned .summary-review-title{color:#b85b48}
+.summary-review-opinion{white-space:pre-wrap;word-break:break-word;margin-top:8rpx}
+.summary-return-button{color:#b85b48;background:#fff3ef}
+.summary-history{margin:0 24rpx 22rpx;border-top:1rpx solid #e7e8ee}
+.summary-history-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;padding:22rpx 0;background:transparent;border-radius:0;color:#47709d;font-size:23rpx;font-weight:500;text-align:left}
+.summary-history-toggle text{color:#9295a0;font-size:21rpx}
+.summary-history-entry{padding:20rpx 0;border-top:1rpx solid #e7e8ee}
+.summary-history-title{font-size:24rpx;font-weight:600;color:#50535d;line-height:1.6}
+.summary-history-meta{font-size:21rpx;color:#9295a0;line-height:1.8;margin-top:5rpx}
+.summary-history-comment{font-size:23rpx;color:#737783;line-height:1.8;white-space:pre-wrap;word-break:break-word;margin-top:10rpx}
+.summary-version-toggle{display:block;padding:12rpx 0;background:transparent;border-radius:0;color:#47709d;font-size:22rpx;font-weight:400;text-align:left;line-height:1.8}
+.summary-history-content{padding:20rpx 22rpx;background:#f7f7fa;border-radius:20rpx;font-size:23rpx;color:#737783;line-height:1.85;white-space:pre-wrap;word-break:break-word}
+.summary-published{border-top:1rpx solid #e7e8ee;padding:22rpx 24rpx 24rpx}
+.summary-published-meta{font-size:21rpx;color:#9295a0;margin-bottom:7rpx;word-break:break-all}
+.summary-feedback{padding:23rpx;background:#fafafd;border-radius:28rpx;margin-top:18rpx}
+.summary-feedback-head{display:flex;align-items:center;justify-content:space-between;gap:20rpx}
+.summary-feedback-title{font-size:25rpx;color:#50535d;font-weight:500}
+.summary-feedback-score{font-size:32rpx;font-weight:650;color:#efa448}
+.summary-feedback-score text{font-size:22rpx;font-weight:400;color:#a9a18f}
+.summary-feedback-text{font-size:24rpx;line-height:1.8;color:#737783;white-space:pre-wrap;word-break:break-word;margin-top:12rpx}
+.summary-feedback-form{padding-top:24rpx}
+.summary-rating{display:flex;gap:14rpx;margin:18rpx 0}
+.summary-rating-item{flex:1;min-width:0;padding:17rpx 0;text-align:center;border-radius:15rpx;background:#fafafd;color:#737783;border:1rpx solid transparent;font-size:29rpx;font-weight:600}
+.summary-rating-item text{font-size:19rpx;font-weight:400;margin-left:5rpx}
+.summary-rating-item.summary-rating-active{background:#f4f4f7;border-color:#c9cdd7;color:#0071e3}
+
+.title { font-size: 34rpx; }

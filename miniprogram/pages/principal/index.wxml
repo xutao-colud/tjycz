@@ -1,0 +1,33 @@
+<app-nav section="{{section}}" />
+<view class="page principal-page">
+  <view class="row"><view class="title">{{section === 'affairs' ? '校务' : section === 'todos' ? '校长待办' : detailTitle || '校区概览'}}</view><date-picker wx:if="{{section !== 'affairs'}}" value="{{date}}" bindchange="changeDate"><view class="filter-pill">{{date}} ⌄</view></date-picker></view>
+  <button wx:if="{{section === 'overview' && admin}}" class="text-button" data-url="/pages/follow-ups/index?date={{date}}&kind=MESSAGE" bindtap="go">校区消息 ›</button>
+  <view wx:if="{{section === 'affairs' && admin}}">
+    <view wx:for="{{affairs}}" wx:key="title" class="card"><view class="section-title">{{item.title}}</view><button wx:for="{{item.links}}" wx:for-item="link" wx:key="*this" class="detail-row principal-link" data-url="/pages/{{link[1]}}/index?date={{date}}{{link[2] ? '&section=' + link[2] : ''}}" bindtap="go"><text>{{link[0]}}</text><text>›</text></button></view>
+  </view>
+  <block wx:else>
+    <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+    <view wx:if="{{!loading && !error && section === 'schedule'}}" class="card">
+      <view wx:for="{{schedules}}" wx:key="id" class="detail-row principal-link"><view class="col"><view>{{item.className}} · {{item.courseName}}</view><view class="muted">{{item.campusName}} · {{item.startTime}}–{{item.endTime}}</view></view><text>{{item.enabled ? '已安排' : '已停用'}}</text></view>
+      <view wx:if="{{!schedules.length}}" class="empty-inline">当日暂无排课</view>
+    </view>
+    <view wx:elif="{{overview && !loading && !error}}">
+      <view wx:if="{{section === 'overview'}}">
+        <view class="principal-metrics"><button wx:for="{{overview.metrics}}" wx:key="id" class="principal-metric" data-section="{{item.id}}" bindtap="openSection"><text>{{item.label}} ›</text><view>{{item.value}}</view></button></view>
+        <view class="card"><view class="section-title">需要介入</view><button wx:for="{{overview.attention}}" wx:key="key" class="detail-row principal-link {{item.kind === 'SAFETY' ? 'principal-safety' : ''}}" data-url="{{item.url}}" bindtap="go"><view class="col"><view>{{item.title}}{{item.studentName ? ' · ' + item.studentName : ''}}</view><view class="muted">{{item.reason}}{{item.owner ? ' · ' + item.owner : ''}}</view></view><text>查看 ›</text></button><view wx:if="{{!overview.todos.length}}" class="empty-inline">当前暂无需要介入的事项</view></view>
+        <view class="card"><view class="section-title">班级情况</view><button wx:for="{{overview.classes}}" wx:key="id" class="detail-row principal-link" data-id="{{item.id}}" bindtap="openClass"><view class="col"><view>{{item.name}} · {{item.campusName}}</view><view class="muted">{{item.teacherName || '尚未分配教师'}}</view></view><view class="class-counts">到校 {{item.arrived}}/{{item.expected}}<view wx:if="{{item.alerts}}" class="principal-safety">异常 {{item.alerts}}</view></view></button><view wx:if="{{!overview.classes.length}}" class="empty-inline">暂无授权班级</view></view>
+        <button class="text-button principal-warning" data-section="warnings" bindtap="openSection">课时提醒 · {{overview.warnings.length}} 位学生 ›</button>
+      </view>
+      <view wx:elif="{{section === 'todos'}}" class="card">
+        <button wx:for="{{overview.todos}}" wx:key="key" class="detail-row principal-link {{item.kind === 'SAFETY' ? 'principal-safety' : ''}}" data-url="{{item.url}}" bindtap="go"><view class="col"><view>{{item.title}}{{item.studentName ? ' · ' + item.studentName : ''}}</view><view class="muted">{{item.reason}}{{item.owner ? ' · ' + item.owner : ''}}</view></view><text>查看 ›</text></button><view wx:if="{{!overview.todos.length}}" class="empty-inline">当前暂无待处理事项</view>
+      </view>
+      <view wx:else class="card">
+        <view wx:if="{{section === 'arrived'}}" class="muted">应到 {{overview.expectedCount}} 人。按当日排课与报名统计，未排课班级按在册学生统计，已批准整日请假不计入。</view>
+        <view wx:if="{{section === 'classroom' && classroom}}"><view class="section-title">{{classroom.name}}</view><view class="muted">{{classroom.teacherName || '尚未分配教师'}} · 到校 {{classroom.arrived}}/{{classroom.expected}} · 在校 {{classroom.present}} · 异常 {{classroom.alerts}}</view><button class="text-button" data-url="/pages/workbench/index?date={{date}}&classId={{classroom.id}}" bindtap="go">查看班级学生工作台 ›</button><button class="text-button" data-url="/pages/class-reports/index?date={{date}}&classId={{classroom.id}}" bindtap="go">查看班级日报 ›</button><view class="section-title">已到校学生</view></view>
+        <button wx:for="{{detailRows}}" wx:key="id" class="detail-row principal-link" data-url="{{section === 'warnings' ? '/pages/lessons/index?studentId=' + item.id : '/pages/growth/index?date=' + date + '&studentId=' + item.id}}" bindtap="go"><view class="col"><view>{{item.name}}</view><view class="muted">{{item.className}} · {{item.campusName}}</view></view><text>{{section === 'warnings' ? '查看课时' : item.attendanceText}} ›</text></button>
+        <view wx:if="{{!detailRows.length}}" class="empty-inline">当前暂无相关学生</view>
+        <button class="text-button" data-section="overview" bindtap="openSection">返回概览</button>
+      </view>
+    </view>
+  </block>
+</view>

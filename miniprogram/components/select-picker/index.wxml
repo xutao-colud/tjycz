@@ -1,0 +1,14 @@
+<view class="select-trigger {{plain ? 'select-plain' : ''}} {{disabled || !range.length ? 'select-disabled' : ''}}" bindtap="open" role="button" aria-label="{{label}}" aria-expanded="{{open}}" aria-disabled="{{disabled || !range.length}}" hover-class="select-pressed">
+  <view class="select-caption"><slot /></view><view wx:if="{{!plain}}" class="select-chevron"></view>
+</view>
+<view wx:if="{{open}}" class="select-modal" catchtouchmove="swallow">
+  <view class="select-mask" bindtap="close" role="button" aria-label="取消选择"></view>
+  <view class="select-sheet" catchtap="swallow" role="dialog" aria-modal="true" aria-label="{{label}}">
+    <view class="select-handle"></view>
+    <view class="select-header"><text>{{label}}</text><button class="select-close" bindtap="close" aria-label="关闭选择面板">×</button></view>
+    <scroll-view class="select-options" style="height:{{range.length * 104 + 8}}rpx" scroll-y enhanced show-scrollbar="{{false}}" scroll-into-view="select-option-{{value}}">
+      <button wx:for="{{items}}" wx:key="index" id="select-option-{{item.index}}" class="select-option {{item.index === value ? 'select-option-selected' : ''}}" data-index="{{item.index}}" bindtap="choose" aria-label="{{item.label}}" aria-pressed="{{item.index === value}}" hover-class="select-option-pressed"><text>{{item.label}}</text><view wx:if="{{item.index === value}}" class="select-check"></view></button>
+    </scroll-view>
+    <button class="select-cancel" bindtap="close" hover-class="select-pressed">取消</button>
+  </view>
+</view>

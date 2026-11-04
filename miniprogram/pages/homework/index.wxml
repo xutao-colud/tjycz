@@ -1,0 +1,106 @@
+<app-nav />
+<view class="page">
+  <view class="hero homework-hero">
+    <view>
+      <view class="eyebrow">学习任务</view>
+      <view class="title">今日作业</view>
+      <view class="subtitle">{{teacher ? '布置与批改，让学习有回应' : '查看学习任务，记录每一次进步'}}</view>
+    </view>
+    <image class="hero-icon" src="/assets/icons/homework.png" mode="aspectFit" />
+  </view>
+
+  <view class="card homework-filter">
+    <view class="date-filter">
+      <text class="filter-label">任务日期</text>
+      <date-picker class="plain-picker date-picker" value="{{date}}" label="选择任务日期" bindchange="changeDate">
+        <view class="date-value">
+          <text>{{date}}</text>
+          <text class="chevron">›</text>
+        </view>
+      </date-picker>
+    </view>
+    <view class="subject-filters">
+      <select-picker class="plain-picker filter-half" range="{{subjects}}" value="{{subjectIndex}}" data-field="subjectIndex" bindchange="filter" plain="{{true}}" label="选择科目">
+        <view class="filter-choice">
+          <text>{{subjects[subjectIndex]}}</text>
+          <text class="chevron">›</text>
+        </view>
+      </select-picker>
+      <select-picker class="plain-picker filter-half" range="{{statusNames}}" value="{{statusIndex}}" data-field="statusIndex" bindchange="filter" plain="{{true}}" label="选择状态">
+        <view class="filter-choice">
+          <text>{{statusNames[statusIndex]}}</text>
+          <text class="chevron">›</text>
+        </view>
+      </select-picker>
+    </view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+
+  <view hidden="{{loading || error}}">
+    <student-picker students="{{students}}" selected="{{studentIds}}" multiple="{{teacher}}" title="{{teacher ? '选择学生' : '选择孩子'}}" bindchange="pickStudents" />
+
+    <view wx:if="{{created}}" class="created-notice">{{created}}</view>
+    <view wx:if="{{teacher}}" class="card create-entry" bindtap="toggleCreate">
+      <view class="create-entry-main">
+        <view class="create-plus">{{showCreate ? '−' : '+'}}</view>
+        <view>
+          <view class="create-entry-title">布置作业</view>
+          <view class="create-entry-subtitle">给已选 {{studentIds.length}} 位学生添加任务</view>
+        </view>
+      </view>
+      <view class="create-toggle">{{showCreate ? '收起' : '新建'}}<text class="create-arrow">{{showCreate ? '⌃' : '›'}}</text></view>
+    </view>
+
+    <view wx:if="{{teacher && showCreate}}" class="card create-form">
+      <view class="section-head form-heading">
+        <text class="section-title">新建作业</text>
+        <text class="hint">{{studentIds.length}} 位学生</text>
+      </view>
+      <view class="form-pickers">
+        <view class="col">
+          <text class="label">学科</text>
+          <select-picker range="{{taskSubjects}}" value="{{taskSubjectIndex}}" data-field="taskSubjectIndex" bindchange="selectForm" label="选择作业科目">{{taskSubjects[taskSubjectIndex]}}</select-picker>
+        </view>
+        <view class="col">
+          <text class="label">作业类型</text>
+          <select-picker range="{{types}}" value="{{typeIndex}}" data-field="typeIndex" bindchange="selectForm" label="选择事项类型">{{types[typeIndex]}}</select-picker>
+        </view>
+      </view>
+      <view class="field">
+        <text class="label">作业标题 <text class="required">*</text></text>
+        <input value="{{title}}" data-field="title" bindinput="field" maxlength="160" placeholder="例如：数学练习册第 12 页" />
+      </view>
+      <view class="field">
+        <text class="label">任务说明</text>
+        <textarea value="{{description}}" data-field="description" bindinput="field" maxlength="2000" placeholder="填写作业要求与注意事项" />
+      </view>
+      <media-field audio-enabled="{{typeIndex === 1}}" bindchange="media" binduploading="uploadState" reset-key="{{mediaReset}}" disabled="{{busy}}" />
+      <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+      <button class="primary gap" bindtap="create" loading="{{busy}}" disabled="{{busy || uploading || !studentIds.length}}">创建并分配</button>
+    </view>
+
+    <view class="section-head task-list-head">
+      <text class="section-title">作业列表</text>
+      <text class="hint">共 {{items.length}} 项</text>
+    </view>
+    <view wx:for="{{items}}" wx:key="id" class="card homework-card" data-id="{{item.id}}" bindtap="open">
+      <view class="task-top">
+        <view class="subject-icon subject-{{item.subjectTone}}">{{item.subjectIcon}}</view>
+        <view class="task-subject">
+          <view class="subject-name">{{item.subject}}</view>
+          <view class="task-type">{{item.typeText}}</view>
+        </view>
+        <text class="task-status status-{{item.statusTone}}">{{item.statusText}}</text>
+      </view>
+      <view class="task-title">{{item.title}}</view>
+      <view class="task-student"><text class="student-dot"></text>{{item.studentName}}<text wx:if="{{item.className}}" class="student-class"> · {{item.className}}</text></view>
+
+      <view class="task-footer">
+        <text class="task-date">{{item.date}}</text>
+        <text class="task-link">查看作业<text class="task-arrow">›</text></text>
+      </view>
+    </view>
+    <state-view empty="{{!items.length}}" empty-text="当前筛选条件下暂无作业" />
+  </view>
+</view>

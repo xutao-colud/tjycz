@@ -1,0 +1,43 @@
+<view class="calendar-trigger" bindtap="open" role="button" aria-label="{{label}}，当前日期{{value || '今天'}}" aria-expanded="{{open}}" hover-class="calendar-trigger-pressed">
+  <slot />
+</view>
+<view wx:if="{{open}}" class="calendar-modal {{closing ? 'calendar-closing' : ''}}" catchtouchmove="swallow">
+  <view class="calendar-mask" bindtap="close" aria-label="关闭日期选择，保留原日期" role="button"></view>
+  <view class="calendar-sheet" catchtap="swallow" role="dialog" aria-label="{{label}}">
+    <view class="calendar-handle"></view>
+    <view class="calendar-caption">{{label}}</view>
+    <view class="calendar-toolbar">
+      <button class="calendar-arrow" bindtap="previous" disabled="{{previousDisabled}}" aria-label="{{previousLabel}}" hover-class="calendar-button-pressed">‹</button>
+      <view class="calendar-heading">
+        <button class="calendar-heading-button {{mode === 'years' ? 'calendar-heading-active' : ''}}" bindtap="showYears" aria-label="选择年份，当前{{viewYear}}年" hover-class="calendar-button-pressed">{{viewYear}}年<text class="calendar-down">⌄</text></button>
+        <button class="calendar-heading-button {{mode === 'months' ? 'calendar-heading-active' : ''}}" bindtap="showMonths" aria-label="选择月份，当前{{viewMonth}}月" hover-class="calendar-button-pressed">{{viewMonth}}月<text class="calendar-down">⌄</text></button>
+      </view>
+      <button class="calendar-arrow" bindtap="next" disabled="{{nextDisabled}}" aria-label="{{nextLabel}}" hover-class="calendar-button-pressed">›</button>
+    </view>
+    <scroll-view class="calendar-body" style="height:{{bodyHeight}}rpx" scroll-y enhanced show-scrollbar="{{false}}">
+      <view wx:if="{{mode === 'days'}}">
+        <view class="calendar-weekdays"><text wx:for="{{weekdays}}" wx:key="*this" class="calendar-weekday {{index > 4 ? 'calendar-weekend' : ''}}">{{item}}</text></view>
+        <view class="calendar-days">
+          <view wx:for="{{cells}}" wx:key="key" class="calendar-day-wrap">
+            <button wx:if="{{item.value}}" class="calendar-day {{item.weekend ? 'calendar-weekend' : ''}} {{item.selected ? 'calendar-day-selected' : ''}}" data-value="{{item.value}}" bindtap="chooseDay" aria-label="{{item.label}}" hover-class="calendar-button-pressed"><text>{{item.day}}</text><view wx:if="{{item.today}}" class="calendar-today-dot"></view></button>
+            <view wx:else class="calendar-blank"></view>
+          </view>
+        </view>
+      </view>
+      <view wx:elif="{{mode === 'years'}}">
+        <view class="calendar-grid-hint">{{yearStart}} — {{yearEnd}} 年<text class="calendar-grid-note">左右切换更多年份</text></view>
+        <view class="calendar-options"><button wx:for="{{years}}" wx:key="value" class="calendar-option {{item.selected ? 'calendar-option-selected' : ''}}" data-year="{{item.value}}" bindtap="chooseYear" aria-label="选择{{item.value}}年" hover-class="calendar-button-pressed">{{item.value}}年</button></view>
+      </view>
+      <view wx:else>
+        <view class="calendar-grid-hint">选择 {{viewYear}} 年的月份<text class="calendar-grid-note">选定后返回日历</text></view>
+        <view class="calendar-options"><button wx:for="{{months}}" wx:key="value" class="calendar-option {{item.selected ? 'calendar-option-selected' : ''}}" data-month="{{item.value}}" bindtap="chooseMonth" aria-label="选择{{viewYear}}年{{item.value}}月" hover-class="calendar-button-pressed">{{item.value}}月</button></view>
+      </view>
+    </scroll-view>
+    <view class="calendar-selection"><text class="calendar-selection-label">已选日期</text><text class="calendar-selection-value">{{draftText}}</text></view>
+    <view class="calendar-footer">
+      <button class="calendar-today" bindtap="goToday" aria-label="选择今天，确认后生效" hover-class="calendar-button-pressed">今天</button>
+      <button class="calendar-cancel" bindtap="close" aria-label="取消日期选择，保留原日期" hover-class="calendar-button-pressed">取消</button>
+      <button class="calendar-confirm" bindtap="confirm" aria-label="确认日期{{draft}}" hover-class="calendar-button-pressed">确认日期</button>
+    </view>
+  </view>
+</view>

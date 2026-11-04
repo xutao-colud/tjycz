@@ -1,0 +1,35 @@
+<app-nav current="students" />
+<view class="page student-detail-page">
+  <view class="detail-heading">
+    <view class="title">{{teacher ? '学生详情' : '孩子详情'}}</view>
+    <date-picker value="{{date}}" bindchange="changeDate" label="选择查看日期"><view class="detail-date">{{date}} ⌄</view></date-picker>
+  </view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{student && !loading && !error}}">
+    <view class="card detail-student">
+      <image wx:if="{{student.avatarUrl}}" class="avatar" src="{{student.avatarUrl}}" mode="aspectFill" /><view wx:else class="avatar">{{student.avatarText}}</view>
+      <view class="col"><view class="student-name">{{student.name}}</view><view class="muted">{{student.className}}<text wx:if="{{student.grade}}"> · {{student.grade}}</text></view></view>
+      <text class="badge {{student.attendanceStatus === 'NOT_ARRIVED' ? 'dim' : ''}}">{{student.attendanceText}}</text>
+    </view>
+
+    <view class="card detail-section">
+      <view class="card-head"><view class="section-title">作业 <text class="muted">{{completed}} / {{homework.length}}</text></view><button class="text-button" data-section="homework" bindtap="openSection">{{teacher ? '管理作业' : '查看全部'}} ›</button></view>
+      <button wx:for="{{homework}}" wx:key="id" class="homework-row" data-id="{{item.id}}" bindtap="openHomework">
+        <view class="col"><view class="homework-subject">{{item.subject}}</view><view class="homework-title">{{item.title}}</view></view><text class="task-state state-{{item.tone}}">{{item.statusText}}</text><text class="chevron">›</text>
+      </button>
+      <view wx:if="{{!homework.length}}" class="muted">该日期暂无作业</view>
+    </view>
+
+    <view class="card detail-section">
+      <view class="card-head"><view class="section-title">考勤</view><button class="text-button" data-section="attendance" bindtap="openSection">{{teacher ? '拍照打卡' : '查看记录'}} ›</button></view>
+      <view class="attendance-times"><view class="col"><view class="muted">签到</view><view class="attendance-time">{{student.arrival}}</view></view><view class="col"><view class="muted">签退</view><view class="attendance-time">{{student.departure}}</view></view></view>
+    </view>
+
+    <view class="card detail-section">
+      <view class="card-head"><view class="section-title">日小结</view><text class="badge {{summary.status === 'PUBLISHED' ? '' : 'dim'}}">{{summary ? summary.statusText : '未设置'}}</text></view>
+      <view wx:if="{{summary.teacherComment}}" class="body-text summary-comment">{{summary.teacherComment}}</view>
+      <view wx:else class="muted">{{summary ? '查看小结内容与处理进度' : teacher ? '汇总当天记录，预览后设置日小结' : '老师暂未发布该日期的小结'}}</view>
+      <button class="summary-button {{teacher ? 'primary' : 'secondary'}}" data-section="summary" bindtap="openSection">{{teacher ? '设置日小结' : '查看日小结'}}</button>
+    </view>
+  </block>
+</view>

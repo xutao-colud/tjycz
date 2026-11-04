@@ -1,0 +1,242 @@
+:host {
+  display: block;
+}
+
+.files {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin: 18rpx -9rpx 0;
+  color: #1d1d1f;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.file {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  width: calc(100% - 18rpx);
+  padding: 16rpx;
+  margin: 0 9rpx 18rpx;
+  border: 1rpx solid #eeeef3;
+  border-radius: 22rpx;
+  background: #fff;
+}
+
+.file-image {
+  display: block;
+  overflow: hidden;
+  width: calc(33.333333% - 18rpx);
+  padding: 0;
+}
+
+.image-wrap {
+  position: relative;
+  height: 168rpx;
+  background: #f4f4f7;
+}
+
+.thumbnail {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.image-badge {
+  position: absolute;
+  bottom: 10rpx;
+  left: 10rpx;
+  padding: 3rpx 10rpx;
+  border-radius: 8rpx;
+  background: rgba(37, 50, 70, .56);
+  color: #fff;
+  font-size: 18rpx;
+}
+
+.image-name {
+  overflow: hidden;
+  padding: 10rpx 12rpx;
+  color: #1d1d1f;
+  font-size: 21rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 76rpx;
+  height: 76rpx;
+  margin-right: 18rpx;
+  border-radius:28rpx;
+  background: #fff;
+}
+
+.file-icon-audio {
+  background: #e6f7f0;
+}
+
+.file-icon-video {
+  background: #f4f4f7;
+}
+
+.type-icon {
+  width: 38rpx;
+  height: 38rpx;
+}
+
+.video-mark {
+  width: 0;
+  height: 0;
+  margin-left: 5rpx;
+  border-top: 13rpx solid transparent;
+  border-bottom: 13rpx solid transparent;
+  border-left: 20rpx solid #c9cdd7;
+}
+
+.file-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  overflow: hidden;
+  color: #1d1d1f;
+  font-size: 25rpx;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-description {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 7rpx;
+  color: #737783;
+  font-size: 21rpx;
+}
+
+.kind-label {
+  padding-right: 12rpx;
+  margin-right: 12rpx;
+  border-right: 1rpx solid #e7e8ee;
+  color: #737783;
+  line-height: 1.2;
+}
+
+.play-action {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  margin-left: 18rpx;
+  border-radius: 50%;
+  background: #f4f4f7;
+}
+
+.play-mark {
+  width: 0;
+  height: 0;
+  margin-left: 5rpx;
+  border-top: 10rpx solid transparent;
+  border-bottom: 10rpx solid transparent;
+  border-left: 15rpx solid #c9cdd7;
+}
+
+.file-playing {
+  border-color: #d3e2f7;
+  background: #f0f5fc;
+}
+
+.play-action-active {
+  background: #0071e3;
+}
+
+.sound-wave {
+  display: flex;
+  align-items: center;
+  height: 26rpx;
+}
+
+.wave-bar {
+  width: 4rpx;
+  margin: 0 3rpx;
+  border-radius: 3rpx;
+  background: #fff;
+  animation: wave .8s ease-in-out infinite alternate;
+}
+
+.wave-first {
+  height: 14rpx;
+}
+
+.wave-middle {
+  height: 26rpx;
+  animation-delay: .2s;
+}
+
+.wave-last {
+  height: 18rpx;
+  animation-delay: .4s;
+}
+
+.file-chevron {
+  flex-shrink: 0;
+  width: 10rpx;
+  height: 10rpx;
+  margin: 0 6rpx 0 20rpx;
+  border-top: 3rpx solid #c9cdd7;
+  border-right: 3rpx solid #c9cdd7;
+  transform: rotate(45deg);
+}
+
+.files-removable .file-image {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.files-removable .image-wrap {
+  width: 100%;
+}
+
+.files-removable .image-name {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.remove {
+  flex-shrink: 0;
+  padding: 14rpx 4rpx 14rpx 16rpx;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: #737783;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.remove::after {
+  border: 0;
+}
+
+.remove[disabled] {
+  background: transparent;
+  color: #9295a0;
+}
+
+.files-removable .file-image .remove {
+  width: 100%;
+  padding: 10rpx;
+}
+
+@keyframes wave {
+  from { transform: scaleY(.45); }
+  to { transform: scaleY(1); }
+}
+.playback-error { margin: 12rpx 0; padding: 16rpx 20rpx; border-radius: 18rpx; background: #fff1f1; color: #c84949; font-size: 24rpx; line-height: 1.6; word-break: break-word; }

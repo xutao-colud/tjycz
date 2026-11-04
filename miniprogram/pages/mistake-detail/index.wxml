@@ -1,0 +1,206 @@
+<app-nav />
+<view class="page mistake-detail">
+  <view class="hero detail-hero">
+    <view class="col">
+      <view class="eyebrow">LEARN &amp; GROW</view>
+      <view class="title">订正与复习</view>
+      <view class="subtitle">理清一道错题，收获一次成长</view>
+    </view>
+    <view class="hero-icon">
+      <image src="/assets/icons/mistakes.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+
+  <view wx:if="{{item}}" hidden="{{loading || error}}">
+    <view class="card detail-card question-card">
+      <view class="summary-top">
+        <text class="subject-tag">{{item.subject}}</text>
+        <text class="badge status-tag {{item.status === 'UNCORRECTED' ? 'warn' : ''}}">{{item.statusText}}</text>
+      </view>
+      <view class="question-heading">
+        <text class="step-number">01</text>
+        <text class="step-caption">回顾原题</text>
+      </view>
+      <view class="question-title">{{item.title}}</view>
+      <view class="student-panel">
+        <view class="student-avatar">
+          <image src="/assets/icons/students.png" mode="aspectFit" />
+        </view>
+        <view class="col">
+          <view class="student-name">{{item.studentName}}</view>
+          <view class="student-caption">本题学习记录</view>
+        </view>
+        <view class="record-date">
+          <view class="date-caption">录入时间</view>
+          <view class="date-value">{{item.createdText}}</view>
+        </view>
+      </view>
+      <view class="question-files">
+        <view wx:if="{{item.attachments.length}}" class="attachment-caption">原题附件</view>
+        <file-list files="{{item.attachments}}" />
+      </view>
+    </view>
+
+    <view class="card detail-card analysis-card">
+      <view class="detail-section-head">
+        <view class="section-heading">
+          <text class="step-number">02</text>
+          <text class="detail-section-title">找到错误原因</text>
+        </view>
+        <text class="section-caption">理解是进步的开始</text>
+      </view>
+      <view class="knowledge-panel">
+        <view class="content-label">关联知识点</view>
+        <view class="detail-text knowledge-text">{{item.knowledgePoint || '未填写'}}</view>
+      </view>
+      <view class="reason-panel">
+        <view class="content-label">错因分析</view>
+        <view class="detail-text">{{item.errorReason || '未填写'}}</view>
+      </view>
+    </view>
+
+    <view class="card detail-card correction-card">
+      <view class="detail-section-head">
+        <view class="section-heading">
+          <text class="step-number">03</text>
+          <text class="detail-section-title">订正记录</text>
+        </view>
+        <text class="record-count">{{item.corrections.length}} 次记录</text>
+      </view>
+      <view wx:if="{{item.corrections.length}}" class="timeline correction-timeline">
+        <view wx:for="{{item.corrections}}" wx:for-item="correction" wx:for-index="correctionIndex" wx:key="id" class="timeline-item">
+          <view class="timeline-rail">
+            <view class="timeline-dot"></view>
+            <view wx:if="{{correctionIndex < item.corrections.length - 1}}" class="timeline-line"></view>
+          </view>
+          <view class="timeline-content">
+            <view class="record-heading">
+              <text class="record-title">第 {{correctionIndex + 1}} 次订正</text>
+              <text class="record-time">{{correction.createdText}}</text>
+            </view>
+            <view class="detail-text correction-text">{{correction.text || '照片订正，见附件'}}</view>
+            <file-list files="{{correction.attachments}}" />
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{!item.corrections.length}}" class="empty-panel">
+        <image src="/assets/icons/empty.png" mode="aspectFit" />
+        <view class="empty-title">还没有订正记录</view>
+        <view class="empty-description">写下解题思路，记录这一次的进步</view>
+      </view>
+      <view wx:if="{{item.teacherComment}}" class="teacher-feedback">
+        <view class="feedback-label">老师的反馈</view>
+        <view class="detail-text feedback-text">{{item.teacherComment}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{item.status === 'UNCORRECTED'}}" class="card detail-card correction-form-card">
+      <view class="detail-section-title">提交本次订正</view>
+      <view class="section-description">对照原题和错因，把正确的解题步骤写下来。</view>
+      <view class="field correction-field">
+        <view class="form-label-row">
+          <text class="label">订正过程 <text class="required">*</text></text>
+          <text class="field-hint">必填</text>
+        </view>
+        <textarea
+          class="detail-textarea"
+          auto-height
+          value="{{correctionText}}"
+          data-field="correctionText"
+          bindinput="field"
+          maxlength="2000"
+          placeholder="简述正确的解题步骤与思考，也可补充订正照片"
+          placeholder-class="detail-placeholder"
+        />
+      </view>
+      <view class="upload-panel">
+        <view class="upload-caption">
+          <image src="/assets/icons/upload.png" mode="aspectFit" />
+          <text>添加订正照片</text>
+          <text class="optional-caption">选填</text>
+        </view>
+        <media-field bindchange="media" binduploading="uploadState" reset-key="{{mediaReset}}" disabled="{{busy}}" />
+      </view>
+      <view wx:if="{{uploading}}" class="upload-hint">附件上传中，请稍候…</view>
+      <button class="primary submit-button" bindtap="correct" loading="{{busy}}" disabled="{{busy || uploading}}">提交订正，等待复核</button>
+    </view>
+
+    <view wx:if="{{teacher && item.status === 'PENDING_REVIEW'}}" class="card detail-card teacher-card">
+      <view class="detail-section-head">
+        <text class="detail-section-title">教师复核</text>
+        <text class="teacher-tag">教师工作台</text>
+      </view>
+      <view class="section-description">结合订正过程，确认掌握情况并留下反馈。</view>
+      <view class="field review-field">
+        <text class="label">复核说明</text>
+        <textarea
+          class="detail-textarea"
+          auto-height
+          value="{{teacherComment}}"
+          data-field="teacherComment"
+          bindinput="field"
+          maxlength="2000"
+          placeholder="记录掌握情况，或说明需要继续订正的地方"
+          placeholder-class="detail-placeholder"
+        />
+        <view class="field-hint small-gap">选择“继续订正”时，请填写具体原因。</view>
+      </view>
+      <view class="actions detail-actions">
+        <button class="secondary" data-approved="no" bindtap="review" disabled="{{busy}}">继续订正</button>
+        <button class="primary" data-approved="yes" bindtap="review" loading="{{busy}}" disabled="{{busy}}">通过，已掌握</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!teacher && item.status === 'PENDING_REVIEW'}}" class="pending-panel">
+      <view class="pending-dot"></view>
+      <view class="col">
+        <view class="pending-title">订正已提交</view>
+        <view class="pending-description">等待老师复核，完成后继续巩固复习。</view>
+      </view>
+    </view>
+
+    <view class="card detail-card review-plan-card">
+      <view class="detail-section-head">
+        <view class="section-heading">
+          <text class="step-number">04</text>
+          <text class="detail-section-title">间隔复习计划</text>
+        </view>
+        <text class="plan-tag">巩固记忆</text>
+      </view>
+      <view class="section-description">通过复核后，自动安排第 1、3、7 天复习。按时回顾，让掌握更牢固。</view>
+      <view class="review-rhythm">
+        <view class="rhythm-item"><text class="rhythm-day">1</text><text class="rhythm-label">天后</text></view>
+        <view class="rhythm-connector"></view>
+        <view class="rhythm-item"><text class="rhythm-day">3</text><text class="rhythm-label">天后</text></view>
+        <view class="rhythm-connector"></view>
+        <view class="rhythm-item"><text class="rhythm-day">7</text><text class="rhythm-label">天后</text></view>
+      </view>
+      <view wx:if="{{item.reviews.length}}" class="timeline review-timeline">
+        <view wx:for="{{item.reviews}}" wx:for-item="reviewItem" wx:for-index="reviewIndex" wx:key="id" class="timeline-item {{reviewItem.status !== 'PENDING' ? 'timeline-done' : ''}}">
+          <view class="timeline-rail">
+            <view class="timeline-dot"></view>
+            <view wx:if="{{reviewIndex < item.reviews.length - 1}}" class="timeline-line"></view>
+          </view>
+          <view class="timeline-content review-content">
+            <view class="record-heading">
+              <text class="review-date">{{reviewItem.dueDate}}</text>
+              <text class="badge {{reviewItem.status === 'PENDING' ? 'dim' : ''}}">{{reviewItem.statusText}}</text>
+            </view>
+            <button wx:if="{{teacher && reviewItem.canComplete}}" class="secondary review-button" data-id="{{reviewItem.id}}" bindtap="complete" disabled="{{busy}}">我已完成本次复习</button>
+            <view wx:elif="{{reviewItem.status === 'PENDING'}}" class="review-hint">{{reviewItem.canComplete ? '已到复习日，完成后由老师确认' : '尚未到复习日期'}}</view>
+            <view wx:else class="review-hint">完成于 {{reviewItem.completedText}}</view>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{!item.reviews.length}}" class="plan-empty">
+        <view class="plan-empty-title">复习计划待开启</view>
+        <view class="empty-description">通过老师复核后，在这里查看每次复习安排。</view>
+      </view>
+    </view>
+
+    <view wx:if="{{item.history.length}}" class="card"><view class="card-title">状态与操作历史</view><view wx:for="{{item.history}}" wx:key="id" class="gap"><view class="hint">{{item.createdText}} · {{item.actorName}}</view><view>{{item.fromText}} → {{item.toText}}</view><view class="body-text">{{item.comment}}</view></view></view>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+  </view>
+</view>

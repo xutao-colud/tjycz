@@ -1,0 +1,24 @@
+<app-nav />
+<view class="page class-report-page">
+  <view class="hero"><view class="eyebrow">每天的陪伴，都值得记录</view><view class="title">班级日报</view><view class="subtitle">记录本班情况，跟进每一天的小进步</view></view>
+  <view class="card report-filter"><select-picker range="{{classNames}}" value="{{classIndex}}" bindchange="changeClass" label="选择日报班级"><view class="form-pick">{{classNames[classIndex] || '选择日报班级'}}</view></select-picker><date-picker value="{{date}}" bindchange="changeDate" label="日报日期"><view class="form-pick">{{date}} ⌄</view></date-picker></view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <state-view empty="{{!classId}}" empty-text="暂无授权班级，请联系校区管理员" />
+    <block wx:if="{{classId}}">
+      <view wx:if="{{readOnly}}" class="notice">实际情况发生后再记录，未来日期仅供查看。</view>
+      <view class="report-overview"><view><text>{{overview.studentCount}}</text><text>本班学生</text></view><view><text>{{overview.arrivedCount}}/{{overview.studentCount}}</text><text>已到校 · 含已离校</text></view><view><text>{{overview.completedHomeworkCount}}/{{overview.homeworkCount}}</text><text>作业完成份数</text></view></view>
+      <view class="hint report-caption">{{classNames[classIndex]}} · 已请假 {{overview.leaveCount}} 人</view>
+      <view wx:if="{{editing}}" class="card report-editor">
+        <view class="field"><text class="label">班级日报 *</text><textarea value="{{content}}" data-field="content" bindinput="field" maxlength="6000" aria-label="班级日报" placeholder="记录作业辅导、课堂表现、体能活动等…" /></view>
+        <view class="field"><text class="label">需跟进事项</text><textarea value="{{followUp}}" data-field="followUp" bindinput="field" maxlength="2000" aria-label="需跟进事项" placeholder="需要继续辅导或沟通的事项…" /></view>
+        <view class="field"><text class="label">后续安排</text><textarea value="{{nextPlan}}" data-field="nextPlan" bindinput="field" maxlength="2000" aria-label="后续安排" placeholder="下一次辅导、活动或沟通安排…" /></view>
+        <view class="report-actions"><button class="secondary" bindtap="cancelEdit" disabled="{{busy}}">取消</button><button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存班级日报</button></view>
+      </view>
+      <view wx:elif="{{report}}" class="card report-body"><view class="row"><view class="section-title">{{date}} · 班级情况</view><text class="badge">已记录</text></view><view class="report-content">{{report.content}}</view><block wx:if="{{report.followUp}}"><view class="report-label">需跟进事项</view><view class="report-content">{{report.followUp}}</view></block><block wx:if="{{report.nextPlan}}"><view class="report-label">后续安排</view><view class="report-content">{{report.nextPlan}}</view></block><view class="report-footer">记录人 {{report.createdName}}<view>最近更新 {{report.updatedName}} · {{report.updatedText}}</view></view><button class="secondary" bindtap="edit" disabled="{{busy || readOnly}}">编辑日报</button></view>
+      <view wx:else class="card report-empty"><image src="/assets/icons/summaries.png" /><view class="section-title">今天的班级故事，等你记录</view><view class="hint">写下辅导进展、同学们的表现和需要继续关注的事。</view><button class="primary" bindtap="edit" disabled="{{busy || readOnly}}">记录本班情况</button></view>
+      <view class="card class-comments"><view class="row"><view class="section-title">校长点评</view><button wx:if="{{admin}}" class="secondary" bindtap="comment" disabled="{{busy || readOnly}}">点评班级</button></view><view wx:if="{{commenting}}" class="gap"><textarea value="{{commentText}}" data-field="commentText" bindinput="field" maxlength="2000" aria-label="班级情况点评" placeholder="肯定做得好的地方，写下改进方向与建议…" /><view class="report-actions"><button class="secondary" bindtap="cancelComment" disabled="{{busy}}">取消</button><button class="primary" bindtap="saveComment" loading="{{busy}}" disabled="{{busy}}">保存点评</button></view></view><view wx:for="{{comments}}" wx:key="id" class="class-comment"><view class="hint">{{item.actorName}} · {{item.createdText}}</view><view class="report-content">{{item.text}}</view></view><view wx:if="{{!comments.length}}" class="hint gap">暂无校长点评</view></view>
+      <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+    </block>
+  </block>
+</view>

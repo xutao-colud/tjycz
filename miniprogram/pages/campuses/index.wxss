@@ -1,0 +1,8 @@
+.campus-stats { display: flex; flex-wrap: wrap; gap: 12rpx 28rpx; margin-top: 22rpx; color: #737783; font-size: 24rpx; }
+.small { flex-shrink: 0; padding: 14rpx 20rpx; font-size: 23rpx; }
+.campus-access { margin-top: 18rpx; color: #737783; font-size: 25rpx; }
+.access-editor { border-color: #e7e8ee; }
+.campus-choices { display: flex; flex-wrap: wrap; gap: 14rpx; margin: 24rpx 0; }
+.campus-choice { padding: 16rpx 20rpx; border: 1rpx solid #e7e8ee; background: #fafafd; color: #737783; font-size: 25rpx; }
+.campus-choice.chosen { color: #0071e3; background: #f4f4f7; border-color: #e7e8ee; }
+.access-editor .row button { flex: 1; }

@@ -1,0 +1,70 @@
+<app-nav />
+<view class="page growth-page">
+  <view class="growth-heading"><view class="title">{{historyPage ? '成长记录' : '孩子的今天'}}</view><date-picker value="{{date}}" bindchange="changeDate"><view class="filter-pill">{{date}} ⌄</view></date-picker></view>
+  <state-view loading="{{loading}}" error="{{error}}" empty="{{!student}}" empty-text="暂无可查看的孩子，请联系校区核对绑定" bindretry="retry" />
+  <view wx:if="{{student && !loading && !error}}">
+    <view class="student-card">
+      <view class="col">
+        <select-picker wx:if="{{students.length > 1}}" range="{{childNames}}" value="{{childIndex}}" bindchange="chooseChild" label="切换孩子" plain="{{true}}"><view class="student-name">{{student.name}} <text class="child-switch">切换 ⌄</text></view></select-picker>
+        <view wx:else class="student-name">{{student.name}}</view>
+        <view class="student-meta">{{student.className}} · {{student.campusName}}</view>
+        <view wx:if="{{student.checkInTime || student.checkOutTime}}" class="student-meta">{{student.checkInTime ? student.checkIn + ' 到校' : ''}}{{student.checkOutTime ? ' · ' + student.checkOut + ' 离校' : ''}}</view>
+      </view>
+      <text class="badge">{{student.attendanceText}}</text>
+    </view>
+    <button wx:if="{{!historyPage && student.attendanceStatus !== 'ON_LEAVE'}}" class="detail-row pickup-line" bindtap="pickup">
+      <view class="col"><view>接送打卡</view><view wx:if="{{pickupSummary.actor}}" class="muted">记录老师 · {{pickupSummary.actor}}</view></view>
+      <text>{{pickupSummary.label}} ›</text>
+    </button>
+    <view wx:if="{{readOnly}}" class="notice gap">未来日期仅查看安排，尚无已发生的记录。</view>
+    <button wx:if="{{pickupSummary.alertCount}}" class="growth-banner attention" bindtap="pickup"><view class="col"><view class="banner-title">接送异常需要核对</view><view class="banner-copy">请与老师核对，异常处理前暂不离校</view></view><text>›</text></button>
+    <block wx:if="{{historyPage}}">
+    <view class="section-head"><view class="section-title">当日成长时间轴</view><select-picker range="{{filters}}" value="{{filterIndex}}" bindchange="filter" label="筛选成长记录" plain="{{true}}"><view class="filter-pill">{{filters[filterIndex]}} ⌄</view></select-picker></view>
+    <button wx:if="{{teacher && !compareOpen && date === today}}" class="text-button" bindtap="openComparison" disabled="{{busy}}">记录成长对比 ›</button>
+    <view wx:if="{{compareOpen}}" class="card">
+      <view class="row"><view class="section-title">成长对比</view><button class="text-button" bindtap="closeComparison" disabled="{{busy}}">取消</button></view>
+      <view wx:if="{{works.length < 2}}" class="muted">至少需要两张该学生已有的作业或错题图片。</view>
+      <block wx:else>
+        <select-picker range="{{workLabels}}" value="{{beforeIndex}}" data-side="before" bindchange="selectWork" label="选择之前的作品" disabled="{{busy}}"><view class="form-pick">{{workLabels[beforeIndex] || '选择之前的作品'}}</view></select-picker>
+        <file-list wx:if="{{beforeFile}}" files="{{[beforeFile]}}" />
+        <select-picker class="gap" range="{{workLabels}}" value="{{afterIndex}}" data-side="after" bindchange="selectWork" label="选择近期的作品" disabled="{{busy}}"><view class="form-pick">{{workLabels[afterIndex] || '选择近期的作品'}}</view></select-picker>
+        <file-list wx:if="{{afterFile}}" files="{{[afterFile]}}" />
+        <textarea class="gap" value="{{comparisonText}}" data-field="comparisonText" bindinput="field" maxlength="500" placeholder="写一句看得见的进步" />
+        <button class="primary" bindtap="saveComparison" disabled="{{busy}}" loading="{{busy}}">保存到成长记录</button>
+      </block>
+    </view>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+    <view class="timeline">
+      <view wx:for="{{timeline}}" wx:key="key" class="timeline-entry"><view class="event-symbol {{item.tone}}"><image src="/assets/icons/{{item.icon}}.png" /></view><view class="event-body"><view class="event-top" data-key="{{item.key}}" bindtap="event" role="button"><text class="event-time">{{item.timeText}}</text><view class="col event-title">{{item.title}}</view><text class="status {{item.tone}}">{{item.statusText}}</text></view><view class="event-content"><view class="body-text">{{item.detail}}</view><view wx:if="{{item.later}}" class="hint">处理 {{item.businessDate}} 的记录</view><view class="hint">{{item.actorName ? item.actorName + ' · ' : ''}}{{item.occurredAt ? '' : '具体时间未记录'}}</view>
+        <view wx:if="{{item.action === 'COMPARISON' && item.before.length && item.after.length}}" class="work-compare">
+          <view><view class="muted">之前</view><file-list files="{{item.before}}" /></view><view><view class="muted">近期</view><file-list files="{{item.after}}" /></view>
+        </view>
+        <file-list wx:else files="{{item.attachments}}" /><button wx:if="{{item.sourceType === 'HOMEWORK' || item.sourceType === 'FOLLOWUP'}}" class="text-button event-link" data-key="{{item.key}}" bindtap="event">查看详情 ›</button></view></view></view>
+      <view wx:if="{{!timeline.length}}" class="card empty-inline">{{readOnly ? '尚无已发生的记录' : '该日期或筛选条件下暂无记录'}}</view>
+    </view>
+    </block>
+    <block wx:else>
+      <button wx:if="{{reminder}}" class="card detail-row" data-url="/pages/follow-ups/index?id={{reminder.id}}" bindtap="go">
+        <view class="col"><view class="section-title">明日提醒</view><view class="muted">{{reminder.reason}}</view></view><text>查看 ›</text>
+      </button>
+      <view class="card">
+        <view class="card-head"><view class="section-title">今日学习</view><button class="text-button" data-page="homework" bindtap="application">查看作业 ›</button></view>
+        <view wx:if="{{homework.length}}" class="learning-progress">作业完成 {{metrics[0].value}}<text wx:if="{{corrections}}" class="correction-note"> · {{corrections}} 项待订正</text></view>
+        <view wx:else class="muted">当日暂未布置作业</view>
+        <view class="muted gap">体能 {{metrics[2].value}} · 积分 {{metrics[1].value}}</view>
+      </view>
+      <view wx:if="{{actions.length || lowBalances.length && !teacher}}" class="card">
+        <view class="section-title">需要关注</view>
+        <button wx:for="{{actions}}" wx:key="id" class="detail-row" data-url="/pages/follow-ups/index?id={{item.id}}" bindtap="go"><view class="col">{{item.title}}<view wx:if="{{item.parentAction}}" class="muted">{{item.parentAction}}</view></view><text>处理 ›</text></button>
+        <button wx:if="{{lowBalances.length && !teacher}}" class="detail-row" bindtap="family"><text>{{lowBalances.length}} 门课程余额偏低</text><text>查看 ›</text></button>
+      </view>
+      <view class="card">
+        <view class="card-head"><view class="section-title">今日小结</view><button class="text-button" data-url="/pages/summaries/index?date={{date}}&studentId={{student.id}}" bindtap="go">完整小结 ›</button></view>
+        <view wx:if="{{summary.teacherComment}}" class="body-text">{{summary.teacherComment}}</view>
+        <view wx:else class="muted">{{summary ? '老师已发布今日小结' : '老师暂未发布小结'}}</view>
+        <button wx:for="{{recent}}" wx:key="key" class="detail-row" data-key="{{item.key}}" bindtap="event"><text>{{item.timeText}}</text><view class="col">{{item.title}}</view><text>›</text></button>
+        <button class="text-button" bindtap="toggleHistory">完整成长记录 ›</button>
+      </view>
+    </block>
+  </view>
+</view>

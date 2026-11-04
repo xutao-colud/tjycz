@@ -1,0 +1,37 @@
+{
+  "pages": [
+    "pages/login/index",
+    "pages/dashboard/index",
+    "pages/students/index",
+    "pages/attendance/index",
+    "pages/homework/index",
+    "pages/homework-detail/index",
+    "pages/mistakes/index",
+    "pages/mistake-detail/index",
+    "pages/fitness/index",
+    "pages/points/index",
+    "pages/lessons/index",
+    "pages/summaries/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "晚辅智管",
+    "navigationBarBackgroundColor": "#f3f8f6",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f3f8f6",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
+  },
+  "usingComponents": {
+    "app-nav": "/components/app-nav/index",
+    "state-view": "/components/state-view/index",
+    "student-picker": "/components/student-picker/index",
+    "media-field": "/components/media-field/index",
+    "file-list": "/components/file-list/index"
+  },
+  "permission": {
+    "scope.record": { "desc": "用于录制口头作业音频，提交给老师批改" }
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

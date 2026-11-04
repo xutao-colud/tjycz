@@ -1,0 +1,38 @@
+{
+  "name": "wanfu-admin",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 15173 --strictPort",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test:audio": "node scripts/check-audio-playback.mjs",
+    "dev:app": "vite --mode app-dev --host 0.0.0.0 --port 15175 --strictPort",
+    "build:app": "vue-tsc -b && vite build --mode app",
+    "build:app:dev": "vue-tsc -b && vite build --mode app-dev",
+    "sync:app": "cap sync",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "test:app": "node scripts/check-mobile.mjs",
+    "test:location": "node scripts/check-location.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/geolocation": "8.2.4",
+    "@capacitor/ios": "8.5.3",
+    "lucide-vue-next": "^0.468.0",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.1.12",
+    "vue-tsc": "^3.1.1"
+  }
+}

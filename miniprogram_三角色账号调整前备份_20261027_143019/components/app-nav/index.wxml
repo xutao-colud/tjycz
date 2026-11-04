@@ -1,0 +1,12 @@
+<view class="nav">
+  <view class="nav-row"><view class="brand" bindtap="navigate" data-page="dashboard">晚辅智管 <text class="role">{{roleName}}</text></view><view class="nav-link" bindtap="toggle">{{open ? '收起导航' : '全部功能'}}</view></view>
+  <view wx:if="{{demo}}" class="demo">本地演示会话 · 使用虚构学生数据</view>
+  <view wx:if="{{open}}" class="nav-panel">
+    <view class="nav-items">
+      <view bindtap="navigate" data-page="dashboard">工作台</view><view bindtap="navigate" data-page="students">{{teacher ? '学生名册' : '我的孩子'}}</view>
+      <view wx:if="{{teacher}}" bindtap="navigate" data-page="attendance">考勤签到</view><view bindtap="navigate" data-page="homework">学习作业</view>
+      <view bindtap="navigate" data-page="mistakes">错题复习</view><view bindtap="navigate" data-page="fitness">体能打卡</view>
+      <view bindtap="navigate" data-page="points">成长积分</view><view bindtap="navigate" data-page="lessons">课程课时</view><view bindtap="navigate" data-page="summaries">每日小结</view>
+    </view><view class="account" bindtap="account">切换角色 / 登录账号</view>
+  </view>
+</view>

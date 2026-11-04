@@ -1,0 +1,20 @@
+<app-nav />
+<view class="page">
+  <view class="hero"><view class="eyebrow">校区考勤</view><view class="title">{{admin ? '老师签到' : '我的打卡'}}</view><view class="subtitle">{{admin ? '查看各校区老师当日的到校与签到时间' : '选择本人任教校区，记录今天的到校时间'}}</view></view>
+  <view class="card">
+    <view class="row"><date-picker value="{{date}}" label="选择签到日期" bindchange="changeDate"><text>{{date}}</text></date-picker><select-picker range="{{statusNames}}" value="{{statusIndex}}" bindchange="changeStatus" label="筛选签到状态"><text>{{statusNames[statusIndex]}}</text></select-picker></view>
+    <view class="hint">跨校区任教的老师，每个校区分别签到。</view>
+  </view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <view class="metric-grid"><view class="metric"><view class="metric-value">{{checkedInCount}} / {{total}}</view><view class="metric-label">已签到 / 应签到人次</view></view><view class="metric"><view class="metric-value">{{total - checkedInCount}}</view><view class="metric-label">未签到人次</view></view></view>
+    <view wx:if="{{!admin && !isToday}}" class="card hint">当前为历史或未来日期，仅可查看记录；本人签到请切换至今天。</view>
+    <view wx:for="{{visibleRecords}}" wx:key="key" class="card">
+      <view class="row"><view><view class="section-title">{{item.teacherName}}</view><view class="hint">{{item.campusName}}</view></view><text class="badge {{item.checkInTime ? '' : 'dim'}}">{{item.statusText}}</text></view>
+      <view class="check-time">签到时间<text>{{item.checkInText}}</text></view>
+      <view class="hint">{{item.checkInAddress}}<text wx:if="{{item.checkInRadius}}"> · 周围 {{item.checkInRadius}} 米</text></view><button wx:if="{{item.canCheckIn}}" class="primary" data-key="{{item.key}}" bindtap="checkIn" loading="{{busy}}" disabled="{{busy}}">本人签到</button>
+    </view>
+    <state-view empty="{{!visibleRecords.length}}" empty-text="当前范围暂无符合条件的老师" />
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+  </block>
+</view>

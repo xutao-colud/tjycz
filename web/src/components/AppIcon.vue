@@ -1,0 +1,10 @@
+<script setup lang="ts">
+import { Activity, ArrowRight, ArrowUpRight, Award, BookOpen, BookOpenCheck, BookPlus, Building2, CalendarCheck2, CalendarDays, CalendarPlus, Check, ChevronDown, ChevronRight, ChevronsUpDown, Circle, CircleAlert, CircleCheck, ClipboardCheck, ClipboardList, Clock3, CloudOff, Coffee, Coins, Dumbbell, FilePenLine, GraduationCap, HeartHandshake, Inbox, Info, Languages, LayoutDashboard, Leaf, Lightbulb, ListTodo, LogOut, Menu, NotebookPen, PanelLeft, Paperclip, PlugZap, Plus, Quote, ReceiptText, RefreshCw, ScanLine, School, Search, Settings2, ShieldCheck, Sigma, SlidersHorizontal, Sparkles, Sprout, Sun, TriangleAlert, Trophy, UploadCloud, UserRoundPlus, UsersRound, WalletCards, X } from 'lucide-vue-next'
+const icons: Record<string, any> = { Activity, ArrowRight, ArrowUpRight, Award, BookOpen, BookOpenCheck, BookPlus, Building2, CalendarCheck2, CalendarDays, CalendarPlus, Check, ChevronDown, ChevronRight, ChevronsUpDown, Circle, CircleAlert, CircleCheck, ClipboardCheck, ClipboardList, Clock3, CloudOff, Coffee, Coins, Dumbbell, FilePenLine, GraduationCap, HeartHandshake, Inbox, Info, Languages, LayoutDashboard, Leaf, Lightbulb, ListTodo, LogOut, Menu, NotebookPen, PanelLeft, Paperclip, PlugZap, Plus, Quote, ReceiptText, RefreshCw, ScanLine, School, Search, Settings2, ShieldCheck, Sigma, SlidersHorizontal, Sparkles, Sprout, Sun, TriangleAlert, Trophy, UploadCloud, UserRoundPlus, UsersRound, WalletCards, X }
+import { computed } from 'vue'
+import { House, CircleUserRound, LayoutGrid, MessageCircle, UserCheck, ChevronLeft, MapPin, BellRing, Utensils } from 'lucide-vue-next'
+Object.assign(icons,{House,CircleUserRound,LayoutGrid,MessageCircle,UserCheck,ChevronLeft,MapPin,BellRing,Utensils})
+const props = withDefaults(defineProps<{ name: string; size?: number; strokeWidth?: number }>(), { size: 20, strokeWidth: 1.7 })
+const icon = computed(() => (icons as unknown as Record<string, any>)[props.name] || icons.Circle)
+</script>
+<template><component :is="icon" :size="size" :stroke-width="strokeWidth" aria-hidden="true" /></template>

@@ -1,0 +1,25 @@
+<app-nav />
+<view class="page campus-report-page">
+  <view class="hero"><view class="eyebrow">校区管理</view><view class="title">校区总结</view><view class="subtitle">看见整体进展，回应每个班级的努力</view></view>
+  <view class="card report-filter"><select-picker range="{{campusNames}}" value="{{campusIndex}}" bindchange="changeCampus" label="选择总结校区"><view class="form-pick">{{campusNames[campusIndex] || '选择总结校区'}}</view></select-picker><date-picker value="{{date}}" bindchange="changeDate" label="总结日期"><view class="form-pick">{{date}} ⌄</view></date-picker></view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <state-view empty="{{!campusId}}" empty-text="暂无授权校区，请联系老板分配权限" />
+    <block wx:if="{{campusId}}">
+      <view wx:if="{{readOnly}}" class="notice">实际情况发生后再记录，未来日期仅供查看。</view>
+      <view class="report-overview"><view><text>{{overview.arrivedCount}}/{{overview.studentCount}}</text><text>学生到校 · 含已离校</text></view><view><text>{{overview.checkedInTeacherCount}}/{{overview.teacherCount}}</text><text>老师签到</text></view><view><text>{{overview.completedHomeworkCount}}/{{overview.homeworkCount}}</text><text>作业完成份数</text></view></view>
+      <view wx:if="{{editing}}" class="card report-editor">
+        <view class="section-title">{{campusNames[campusIndex]}} · {{date}}</view>
+        <view class="field gap"><text class="label">校区总结 *</text><textarea value="{{content}}" data-field="content" bindinput="field" maxlength="6000" aria-label="校区总结" placeholder="整体运营、教学进展与服务情况…" /></view>
+        <view class="field"><text class="label">重点跟进</text><textarea value="{{followUp}}" data-field="followUp" bindinput="field" maxlength="2000" aria-label="重点跟进" /></view>
+        <view class="field"><text class="label">后续安排</text><textarea value="{{nextPlan}}" data-field="nextPlan" bindinput="field" maxlength="2000" aria-label="后续安排" /></view>
+        <view class="report-actions"><button class="secondary" bindtap="cancelEdit" disabled="{{busy}}">取消</button><button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存校区总结</button></view>
+      </view>
+      <view wx:else class="card report-summary"><view class="row"><view class="section-title">校区今日总结</view><text class="badge">{{summary ? '已记录' : '待记录'}}</text></view><block wx:if="{{summary}}"><view class="report-content">{{summary.content}}</view><block wx:if="{{summary.followUp}}"><view class="report-label">重点跟进</view><view class="report-content">{{summary.followUp}}</view></block><block wx:if="{{summary.nextPlan}}"><view class="report-label">后续安排</view><view class="report-content">{{summary.nextPlan}}</view></block><view class="report-footer">记录人 {{summary.createdName}} · 最近更新 {{summary.updatedName}}<view>{{summary.updatedText}}</view></view></block><view wx:else class="hint gap">记录所负责校区的整体进展、重点事项与后续安排。</view><button class="secondary gap" bindtap="edit" disabled="{{busy || readOnly}}">{{summary ? '编辑总结' : '记录校区总结'}}</button></view>
+      <view class="section-head"><text class="section-title">班级情况与点评</text><text class="hint">{{classes.length}} 个班级</text></view>
+      <view wx:if="{{commentingClassId}}" class="card report-editor"><view class="section-title">点评 · {{commentingClassName}}</view><view class="hint">点评供对应班级老师查看</view><textarea class="gap" value="{{commentText}}" data-field="commentText" bindinput="field" maxlength="2000" aria-label="班级情况点评" placeholder="肯定做得好的地方，写下改进方向与建议…" /><view class="report-actions"><button class="secondary" bindtap="cancelComment" disabled="{{busy}}">取消</button><button class="primary" bindtap="saveComment" loading="{{busy}}" disabled="{{busy}}">保存点评</button></view></view>
+      <view wx:for="{{classes}}" wx:key="id" class="card campus-class-card"><view class="row"><view class="col"><view class="section-title">{{item.name}}</view><view class="hint">{{item.teacherName}} · {{item.overview.studentCount}} 位学生</view></view><button class="secondary" data-id="{{item.id}}" bindtap="comment" disabled="{{busy || readOnly}}">点评班级</button></view><view class="report-class-stats">到校 {{item.overview.arrivedCount}}/{{item.overview.studentCount}} · 请假 {{item.overview.leaveCount}} · 作业 {{item.overview.completedHomeworkCount}}/{{item.overview.homeworkCount}}</view><view wx:if="{{item.report}}" class="teacher-note"><view class="hint">老师日报 · {{item.report.updatedName}}</view><view class="report-content">{{item.report.content}}</view></view><view wx:else class="hint gap">老师尚未记录当日情况，可先根据现场情况点评。</view><view wx:for="{{item.comments}}" wx:for-item="note" wx:key="id" class="principal-comment"><view class="hint">{{note.actorName}} · {{note.createdText}}</view><view class="report-content">{{note.text}}</view></view><button class="text-button gap" data-id="{{item.id}}" bindtap="openClass">查看班级日报与点评 ›</button></view>
+      <view wx:if="{{!classes.length}}" class="card hint">当前校区暂无班级</view><view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+    </block>
+  </block>
+</view>

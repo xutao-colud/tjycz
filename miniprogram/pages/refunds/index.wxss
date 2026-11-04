@@ -1,0 +1,9 @@
+@import "../../styles/growth.wxss";
+.refund-compose { margin-top:22rpx; }
+.refund-card { width:100%; margin-top:22rpx; text-align:left; line-height:1.6; }
+.refund-card .card-title { overflow-wrap:anywhere; }
+.refund-amount { font-size:48rpx; font-weight:650; color:#1d1d1f; margin-top:20rpx; font-variant-numeric:tabular-nums; }
+.source-summary { padding:22rpx; border-radius:24rpx; background:#f4f4f8; color:#626570; font-size:25rpx; line-height:1.8; word-break:break-word; }
+.log-name { color:#1d1d1f; font-size:26rpx; font-weight:600; }
+.refunds-page .row { flex-wrap:wrap; }
+.refunds-page textarea { min-height:160rpx; }

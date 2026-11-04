@@ -1,0 +1,92 @@
+<app-nav />
+<view class="page points-page">
+  <view class="hero">
+    <view class="eyebrow">努力看得见</view>
+    <view class="title">成长积分</view>
+    <view class="subtitle">把每一次进步，积攒成成长的力量。</view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <student-picker students="{{students}}" selected="{{studentIds}}" bindchange="pickStudents" />
+
+    <button class="secondary gap" data-url="/pages/rewards/index" bindtap="go">固定奖励与奖品兑换 ›</button>
+    <view class="points-balance-card">
+      <view class="points-balance-top">
+        <text class="points-balance-label">当前可用积分</text>
+        <view class="points-balance-icon">
+          <image src="/assets/icons/points.png" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="points-balance-number">{{balance}}<text class="points-balance-unit">分</text></view>
+      <view class="points-balance-foot">
+        <text>{{studentName || '选择学生查看积分'}}</text>
+        <text>每一份努力都有回响</text>
+      </view>
+      <view class="points-balance-orbit"></view>
+    </view>
+
+    <view wx:if="{{teacher}}" class="card points-editor">
+      <button class="points-editor-toggle" bindtap="toggleForm" disabled="{{busy}}">
+        <view>
+          <view class="points-editor-title">奖励与调整</view>
+          <view class="points-editor-note">为学生记录鼓励或调整积分</view>
+        </view>
+        <text class="points-toggle-text">{{formOpen ? '收起' : '展开'}}<text class="points-toggle-mark">{{formOpen ? '−' : '+'}}</text></text>
+      </button>
+      <view wx:if="{{formOpen}}" class="points-form">
+        <view class="field">
+          <text class="label">调整积分 *</text>
+          <input value="{{amount}}" data-field="amount" bindinput="field" placeholder="填写 -100 至 100 的整数，不能为 0" />
+        </view>
+        <view class="field">
+          <text class="label">调整原因 *</text>
+          <textarea value="{{reason}}" data-field="reason" bindinput="field" maxlength="500" placeholder="例如：主动帮助同学" />
+        </view>
+        <view class="hint">奖励填正数，扣减填负数。扣减后积分不能小于 0。</view>
+        <button class="primary gap" bindtap="submit" disabled="{{busy || !studentIds.length}}" loading="{{busy}}">确认调整积分</button>
+      </view>
+    </view>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+
+    <view class="section-head">
+      <view class="section-title">积分明细</view>
+      <text class="points-section-note">共 {{items.length}} 笔</text>
+    </view>
+    <view class="card points-ledger">
+      <view wx:for="{{items}}" wx:key="id" class="points-ledger-row">
+        <view class="points-entry-icon points-icon-{{item.tone}}">
+          <image src="/assets/icons/{{item.icon}}.png" mode="aspectFit" />
+        </view>
+        <view class="col">
+          <view class="points-entry-title">{{item.reason || item.typeText}}</view>
+          <view class="points-entry-type">{{item.typeText}}</view>
+          <view class="points-entry-time">{{item.createdText}}</view>
+        </view>
+        <view class="points-entry-amount">
+          <view class="points-change {{item.amount > 0 ? 'number-positive' : 'number-negative'}}">{{item.amount > 0 ? '+' : ''}}{{item.amount}}</view>
+          <view class="points-entry-balance">余额 {{item.balance}}</view>
+        </view>
+      </view>
+      <view wx:if="{{!items.length}}" class="points-empty">
+        <image src="/assets/icons/empty.png" mode="aspectFit" />
+        <view>还没有积分变动记录</view>
+        <text>每一点进步都值得期待</text>
+      </view>
+    </view>
+
+    <view wx:if="{{rules.length}}" class="card points-rules">
+      <view class="points-rules-head">
+        <view class="points-rules-icon">
+          <image src="/assets/icons/points.png" mode="aspectFit" />
+        </view>
+        <view class="card-title">积分小规则</view>
+      </view>
+      <view wx:for="{{rules}}" wx:key="name" class="points-rule-row">
+        <text class="points-rule-name">{{item.name}}</text>
+        <text class="points-rule-value">{{item.points > 0 ? '+' : ''}}{{item.points}}<text class="points-rule-unit">分</text></text>
+      </view>
+      <view class="points-rule-hint">按机构规则奖励，同一事项不重复计分。</view>
+    </view>
+  </block>
+</view>

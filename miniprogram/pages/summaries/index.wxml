@@ -1,0 +1,186 @@
+<app-nav />
+<view class="page summaries-page">
+  <view class="hero">
+    <view wx:if="{{!quick}}" class="eyebrow">一天的成长，认真记录</view>
+    <view class="title">每日小结</view>
+    <view wx:if="{{!quick}}" class="subtitle">{{teacher ? '回顾今天的学习，写下看得见的成长。' : '今天的点滴进步，老师为你认真记录。'}}</view>
+  </view>
+
+  <view class="filter-bar summaries-date">
+    <text class="filter-label">小结日期</text>
+    <date-picker class="plain-picker" value="{{date}}" label="选择小结日期" bindchange="changeDate">
+      <view class="summaries-date-value">
+        <text class="filter-value">{{date}}</text>
+        <text class="chevron">⌄</text>
+      </view>
+    </date-picker>
+  </view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <view wx:if="{{quick}}" class="section-title">{{quickName}} · 当日小结</view>
+    <student-picker wx:else
+      students="{{students}}"
+      selected="{{studentIds}}"
+      multiple="{{teacher}}"
+      title="{{teacher ? '选择学生' : '查看孩子'}}"
+      bindchange="pickStudents"
+    />
+
+    <button wx:if="{{quick && !items.length && !readOnly}}" class="primary" bindtap="generate" loading="{{busy}}" disabled="{{busy}}">汇总记录并预览</button>
+    <view wx:if="{{teacher && !quick}}" class="card summaries-generator">
+      <button class="summaries-generator-toggle" bindtap="toggleGenerate" disabled="{{busy}}">
+        <view class="summaries-generator-label">
+          <view class="summaries-generator-icon">
+            <image src="/assets/icons/summaries.png" mode="aspectFit" />
+          </view>
+          <view>
+            <view class="summaries-generator-title">生成小结草稿</view>
+            <view class="summaries-generator-note">已选择 {{studentIds.length}} 位学生 · {{date}}</view>
+          </view>
+        </view>
+        <text class="summaries-toggle-text">{{generateOpen ? '收起' : '展开'}}</text>
+      </button>
+      <view wx:if="{{generateOpen}}" class="summaries-generator-body">
+        <view class="hint">汇总当天记录后，可编辑正文和寄语，提交给另一位校长或老板审核，通过后再发布。待审、已通过和已发布的小结会保留。</view>
+        <button class="primary gap" bindtap="generate" loading="{{busy}}" disabled="{{busy || !studentIds.length}}">生成 {{studentIds.length}} 人的小结草稿</button>
+      </view>
+    </view>
+    <view wx:if="{{generated}}" class="notice">{{generated}}</view>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+
+    <view class="section-head">
+      <view class="section-title">{{teacher ? '学习日报' : '孩子的学习日报'}}</view>
+      <text class="summaries-section-note">{{items.length}} 份小结</text>
+    </view>
+    <view wx:for="{{items}}" wx:key="id" class="card summary-report">
+      <view class="summary-report-head">
+        <view class="summary-avatar">{{item.initial}}</view>
+        <view class="col">
+          <view class="summary-student-name">{{item.studentName}}的学习日报</view>
+          <view class="summary-report-date">{{item.date}}<text wx:if="{{item.status === 'PUBLISHED'}}"> · 第 {{item.version}} 版</text></view>
+        </view>
+        <text class="badge {{item.reviewTone}}">{{item.statusText}}</text>
+      </view>
+
+      <view wx:if="{{editingId !== item.id}}" class="summary-content">
+        <view wx:for="{{item.sections}}" wx:for-item="section" wx:key="id" class="summary-section">
+          <view class="summary-section-heading">
+            <view class="summary-section-icon summary-tone-{{section.tone}}">
+              <image src="/assets/icons/{{section.icon}}.png" mode="aspectFit" />
+            </view>
+            <text class="summary-section-name">{{section.title}}</text>
+          </view>
+          <view class="summary-section-text">{{section.text}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{item.teacherComment && editingId !== item.id}}" class="summary-teacher-comment">
+        <view class="summary-comment-title">老师的话</view>
+        <view class="summary-comment-text">{{item.teacherComment}}</view>
+      </view>
+      <file-list wx:if="{{editingId !== item.id && item.photos.length}}" files="{{item.photos}}" />
+
+      <block wx:if="{{teacher}}">
+        <view wx:if="{{item.status === 'IN_REVIEW'}}" class="summary-review-note">
+          <view class="summary-review-title">等待独立审核</view>
+          <view>{{item.submittedName}} 于 {{item.submittedText}} 提交 · 稿件版本 {{item.reviewVersion}}</view>
+          <view>正文和寄语已冻结；提交者可撤回后修改。</view>
+        </view>
+        <view wx:elif="{{item.status === 'APPROVED' || item.status === 'REJECTED' || item.status === 'PUBLISHED'}}" class="summary-review-note {{item.status === 'REJECTED' ? 'summary-review-returned' : ''}}">
+          <view class="summary-review-title">{{item.status === 'REJECTED' ? '已退回，请修改后重新提交' : '审核内容已固定'}}</view>
+          <view>{{item.reviewedName}} · {{item.reviewedText}} · 稿件版本 {{item.reviewVersion}}</view>
+          <view class="summary-review-opinion">{{item.reviewComment}}</view>
+        </view>
+        <view wx:elif="{{item.canEdit}}" class="summary-review-note">编辑后请提交给另一位校长或老板审核，通过后再发布给家长。</view>
+
+        <view wx:if="{{editingId === item.id}}" class="summary-edit-form">
+          <view class="label">小结正文 · 最多12000字</view>
+          <textarea class="summary-content-input" value="{{editContent}}" data-field="editContent" bindinput="field" maxlength="12000" placeholder="认真记录孩子今天的学习与成长" />
+          <view class="label">教师评语</view>
+          <view class="chips">
+            <button class="chip" data-text="作业完成认真" bindtap="quickComment">作业认真</button>
+            <button class="chip" data-text="课堂专注，主动参与" bindtap="quickComment">课堂专注</button>
+            <button class="chip" data-text="积极参与运动" bindtap="quickComment">积极运动</button>
+          </view>
+          <textarea value="{{teacherComment}}" data-field="teacherComment" bindinput="field" maxlength="2000" placeholder="写下孩子今天的亮点与建议" />
+          <file-list wx:if="{{draftPhoto}}" files="{{[draftPhoto]}}" />
+          <button wx:if="{{draftPhoto}}" class="text-button" bindtap="removePhoto" disabled="{{busy}}">移除作品图</button>
+          <button wx:else class="text-button" bindtap="choosePhoto" disabled="{{busy}}">添加一张作品图</button>
+          <view class="actions">
+            <button class="secondary" bindtap="cancelEdit" disabled="{{busy}}">取消</button>
+            <button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存小结</button>
+          </view>
+        </view>
+
+        <view wx:elif="{{reviewingId === item.id}}" class="summary-edit-form">
+          <view class="label">审核意见</view>
+          <view class="hint">请核对上方正文和教师寄语，说明通过原因或需修改的内容。</view>
+          <textarea value="{{reviewComment}}" data-field="reviewComment" bindinput="field" maxlength="2000" placeholder="填写本次核对结果或修改建议" />
+          <view class="actions">
+            <button class="secondary" bindtap="cancelReview" disabled="{{busy}}">取消</button>
+            <button class="secondary summary-return-button" data-approved="no" bindtap="decideReview" disabled="{{busy}}">退回修改</button>
+            <button class="primary" data-approved="yes" bindtap="decideReview" loading="{{busy}}" disabled="{{busy}}">审核通过</button>
+          </view>
+        </view>
+        <view wx:else class="actions summary-actions">
+          <button wx:if="{{item.canEdit}}" class="secondary" data-id="{{item.id}}" bindtap="edit" disabled="{{busy}}">编辑小结</button>
+          <button wx:if="{{item.canSubmit}}" class="primary" data-id="{{item.id}}" bindtap="submitReview" loading="{{busy}}" disabled="{{busy}}">提交审核</button>
+          <button wx:if="{{item.canWithdraw}}" class="secondary" data-id="{{item.id}}" bindtap="withdrawReview" disabled="{{busy}}">撤回修改</button>
+          <button wx:if="{{item.canReview}}" class="primary" data-id="{{item.id}}" bindtap="beginReview" disabled="{{busy}}">审核小结</button>
+          <button wx:if="{{item.canPublish}}" class="primary" data-id="{{item.id}}" bindtap="publish" loading="{{busy}}" disabled="{{busy}}">发布小结</button>
+        </view>
+
+        <view wx:if="{{item.reviewHistory.length}}" class="summary-history">
+          <button class="summary-history-toggle" data-id="{{item.id}}" bindtap="toggleHistory">提交与审核记录 · {{item.reviewHistory.length}}<text>{{historyId === item.id ? '收起' : '查看'}}</text></button>
+          <view wx:if="{{historyId === item.id}}" class="summary-history-list">
+            <view wx:for="{{item.reviewHistory}}" wx:for-item="entry" wx:key="id" class="summary-history-entry">
+              <view class="summary-history-title">{{entry.actionText}} · {{entry.actorName}}</view>
+              <view class="summary-history-meta">{{entry.createdText}} · 版本 {{entry.version}} · {{entry.statusText}}</view>
+              <view wx:if="{{entry.comment}}" class="summary-history-comment">{{entry.comment}}</view>
+              <button class="summary-version-toggle" data-id="{{entry.id}}" bindtap="toggleHistoryVersion">{{historyEntryId === entry.id ? '收起此版本内容' : '查看此版本内容'}}</button>
+              <view wx:if="{{historyEntryId === entry.id}}" class="summary-history-content">
+                <text selectable>{{entry.content}}</text>
+                <view wx:if="{{entry.teacherComment}}" class="summary-history-comment">教师寄语：{{entry.teacherComment}}</view>
+                <file-list wx:if="{{entry.photos.length}}" files="{{entry.photos}}" />
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <view wx:if="{{item.status === 'PUBLISHED'}}" class="summary-published">
+        <view class="summary-published-meta">发布于 {{item.publishedText}}</view>
+        <view wx:if="{{teacher}}" class="summary-published-meta">通知：{{item.notificationText}}</view>
+        <view wx:if="{{item.feedbackSatisfaction}}" class="summary-feedback">
+          <view class="summary-feedback-head">
+            <text class="summary-feedback-title">家长反馈</text>
+            <text class="summary-feedback-score">{{item.feedbackSatisfaction === 'SATISFIED' ? '满意' : '不满意'}}</text>
+          </view>
+          <view class="summary-feedback-text">{{item.feedbackText || '暂无文字反馈'}}</view>
+        </view>
+        <block wx:if="{{!teacher}}">
+          <view wx:if="{{feedbackId === item.id}}" class="summary-feedback-form">
+            <view class="label">今天的小结，您觉得如何？</view>
+            <view class="summary-rating">
+              <view
+                wx:for="{{satisfactions}}"
+                wx:for-item="score"
+                wx:key="value"
+                class="summary-rating-item {{satisfaction === score.value ? 'summary-rating-active' : ''}}"
+                data-satisfaction="{{score.value}}"
+                bindtap="rate"
+              >{{score.label}}</view>
+            </view>
+            <textarea value="{{feedbackText}}" data-field="feedbackText" bindinput="field" maxlength="2000" placeholder="{{satisfaction === 'DISSATISFIED' ? '请填写不满意的原因（必填）' : '留下鼓励或建议（可选）'}}" />
+            <view class="actions">
+              <button class="secondary" bindtap="cancelFeedback" disabled="{{busy}}">取消</button>
+              <button class="primary" bindtap="sendFeedback" loading="{{busy}}" disabled="{{busy}}">提交反馈</button>
+            </view>
+          </view>
+          <button wx:else class="secondary gap" data-id="{{item.id}}" bindtap="feedback" disabled="{{busy}}">{{item.feedbackSatisfaction ? '更新我的反馈' : '满意度反馈'}}</button>
+        </block>
+      </view>
+    </view>
+    <state-view empty="{{!items.length}}" empty-text="{{teacher ? '当日暂无小结，可选择学生生成草稿' : '老师暂未发布当日小结，请稍后查看'}}" />
+  </block>
+</view>

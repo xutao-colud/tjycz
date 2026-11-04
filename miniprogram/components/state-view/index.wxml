@@ -1,0 +1,24 @@
+<view wx:if="{{loading}}" class="state state-loading">
+  <view class="state-icon loading-icon">
+    <view class="spinner"></view>
+  </view>
+  <view class="state-title">正在加载</view>
+  <view class="state-description">请稍候</view>
+</view>
+<view wx:elif="{{error}}" class="state state-error">
+  <view class="state-icon error-icon">
+    <text class="error-mark">!</text>
+  </view>
+  <view class="state-title">加载失败</view>
+  <view class="state-description error-description">{{error}}</view>
+  <button class="retry-button" bindtap="retry">
+    <text class="retry-icon">↻</text>
+    <text>重新加载</text>
+  </button>
+</view>
+<view wx:elif="{{empty}}" class="state state-empty">
+  <view class="state-icon empty-icon-wrap">
+    <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit" />
+  </view>
+  <view class="state-title empty-title">{{emptyText}}</view>
+</view>

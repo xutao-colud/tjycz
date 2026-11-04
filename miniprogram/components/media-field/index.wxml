@@ -1,0 +1,46 @@
+<view class="media">
+  <view class="media-head">
+    <text class="media-title">附件</text>
+    <text class="media-count">{{files.length}} / 6</text>
+  </view>
+
+  <button wx:if="{{files.length < 6}}" class="upload-area" disabled="{{disabled || busy || recording}}" loading="{{uploadingFiles}}" bindtap="choose">
+    <view class="upload-icon-wrap">
+      <image class="upload-icon" src="/assets/icons/upload.png" mode="aspectFit" />
+    </view>
+    <view class="upload-copy">
+      <view class="upload-title">{{uploadingFiles ? '正在上传…' : '添加照片 / 视频'}}</view>
+      <view class="upload-description">拍照或从相册选择</view>
+    </view>
+    <text class="upload-plus">+</text>
+  </button>
+
+  <button wx:if="{{audioEnabled && !recording && files.length < 6}}" class="record-button" bindtap="record" disabled="{{disabled || busy}}">
+    <image class="mic-icon" src="/assets/icons/mic.png" mode="aspectFit" />
+    <text class="record-title">录制语音</text>
+    <text class="record-limit">最长 60 秒</text>
+  </button>
+  <view wx:if="{{recording}}" class="recording-panel">
+    <view class="recording-copy">
+      <view class="recording-title">
+        <view class="recording-dot"></view>
+        <text>录音中</text>
+        <text class="recording-time">{{seconds}} / 60 秒</text>
+      </view>
+      <view class="recording-hint">离开页面将取消当前录音</view>
+    </view>
+    <button class="stop-button" bindtap="stopRecord">
+      <view class="stop-mark"></view>
+      <text>停止并上传</text>
+    </button>
+  </view>
+
+  <view class="hint">最多 6 个附件，单个不超过 20MB</view>
+  <file-list files="{{files}}" removable disabled="{{disabled || busy || recording}}" bindremove="remove" />
+
+  <view wx:if="{{error}}" class="error">
+    <text class="error-mark">!</text>
+    <text class="error-copy">{{error}}</text>
+  </view>
+  <button wx:if="{{recordDenied}}" class="settings-button" bindtap="settings">开启麦克风权限</button>
+</view>

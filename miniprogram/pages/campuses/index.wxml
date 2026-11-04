@@ -1,0 +1,32 @@
+<app-nav />
+<view class="page">
+  <view class="hero"><view class="eyebrow">校区管理范围</view><view class="title">校区与权限</view><view class="subtitle">{{superAdmin ? '查看全部校区，为每位校长设置管理范围' : '查看本人已获授权的校区，权限调整请联系老板'}}</view></view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <view wx:for="{{campuses}}" wx:key="id" class="card">
+      <view class="row"><view class="section-title">{{item.name}}</view><button class="secondary small" data-id="{{item.id}}" bindtap="viewCampus">查看运营 ›</button></view>
+      <view wx:if="{{item.address}}" class="hint">{{item.address}}</view><view class="hint">老师签到地点：{{item.checkInAddress || '尚未设置'}}<text wx:if="{{item.checkInRadius}}"> · 周围 {{item.checkInRadius}} 米</text></view><button class="text-button" data-id="{{item.id}}" bindtap="editLocation" disabled="{{busy}}">设置老师签到范围 ›</button>
+      <view class="campus-stats"><text>学生 {{item.studentCount}} 人</text><text>老师 {{item.teacherCount}} 人</text><text>班级 {{item.classCount}} 个</text></view>
+    </view>
+    <view wx:if="{{locationCampusId}}" class="card">
+      <view class="section-title">签到地址与范围</view><view class="hint">在校区现场可使用当前位置。手动输入须使用WGS84经纬度。</view>
+      <view class="field"><text class="label">签到地址</text><input value="{{locationAddress}}" data-field="locationAddress" bindinput="field" maxlength="300" aria-label="签到地址" /></view>
+      <view class="field"><text class="label">中心点纬度</text><input type="text" value="{{locationLatitude}}" data-field="locationLatitude" bindinput="field" aria-label="中心点纬度" /></view>
+      <view class="field"><text class="label">中心点经度</text><input type="text" value="{{locationLongitude}}" data-field="locationLongitude" bindinput="field" aria-label="中心点经度" /></view>
+      <view class="field"><text class="label">允许签到范围</text><select-picker range="{{radiusNames}}" value="{{radiusIndex}}" bindchange="changeRadius" label="允许签到范围"><view class="form-pick">{{radiusNames[radiusIndex] || '允许签到范围'}}</view></select-picker></view>
+      <button class="secondary" bindtap="locate" disabled="{{busy}}">使用当前位置</button><view class="row"><button class="secondary" bindtap="cancelLocation" disabled="{{busy}}">取消</button><button class="primary" bindtap="saveLocation" loading="{{busy}}" disabled="{{busy}}">保存签到地点</button></view>
+    </view>
+    <state-view empty="{{!campuses.length}}" empty-text="当前账号暂无授权校区" />
+    <block wx:if="{{superAdmin}}">
+      <view class="section-head"><text class="section-title">校长的校区权限</text><text class="hint">支持多选校区</text></view>
+      <view wx:if="{{editingId}}" class="card access-editor">
+        <view class="section-title">{{editingName}} · 管理校区</view><view class="hint">勾选可管理的校区；取消全部勾选可撤销校区权限。</view>
+        <view class="campus-choices"><button wx:for="{{choices}}" wx:key="id" class="campus-choice {{item.checked ? 'chosen' : ''}}" data-id="{{item.id}}" bindtap="toggleCampus" disabled="{{busy}}" aria-pressed="{{item.checked}}">{{item.checked ? '✓ ' : '○ '}}{{item.name}}</button></view>
+        <view class="row"><button class="secondary" bindtap="cancel" disabled="{{busy}}">取消</button><button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存权限</button></view>
+      </view>
+      <view wx:for="{{principals}}" wx:key="id" class="card"><view class="row"><view><view class="section-title">{{item.name}}</view><view class="hint">校区校长 · {{item.username}}</view></view><button class="secondary small" data-id="{{item.id}}" bindtap="edit" disabled="{{busy}}">设置权限</button></view><view class="campus-access">{{item.campusText}}</view></view>
+      <view wx:if="{{!principals.length}}" class="card hint">暂无校长账号，可在管理后台创建后到这里配置校区权限。</view>
+    </block>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+  </block>
+</view>

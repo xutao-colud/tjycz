@@ -1,0 +1,25 @@
+{
+  "models": {
+    "PP-LCNet_x1_0_doc_ori": {
+      "config.json": "e49f6be2fe4034232b05fb80d983a7b9bde4592d4a52812129c9a348057d3147",
+      "inference.json": "3580978602f309c3554508dd85d4fe09b73a7e0d80d7f9e63258f5b72c390c69",
+      "inference.pdiparams": "e8d6e7c5d264507e40e58a655779059d616b20d7441ea22047d829eb3931989c",
+      "inference.yml": "9e195eb729a8173588cd0e8a852c8b373aa606e79e77b4ac7d8346f5426caf26"
+    },
+    "PP-DocLayout-S": {
+      "inference.json": "ac09e931895d4c442e5379ab3b7e9b583baf288e816ab7675ca519da9eb2a9d7",
+      "inference.pdiparams": "491c3382d84ca04d2033afbee0c105942ed82fea392bb4a19170646adebe088a",
+      "inference.yml": "6f690098c438214c67822239a568f0bc2bbe97a8f02fba93e492d4f2c47523c3"
+    },
+    "PP-OCRv5_mobile_det": {
+      "inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+      "inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+      "inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699"
+    },
+    "PP-OCRv6_tiny_rec": {
+      "inference.json": "b5b14770c7dcf092781e92f4278a2ae5f95048f08b4b8a04140e88cb2745f147",
+      "inference.pdiparams": "bb2f8f54d1e25f28c71b6fa4fe23f5940e159cae27fbee96155c99f822156e57",
+      "inference.yml": "66170210bad538e83fff3c4a3867e547d6bf20b50d64b20347c4b913f3034ea1"
+    }
+  }
+}

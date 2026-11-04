@@ -1,0 +1,26 @@
+<view wx:if="{{teacher && campuses.length}}" class="campus-bar">
+  <text>当前校区</text>
+  <select-picker wx:if="{{campuses.length > 1}}" range="{{campusNames}}" value="{{campusIndex}}" bindchange="changeCampus" label="切换校区" plain="{{true}}"><view>{{campusName}}<text class="campus-arrow">⌄</text></view></select-picker>
+  <text wx:else class="campus-name">{{campusName}}</text>
+</view>
+<view wx:if="{{open}}" class="nav-overlay" bindtap="close">
+  <view class="nav-sheet" catchtap="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head"><view class="sheet-title">{{sheetTitle}}</view><view class="sheet-close" bindtap="close">×</view></view>
+    <view class="sheet-account" bindtap="account"><view class="account-avatar">{{userName ? userName[0] : '我'}}</view><view class="account-copy"><view>{{userName || '当前账号'}}<text class="role">{{roleName}}</text></view><view class="account-tip">{{demo ? '本地演示 · 虚构学生数据' : '账号与登录管理'}}</view></view><text class="account-arrow">›</text></view>
+    <scroll-view scroll-y="{{true}}" class="app-list-scroll">
+    <view wx:for="{{groups}}" wx:key="title" class="app-group">
+      <view class="group-title">{{item.title}}</view>
+      <view class="app-list">
+        <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="page" class="app-entry" data-page="{{entry.page}}" bindtap="navigate">
+          <image class="app-icon" src="/assets/icons/{{entry.icon}}.png" mode="aspectFit"/><text>{{entry.name}}</text><text class="entry-arrow">›</text>
+        </view>
+      </view>
+    </view>
+    </scroll-view>
+  </view>
+</view>
+<view class="bottom-nav">
+  <view wx:for="{{tabs}}" wx:key="key" class="tab {{item.selected && !open ? 'selected' : ''}}" data-page="{{item.page}}" data-section="{{item.section}}" data-kind="{{item.kind}}" bindtap="navigate" role="button" aria-label="{{item.name}}"><image src="/assets/icons/{{item.icon}}{{item.icon === 'home' && item.selected && !open ? '-active' : ''}}.png" mode="aspectFit"/><text>{{item.name}}</text></view>
+  <view class="tab {{open ? 'selected' : ''}}" bindtap="toggle" role="button" aria-label="{{sheetTitle}}"><image src="/assets/icons/user{{open ? '-active' : ''}}.png" mode="aspectFit"/><text>{{sheetTitle}}</text></view>
+</view>

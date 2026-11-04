@@ -1,0 +1,117 @@
+<app-nav />
+<view class="page">
+  <view class="hero mistakes-hero">
+    <view>
+      <view class="eyebrow">积累与掌握</view>
+      <view class="title">错题成长本</view>
+      <view class="subtitle">把每一道错题，变成下一次进步</view>
+    </view>
+    <image class="hero-icon" src="/assets/icons/mistakes.png" mode="aspectFit" />
+  </view>
+
+  <view class="card mistakes-filter">
+    <view class="filter-column">
+      <text class="filter-label">学科</text>
+      <select-picker class="plain-picker" range="{{subjects}}" value="{{subjectIndex}}" data-field="subjectIndex" bindchange="filter" plain="{{true}}" label="选择科目">
+        <view class="filter-choice">
+          <text>{{subjects[subjectIndex]}}</text>
+          <text class="chevron">›</text>
+        </view>
+      </select-picker>
+    </view>
+    <view class="filter-column">
+      <text class="filter-label">掌握状态</text>
+      <select-picker class="plain-picker" range="{{statusNames}}" value="{{statusIndex}}" data-field="statusIndex" bindchange="filter" plain="{{true}}" label="选择状态">
+        <view class="filter-choice">
+          <text>{{statusNames[statusIndex]}}</text>
+          <text class="chevron">›</text>
+        </view>
+      </select-picker>
+    </view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+
+  <view hidden="{{loading || error}}">
+    <student-picker students="{{students}}" selected="{{studentIds}}" title="{{teacher ? '选择学生' : '选择孩子'}}" bindchange="pickStudents" />
+
+    <view class="card create-entry" bindtap="toggleCreate">
+      <view class="create-entry-main">
+        <view class="create-icon"><image src="/assets/icons/upload.png" mode="aspectFit" /></view>
+        <view>
+          <view class="create-entry-title">记录一道错题</view>
+          <view class="create-entry-subtitle">拍照或文字，留住学习的重点</view>
+        </view>
+      </view>
+      <view class="create-toggle">{{showCreate ? '收起' : '添加'}}<text class="create-arrow">{{showCreate ? '⌃' : '›'}}</text></view>
+    </view>
+
+    <view wx:if="{{showCreate}}" class="card create-form">
+      <view class="section-head form-heading">
+        <text class="section-title">录入错题</text>
+        <text class="hint">为已选学生记录</text>
+      </view>
+      <view class="field">
+        <text class="label">学科</text>
+        <select-picker range="{{taskSubjects}}" value="{{taskSubjectIndex}}" bindchange="selectSubject" label="选择作业科目">{{taskSubjects[taskSubjectIndex]}}</select-picker>
+      </view>
+      <view class="field">
+        <text class="label">题目或照片（二选一）</text>
+        <textarea value="{{title}}" data-field="title" bindinput="field" maxlength="300" placeholder="输入题目，或为照片添加简短标题" />
+      </view>
+      <view class="field">
+        <text class="label">知识点（可后补）</text>
+        <input value="{{knowledgePoint}}" data-field="knowledgePoint" bindinput="field" placeholder="例如：分数加减法" maxlength="200" />
+      </view>
+      <view class="field">
+        <text class="label">错误原因（可后补）</text>
+        <textarea value="{{errorReason}}" data-field="errorReason" bindinput="field" maxlength="1000" placeholder="记下概念、方法或审题问题" />
+      </view>
+      <view class="field">
+        <text class="label">关联作业编号 <text class="optional">选填</text></text>
+        <input type="number" value="{{homeworkId}}" data-field="homeworkId" bindinput="field" placeholder="填写要关联的作业编号" />
+      </view>
+      <media-field bindchange="media" binduploading="uploadState" reset-key="{{mediaReset}}" disabled="{{busy}}" />
+      <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+      <button class="primary gap" bindtap="create" loading="{{busy}}" disabled="{{busy || uploading || !studentIds.length}}">保存错题</button>
+    </view>
+
+    <view class="card"><view class="actions"><button wx:if="{{teacher}}" class="secondary" bindtap="capture" disabled="{{busy || !studentIds.length}}">拍照录题</button><button class="primary" bindtap="printBook" disabled="{{busy || !items.length}}">生成打印本</button></view><button wx:if="{{book}}" class="text-button gap" bindtap="openBook" disabled="{{busy}}">打开PDF，保存或打印 ›</button></view>
+    <view class="section-head mistake-list-head">
+      <text class="section-title">我的错题</text>
+      <text class="hint">共 {{items.length}} 道</text>
+    </view>
+    <view wx:for="{{items}}" wx:key="id" class="card mistake-card" data-id="{{item.id}}" bindtap="open">
+      <view class="mistake-top">
+        <view class="subject-icon subject-{{item.subjectTone}}">{{item.subjectIcon}}</view>
+        <view class="mistake-subject">
+          <view class="subject-name">{{item.subject}}</view>
+          <view class="student-name">{{item.studentName}}</view>
+        </view>
+        <text class="mistake-status {{item.status === 'MASTERED' ? 'status-mastered' : item.status === 'PENDING_REVIEW' ? 'status-review' : 'status-uncorrected'}}">{{item.statusText}}</text>
+      </view>
+      <view class="mistake-title">{{item.title}}</view>
+      <view class="knowledge-line">
+        <text class="knowledge-label">知识点（可后补）</text>
+        <text class="knowledge-value">{{item.knowledgePoint || '待补充'}}</text>
+      </view>
+      <view class="review-strip">
+        <view class="review-item">
+          <text class="review-number">{{item.pendingReviews}}</text>
+          <text class="review-caption">待复习</text>
+        </view>
+        <view class="review-divider"></view>
+        <view class="review-item">
+          <text class="review-number review-completed">{{item.completedReviews}}</text>
+          <text class="review-caption">已复习</text>
+        </view>
+        <text class="review-arrow">›</text>
+      </view>
+      <view class="mistake-footer">
+        <text>{{item.createdDate}} 收录</text>
+        <text class="mistake-link">查看错题 ›</text>
+      </view>
+    </view>
+    <state-view empty="{{!items.length}}" empty-text="暂无错题，继续保持学习好习惯" />
+  </view>
+</view>

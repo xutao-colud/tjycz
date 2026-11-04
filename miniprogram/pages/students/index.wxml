@@ -1,0 +1,75 @@
+<app-nav />
+<view class="page">
+  <view class="hero student-hero">
+    <view>
+      <view class="eyebrow">学生管理</view>
+      <view class="title">{{teacher ? '学生名册' : '我的孩子'}}</view>
+      <view class="subtitle">点击卡片，查看作业、考勤与日小结</view>
+    </view>
+    <image class="hero-icon" src="/assets/icons/students.png" mode="aspectFit" />
+  </view>
+
+  <view class="card search-card">
+    <view class="search-row">
+      <view class="search-input">
+        <view class="search-symbol"></view>
+        <input value="{{keyword}}" data-field="keyword" bindinput="field" bindconfirm="search" confirm-type="search" placeholder="搜索学生姓名" />
+      </view>
+      <button class="search-button" bindtap="search" disabled="{{loading}}">搜索</button>
+    </view>
+    <view wx:if="{{teacher}}" class="class-filter">
+      <text class="filter-label">班级</text>
+      <select-picker class="plain-picker class-picker" range="{{classNames}}" value="{{classIndex}}" bindchange="changeClass" plain="{{true}}" label="选择班级">
+        <view class="class-picker-value">
+          <text>{{classNames[classIndex]}}</text>
+          <text class="chevron">›</text>
+        </view>
+      </select-picker>
+    </view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" empty="{{!students.length}}" empty-text="暂无符合条件的学生" bindretry="retry" />
+
+  <block wx:if="{{!loading && !error && students.length}}">
+    <view class="section-head roster-head">
+      <view>
+        <text class="section-title">{{teacher ? '学生列表' : '孩子档案'}}</text>
+        <text class="roster-count">{{students.length}} 位</text>
+      </view>
+    </view>
+
+    <view wx:for="{{students}}" wx:key="id" class="card student-card" data-id="{{item.id}}" bindtap="openStudent" role="button" aria-label="查看{{item.name}}的作业、考勤与日小结" hover-class="student-pressed">
+      <view class="student-top">
+        <image wx:if="{{item.avatarUrl}}" class="avatar student-avatar" src="{{item.avatarUrl}}" mode="aspectFill" /><view wx:else class="avatar student-avatar avatar-tone-{{item.avatarTone}}">{{item.avatarText}}</view>
+        <view class="student-info">
+          <view class="student-name">{{item.name}}</view>
+          <view class="list-description">{{item.className}}<text wx:if="{{item.grade}}"> · {{item.grade}}</text></view>
+        </view>
+        <text class="badge {{item.attendanceStatus === 'NOT_ARRIVED' ? 'dim' : ''}}">{{item.attendanceText}}</text>
+        <text class="chevron">›</text>
+      </view>
+
+      <view class="student-metrics">
+        <view class="student-metric">
+          <view class="metric-number">{{item.homeworkCompleted || 0}}<text class="metric-total"> / {{item.homeworkTotal || 0}}</text></view>
+          <view class="metric-caption">作业完成</view>
+        </view>
+        <view class="student-metric">
+          <view class="metric-number points-number">{{item.points || 0}}</view>
+          <view class="metric-caption">成长积分</view>
+        </view>
+        <view class="student-metric">
+          <view class="metric-number lesson-number">{{item.lessonBalance || 0}}<text class="metric-unit">课时</text></view>
+          <view class="metric-caption">晚辅余额</view>
+        </view>
+      </view>
+
+      <view class="student-times">
+        <text><text class="time-dot"></text>签到 {{item.checkInClock}}</text>
+        <text><text class="time-dot out-dot"></text>签退 {{item.checkOutClock}}</text>
+      </view>
+      <view class="parent-line">家长 · {{item.parentName || '未登记'}}<text wx:if="{{teacher && item.parentPhone}}"> · {{item.parentPhone}}</text></view>
+    </view>
+
+  </block>
+</view>

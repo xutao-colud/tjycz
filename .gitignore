@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
+node_modules/
+web/dist/
+backend/target/
+backend/data/
+backend/uploads/
+*.log
+.run/
+**/project.private.config.json
+*.tsbuildinfo
+__pycache__/
+*.pyc

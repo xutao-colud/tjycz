@@ -1,0 +1,1 @@
+.capture-steps{display:flex;justify-content:space-between;color:#7a879a;font-size:24rpx;margin-bottom:28rpx}.capture-photo{display:block;width:100%;border-radius:28rpx;margin:28rpx 0;background:#f2f5fa}.capture-note{padding:26rpx;background:#fff4e5;border-radius:24rpx;font-size:25rpx;line-height:1.8;color:#946638}

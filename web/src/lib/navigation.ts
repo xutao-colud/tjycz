@@ -1,0 +1,23 @@
+import type { Role } from './types'
+export const navigation = [
+  { path: '/', name: '工作台', icon: 'LayoutDashboard', group: '工作空间', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/students', name: '学生档案', icon: 'UsersRound', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/family-services', name: '课程与订餐', icon: 'HeartHandshake', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/safety', name: '接送管理', icon: 'ShieldCheck', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/capture', name: '拍照录题', icon: 'ScanLine', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER'] },
+  { path: '/rewards', name: '积分与奖品', icon: 'Trophy', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/student-notifications', name: '到离校消息', icon: 'BellRing', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/attendance', name: '到校签到', icon: 'ScanLine', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER'] },
+  { path: '/homework', name: '作业管理', icon: 'NotebookPen', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/mistakes', name: '成长错题本', icon: 'BookOpenCheck', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/fitness', name: '体能与积分', icon: 'Trophy', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/schedules', name: '课程排课', icon: 'CalendarDays', group: '机构运营', roles: ['SUPER_ADMIN','ADMIN','TEACHER'] },
+  { path: '/ledger', name: '课时账本', icon: 'WalletCards', group: '机构运营', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/renewals', name: '收费续费', icon: 'ReceiptText', group: '机构运营', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/campus-reports', name: '校区总结', icon: 'Building2', group: '机构运营', roles: ['SUPER_ADMIN','ADMIN'] },
+  { path: '/class-reports', name: '班级日报', icon: 'ClipboardList', group: '教学管理', roles: ['SUPER_ADMIN','ADMIN','TEACHER'] },
+  { path: '/summaries', name: '每日小结', icon: 'ClipboardList', group: '机构运营', roles: ['SUPER_ADMIN','ADMIN','TEACHER','PARENT'] },
+  { path: '/privacy', name: '隐私与数据', icon: 'ShieldCheck', group: '系统', roles: ['SUPER_ADMIN','ADMIN','PARENT'] },
+  { path: '/campuses', name: '校区管理', icon: 'School', group: '系统', roles: ['SUPER_ADMIN','ADMIN'] },
+  { path: '/settings', name: '系统设置', icon: 'Settings2', group: '系统', roles: ['SUPER_ADMIN','ADMIN','TEACHER'] },
+] satisfies {path:string;name:string;icon:string;group:string;roles:Role[]}[]

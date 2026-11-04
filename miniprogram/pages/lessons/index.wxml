@@ -1,0 +1,130 @@
+<app-nav />
+<view class="page lessons-page">
+  <view class="hero">
+    <view class="eyebrow">每一节课都清楚</view>
+    <view class="title">课程与课时</view>
+    <view class="subtitle">查看课程余额，安心安排每一次学习。</view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <student-picker students="{{students}}" selected="{{studentIds}}" bindchange="pickStudents" /><view wx:if="{{teacher}}" class="card gap"><button class="secondary" bindtap="toggleGrant" disabled="{{busy}}">为孩子增加课程课时</button><view wx:if="{{grantOpen}}"><view class="field"><text class="label">课程（晚辅、周末、假期等）</text><select-picker range="{{courseNames}}" value="{{courseIndex}}" bindchange="course" label="选择增加课时的课程"><view class="form-pick">{{courseNames[courseIndex] || '选择增加课时的课程'}}</view></select-picker></view><view class="field"><text class="label">增加课时</text><input value="{{grantUnits}}" data-field="grantUnits" bindinput="field" type="digit" /></view><view class="field"><text class="label">增加原因</text><textarea value="{{grantReason}}" data-field="grantReason" bindinput="field" maxlength="800" /></view><view class="hint">仅记入增补课时，不登记收款；老师只能操作自己负责的学生。</view><button class="primary gap" bindtap="grant" disabled="{{busy}}">确认增加课时</button></view></view>
+
+    <view class="section-head">
+      <view class="section-title">我的课程</view>
+      <text class="lessons-section-note">{{accounts.length}} 门课程</text>
+    </view>
+    <view wx:for="{{accounts}}" wx:key="id" class="card lessons-account">
+      <view class="lessons-account-head">
+        <view class="lessons-course-icon lessons-tone-{{item.tone}}">
+          <image src="/assets/icons/lessons.png" mode="aspectFit" />
+        </view>
+        <view class="col">
+          <view class="lessons-course-name">{{item.courseName}}</view>
+          <view class="lessons-account-caption">独立课时账户</view>
+        </view>
+        <text class="badge {{item.low ? 'warn' : ''}}">{{item.low ? '余额不足提醒' : '正常'}}</text>
+      </view>
+      <view class="lessons-balance">
+        <view class="lessons-balance-label">剩余课时</view>
+        <view class="lessons-balance-line">
+          <text class="lessons-balance-value {{item.low ? 'lessons-balance-low' : ''}}">{{item.balance}}</text>
+          <text class="lessons-balance-unit">{{item.unit || '课时'}}</text>
+        </view>
+      </view>
+      <view class="hint">可用 {{item.availableBalance}} {{item.unit}} · 退款预留 {{item.refundReserved}} {{item.unit}}</view><button wx:if="{{!teacher || admin}}" class="text-button" data-url="/pages/refunds/index?studentId={{item.studentId}}" bindtap="go">退款申请与记录 ›</button><view class="lessons-account-stats">
+        <view class="lessons-account-stat">
+          <view class="lessons-stat-value">{{item.purchased}}</view>
+          <view class="lessons-stat-label">净购买课时</view>
+        </view>
+        <view class="lessons-account-stat">
+          <view class="lessons-stat-value">{{item.gifted}}</view>
+          <view class="lessons-stat-label">净赠送课时</view>
+        </view>
+        <view class="lessons-account-stat">
+          <view class="lessons-stat-value">{{item.consumed}}</view>
+          <view class="lessons-stat-label">累计消耗</view>
+        </view>
+      </view>
+      <view class="lessons-threshold {{item.low ? 'lessons-threshold-low' : ''}}">{{item.low ? '请留意续费，保持学习不中断' : '余额提醒线'}} · {{item.warningThreshold}} {{item.unit || '课时'}}</view>
+    </view>
+    <state-view empty="{{!accounts.length}}" empty-text="暂无课程账户，请联系机构确认报名" />
+
+    <view wx:if="{{settlements.length}}" class="card lessons-pending">
+      <view class="lessons-pending-head">
+        <view class="lessons-pending-mark">!</view>
+        <view class="col">
+          <view class="lessons-pending-title">有 {{settlements.length}} 笔课时待结算</view>
+          <view class="lessons-pending-subtitle">核对后可重新处理</view>
+        </view>
+      </view>
+      <view wx:for="{{settlements}}" wx:key="id" class="lessons-pending-row">
+        <view class="col">
+          <view class="lessons-pending-course">{{item.courseName}} · {{item.date}}</view>
+          <view class="lessons-pending-reason">{{item.reason || '请核对账户余额与排课'}}</view>
+        </view>
+        <button class="lessons-retry" data-id="{{item.id}}" bindtap="retrySettlement" disabled="{{busy}}" loading="{{busy}}">重新结算</button>
+      </view>
+    </view>
+
+    <view class="section-head">
+      <view class="section-title">课时明细</view>
+      <text class="lessons-section-note">共 {{ledger.length}} 笔</text>
+    </view>
+    <view class="filter-bar lessons-filter">
+      <text class="filter-label">课程</text>
+      <select-picker class="plain-picker" range="{{accountNames}}" value="{{accountIndex}}" bindchange="account" plain="{{true}}" label="选择课时账户">
+        <view class="lessons-filter-value">
+          <text class="filter-value">{{accountNames[accountIndex]}}</text>
+          <text class="chevron">⌄</text>
+        </view>
+      </select-picker>
+    </view>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+    <view class="card lessons-ledger">
+      <view wx:for="{{ledger}}" wx:key="id" class="lessons-ledger-row">
+        <view class="lessons-ledger-main">
+          <view class="lessons-ledger-dot {{item.amount > 0 ? 'lessons-dot-positive' : 'lessons-dot-negative'}}">{{item.amount > 0 ? '+' : '−'}}</view>
+          <view class="col">
+            <view class="lessons-entry-title">{{item.typeText}}<text wx:if="{{item.reversed}}" class="badge dim lessons-reversed">已冲正</text></view>
+            <view class="lessons-entry-course">{{item.courseName}}</view>
+          </view>
+          <text class="lessons-entry-amount {{item.amount > 0 ? 'number-positive' : 'number-negative'}}">{{item.amount > 0 ? '+' : ''}}{{item.amount}}</text>
+        </view>
+        <view class="lessons-entry-reason">{{item.reason || '系统记账'}}</view>
+        <view class="lessons-entry-meta">
+          <text>{{item.createdText}}</text>
+          <text class="lessons-entry-balances">{{item.balanceBefore}} → {{item.balanceAfter}}</text>
+        </view>
+      </view>
+      <view wx:if="{{!ledger.length}}" class="lessons-empty">
+        <image src="/assets/icons/empty.png" mode="aspectFit" />
+        <view>当前课程暂无课时明细</view>
+      </view>
+    </view>
+
+    <view class="section-head">
+      <view class="section-title">续费记录</view>
+      <text class="lessons-section-note">共 {{renewals.length}} 笔</text>
+    </view>
+    <view class="card lessons-renewals">
+      <view wx:for="{{renewals}}" wx:key="id" class="lessons-renewal-row">
+        <view class="row">
+          <view class="lessons-renewal-name col">{{item.courseName}}</view>
+          <text class="badge {{item.status === 'PENDING' ? 'warn' : ''}}">{{item.statusText}}</text>
+        </view>
+        <view class="lessons-renewal-main">
+          <view class="lessons-renewal-money"><text class="lessons-currency">¥</text>{{item.money}}</view>
+          <view class="lessons-renewal-units">
+            <view>购买 <text>{{item.lessons}}</text> 课时</view>
+            <view>赠送 <text>{{item.giftLessons}}</text> 课时</view>
+          </view>
+        </view>
+        <view class="lessons-renewal-time">{{item.createdText}}</view>
+        <view wx:if="{{item.note}}" class="lessons-renewal-note">{{item.note}}</view>
+      </view>
+      <view wx:if="{{!renewals.length}}" class="lessons-empty-inline">暂无续费记录</view>
+    </view>
+    <view class="lessons-footer-note">续费与冲正请联系机构管理员办理。</view>
+  </block>
+</view>

@@ -1,0 +1,114 @@
+<app-nav />
+<view class="page">
+  <view class="hero attendance-hero">
+    <view>
+      <view class="eyebrow">到校与离校</view>
+      <view class="title">学生考勤</view>
+      <view class="subtitle">记录每一次准时抵达与安心离校</view>
+    </view>
+    <image class="hero-icon" src="/assets/icons/attendance.png" mode="aspectFit" />
+  </view>
+
+  <view class="card attendance-filter">
+    <view class="filter-columns">
+      <view class="filter-column">
+        <text class="filter-label">考勤日期</text>
+        <date-picker class="plain-picker" value="{{date}}" label="选择考勤日期" bindchange="changeDate">
+          <view class="filter-choice">
+            <text>{{date}}</text>
+            <text class="chevron">›</text>
+          </view>
+        </date-picker>
+      </view>
+      <view class="filter-column">
+        <text class="filter-label">班级筛选</text>
+        <select-picker class="plain-picker" range="{{classNames}}" value="{{classIndex}}" bindchange="changeClass" plain="{{true}}" label="选择班级">
+          <view class="filter-choice">
+            <text>{{classNames[classIndex]}}</text>
+            <text class="chevron">›</text>
+          </view>
+        </select-picker>
+      </view>
+    </view>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+
+  <block wx:if="{{!loading && !error}}">
+    <view class="attendance-stats">
+      <view class="attendance-stat">
+        <view class="stat-number">{{records.length}}</view>
+        <view class="stat-caption">考勤记录</view>
+      </view>
+      <view class="attendance-stat">
+        <view class="stat-number stat-green">{{presentCount}}</view>
+        <view class="stat-caption">在校学生</view>
+      </view>
+      <view class="attendance-stat">
+        <view class="stat-number stat-blue">{{leftCount}}</view>
+        <view class="stat-caption">已离校</view>
+      </view>
+    </view>
+
+<view class="card"><view class="section-title">按校区筛选</view><select-picker range="{{campusNames}}" value="{{campusIndex}}" bindchange="changeCampus" label="筛选校区"><view class="form-pick">{{campusNames[campusIndex] || '筛选校区'}}</view></select-picker><view class="hint">由老师确认学生实际到校后登记。</view></view>
+    <student-picker students="{{students}}" selected="{{studentIds}}" multiple title="选择考勤学生" bindchange="pickStudents" />
+
+    <view class="card batch-card">
+      <view class="section-head batch-heading">
+        <text class="section-title">批量考勤</text>
+        <text class="selected-count">已选 {{studentIds.length}} 人</text>
+      </view>
+      <view wx:if="{{admin}}" class="field"><text class="label">历史离校核对原因（补录历史时必填）</text><textarea value="{{historicalReason}}" data-field="historicalReason" bindinput="field" maxlength="1000" aria-label="历史离校核对原因" /></view><button class="text-button" data-url="/pages/safety/index" bindtap="go">请假与安全接送 ›</button><view class="attendance-actions">
+        <button class="primary" data-action="in" bindtap="batch" loading="{{busy}}" disabled="{{busy || !studentIds.length}}">到校登记</button>
+        <button wx:if="{{admin && date < today}}" class="secondary" data-action="out" bindtap="batch" loading="{{busy}}" disabled="{{busy || !studentIds.length}}">人工签退</button>
+      </view>
+      <view class="batch-hint">当天接送请为学生现场拍照签到或签退。签退后按排课结算，已批准整日请假不消课。</view>
+      <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
+    </view>
+
+    <view wx:if="{{results.length}}" class="card result-card">
+      <view class="section-head result-heading">
+        <text class="section-title">本次操作结果</text>
+        <text class="result-summary">成功 {{resultSuccess}}<text wx:if="{{resultFailed}}"> · 失败 {{resultFailed}}</text></text>
+      </view>
+      <view wx:for="{{results}}" wx:key="studentId" class="result-row">
+        <view class="row">
+          <view class="result-name">
+            <text class="result-dot {{item.success ? '' : 'result-dot-fail'}}"></text>
+            <text>{{item.name}}</text>
+          </view>
+          <text class="result-label {{item.success ? 'result-ok' : 'result-fail'}}">{{item.outcome}}</text>
+        </view>
+        <view wx:if="{{item.message}}" class="result-message">{{item.message}}</view>
+      </view>
+    </view>
+
+    <view class="section-head attendance-list-head">
+      <text class="section-title">当日考勤记录</text>
+      <text class="hint">共 {{records.length}} 条</text>
+    </view>
+    <view wx:for="{{records}}" wx:key="studentId" class="card attendance-record">
+      <view class="record-head">
+        <view class="record-avatar record-tone-{{item.avatarTone}}">{{item.avatarText}}</view>
+        <view class="record-student">
+          <view class="record-name">{{item.studentName}}</view>
+          <view class="list-description">{{item.campusName}} · {{item.className}}</view>
+        </view>
+        <text class="badge {{item.status === 'LEFT' ? 'record-left' : item.status === 'PRESENT' ? '' : 'dim'}}">{{item.statusText}}</text>
+      </view>
+      <view class="time-columns">
+        <view class="time-cell">
+          <view class="time-caption"><text class="time-dot"></text>签到时间</view>
+          <view class="time-value">{{item.checkInClock}}</view>
+        </view>
+        <view class="time-cell">
+          <view class="time-caption"><text class="time-dot out-dot"></text>签退时间</view>
+          <view class="time-value">{{item.checkOutClock}}</view>
+        </view>
+      </view>
+      <view class="actions gap"><button wx:if="{{item.status === 'NOT_ARRIVED'}}" class="primary" data-id="{{item.studentId}}" data-action="CHECK_IN" bindtap="photoMark" disabled="{{busy}}">拍照签到</button><button wx:if="{{item.status === 'PRESENT'}}" class="secondary" data-id="{{item.studentId}}" data-action="CHECK_OUT" bindtap="photoMark" disabled="{{busy}}">拍照签退</button></view><file-list files="{{item.checkInPhotos}}" /><file-list files="{{item.checkOutPhotos}}" />
+      <view class="record-source">{{item.sourceText}}</view>
+    </view>
+    <state-view empty="{{!records.length}}" empty-text="当日暂无考勤记录" />
+  </block>
+</view>

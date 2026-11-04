@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">天健悦成长</string>
+    <string name="title_activity_main">天健悦成长</string>
+    <string name="package_name">cn.tianjianyue.growth</string>
+    <string name="custom_url_scheme">cn.tianjianyue.growth</string>
+</resources>
