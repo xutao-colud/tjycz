@@ -14,7 +14,11 @@ services:
   web:
     mem_limit: 128m
   ocr:
-    build: ./ocr-service
+    build:
+      context: ./ocr-service
+      args:
+        DEBIAN_MIRROR: https://mirrors.aliyun.com
+        PIP_INDEX_URL: https://mirrors.aliyun.com/pypi/simple
     environment:
       OCR_KEY_FILE: /run/secrets/ocr_key
       OCR_CPU_THREADS: "2"

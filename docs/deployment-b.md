@@ -15,7 +15,7 @@ WEB_PORT=80
 WEB_BIND_ADDRESS=0.0.0.0
 ```
 
-`MYSQL_ROOT_PASSWORD`、`DB_PASSWORD`、`ADMIN_PASSWORD` 使用部署时生成的随机值，不复制样例口令，不提交 Git。OCR 内部密钥位于 `.run/ocr.key`，通过 Compose secret 挂载，不能放进小程序。首次管理员口令仅在空库初始化时使用，已有账号不会因修改环境变量自动改密。
+`MYSQL_ROOT_PASSWORD`、`DB_PASSWORD`、`ADMIN_PASSWORD` 使用部署时生成的随机值，不复制样例口令，不提交 Git。OCR 内部密钥位于 `.run/ocr.key`，通过 Compose secret 挂载，不能放进小程序。`.run` 目录权限为0700；密钥文件设为0444，让容器内非root后端能够读取，宿主机仍由私有父目录限制访问。首次管理员口令仅在空库初始化时使用，已有账号不会因修改环境变量自动改密。
 
 ## 构建和运行
 
