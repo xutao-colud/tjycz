@@ -129,6 +129,7 @@ public class PrivacyService {
             Map.entry("consents","SELECT scope,policy_version,granted,created_at FROM privacy_consent WHERE student_id=?"),
             Map.entry("media","SELECT DISTINCT f.id,f.name,f.content_type,f.size FROM stored_file f JOIN file_link l ON l.file_id=f.id WHERE l.student_id=? AND l.kind<>'SUMMARY_HISTORY' AND (l.kind<>'SUMMARY_PHOTO' OR EXISTS(SELECT 1 FROM daily_summary d WHERE d.id=l.target_id AND d.student_id=l.student_id AND d.status='PUBLISHED'))")
         ).entrySet()) data.put(entry.getKey(),db.list(entry.getValue(),student));
+        data.put("dailyParentFeedback",db.list("SELECT parent_id,date,satisfaction,feedback_text,created_at,updated_at FROM daily_parent_feedback WHERE student_id=?"+(sec.actor().role().equals("PARENT")?" AND parent_id="+sec.actor().id():""),student));
         data.put("generatedAt",sec.now());
         db.update("UPDATE privacy_request SET status='COMPLETED',completed_by=?,completed_at=?,export_json=? WHERE id=?",sec.actor().id(),sec.now(),encode(data),id);
         sec.audit("PRIVACY_EXPORT","request="+id+", student="+student); return data;
@@ -192,6 +193,7 @@ public class PrivacyService {
         db.update("UPDATE follow_up SET title='已脱敏关注记录',reason='',measures='',parent_action='' WHERE student_id=?",student);
         db.update("UPDATE summary_review_history SET comment='',content='',teacher_comment='' WHERE summary_id IN (SELECT id FROM daily_summary WHERE student_id=?)",student);
         db.update("UPDATE daily_summary SET content='',teacher_comment='',published_content='',published_comment='',feedback_text='',review_comment='',review_content='',review_teacher_comment='' WHERE student_id=?",student);
+        db.update("UPDATE daily_parent_feedback SET feedback_text='' WHERE student_id=?",student);
         db.update("UPDATE point_ledger SET reason='已脱敏积分记录' WHERE student_id=?",student);
         db.update("UPDATE lesson_ledger SET reason='已脱敏课时记录' WHERE account_id IN (SELECT id FROM lesson_account WHERE student_id=?)",student);
         db.update("UPDATE settlement SET reason='已脱敏结算记录' WHERE student_id=?",student);

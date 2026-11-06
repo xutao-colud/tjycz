@@ -161,3 +161,12 @@ local：H2 文件持久化、8 名虚构学生、两个班级、教师仅班级 
 ### 家长授权开关（2026-10-31）
 
 `app.privacy.consent-required`由`GUARDIAN_CONSENT_REQUIRED`配置，默认`false`。`GET /privacy/policy`和`GET /privacy/consents?studentId=`增加`consentRequired`。关闭时`effectiveService/effectiveMedia`表示业务可用，均为`true`，`canConsent=false`；原始SERVICE/MEDIA状态和历史仍如实保留，不等同于监护人曾经同意。`POST /privacy/consents`对绑定家长返回410，无需提交；跨孩子或角色访问仍403。此开关不影响角色、班级、校区、附件阻断、脱敏及资料申请权限。
+
+## 每日家长评价与作业曲线（V19，2026-11-05）
+
+- `GET /daily-feedback?date=&studentId=`：家长仅返回本人的绑定孩子评价；管理者按校区查看；教师403。记录含`studentId,parentId,date,feedbackSatisfaction,feedbackText,feedbackSubmitted,feedbackSubmittedAt,canFeedback`。没有提交时返回默认满意，`feedbackSubmitted=false`，不伪造提交时间。
+- `PUT /students/{id}/daily-feedback`：家长提交`{date?,satisfaction:SATISFIED|DISSATISFIED,text?}`，仅上海业务当天；不满意必须填写原因，最多2000字。按孩子、家长、日期唯一，重复保存不重复建记录。父母各自记录；旧`POST /summaries/{id}/feedback`继续要求已发布小结，并转入同一独立评价逻辑。
+- `GET /class-satisfaction?date=&classId=`：仅校长／总管理员，校区与班级由后端校验。返回`parentCount,submittedCount,defaultCount,satisfiedCount,dissatisfiedCount,satisfactionPercent`；分母为查询时当前班级有效孩子与家长绑定的组合数，默认满意参与分子，百分比保留1位小数。分母0返回null，未来日期拒绝。
+- 教师的小结列表、单份详情及工作台均删除反馈字段；家长小结只带自己的评价，管理员增加`parentFeedback`逐家长记录。旧共用反馈保留作历史，不推测作者、不合并为新评价。
+- `GET /homework-trend?studentId=&days=7|30&date=`：仅绑定家长，date默认当天且不能为未来。返回`startDate,endDate,points:[{date,gradedCount,accuracy,errorRate}]`，包含结束日期，按天升序并补足7／30天。正确率为已录入正确率作业的平均值，保留1位小数；错题率为100减正确率。没有批改数据时两项均null，不能当作0%。
+- `POST /fitness/batch`继续接受自由填写的`project`（1–80字），`count`和`duration`省略时为0，均须非负整数且至少一项为正；继续使用已有授权、当天／历史时间校验及业务防重。

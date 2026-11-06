@@ -73,8 +73,9 @@ class SummaryReviewIntegrationTest {
         assertThat(actions(repeated.path("reviewHistory"))).containsExactly("GENERATE","EDIT","SUBMIT","APPROVE","PUBLISH");
         var visible=get(path(published),parent); assertThat(visible.path("content").asText()).isEqualTo("虚构审核正文 A");
         assertThat(visible.path("reviewHistory").size()).isZero(); assertThat(visible.has("reviewComment")).isFalse();
-        post(path(published)+"/feedback",parent,Map.of("satisfaction","SATISFIED","text","家长已阅"));
-        assertThat(get(path(published),teacher).path("feedbackSatisfaction").asText()).isEqualTo("SATISFIED");
+        call(HttpMethod.POST,path(published)+"/feedback",parent,Map.of("satisfaction","SATISFIED","text","家长已阅"),400);
+        call(HttpMethod.PUT,"/students/1/daily-feedback",parent,Map.of("satisfaction","SATISFIED","text","今天已阅"),200);
+        assertThat(get(path(published),teacher).has("feedbackSatisfaction")).isFalse();
         assertThat(post("/summaries/generate",teacher,Map.of("date",date,"studentIds",List.of(1))).path("generatedCount").asInt()).isZero();
         call(HttpMethod.PATCH,path(published),teacher,Map.of("teacherComment","发布后覆盖"),400);
     }

@@ -214,7 +214,8 @@ class BusinessIntegrationTest {
         var published=post("/summaries/"+id+"/publish",admin,Map.of()); String snapshot=published.path("content").asText(); assertThat(snapshot).contains("积分","课时账户","错题","体能","数学"); assertThat(published.path("notificationStatus").asText()).isEqualTo("NOT_CONFIGURED");
         complete(task(sid)); post("/summaries/generate",admin,Map.of("date",date,"studentIds",List.of(sid)));
         assertThat(get("/summaries?date="+date+"&studentId=1",parent).get(0).path("content").asText()).isEqualTo(snapshot);
-        call(HttpMethod.PATCH,"/summaries/"+id,admin,Map.of("teacherComment","不允许修改"),400); post("/summaries/"+id+"/feedback",parent,Map.of("satisfaction","SATISFIED","text","谢谢"));
+        call(HttpMethod.PATCH,"/summaries/"+id,admin,Map.of("teacherComment","不允许修改"),400); call(HttpMethod.POST,"/summaries/"+id+"/feedback",parent,Map.of("satisfaction","SATISFIED","text","谢谢"),400);
+        call(HttpMethod.PUT,"/students/"+sid+"/daily-feedback",parent,Map.of("satisfaction","SATISFIED","text","谢谢"),200);
     }
     Map<String,Object> encrypted(String purpose,Map<String,Object> body) {
         Map<String,Object> challenge=mapper.convertValue(get("/auth/challenge?purpose="+purpose,null),new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){});

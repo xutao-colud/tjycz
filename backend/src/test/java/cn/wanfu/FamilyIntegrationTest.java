@@ -40,6 +40,65 @@ class FamilyIntegrationTest {
         parent=token(parentId);teacher=token(tid);principal=token(aid);stranger=token(pid);foreignPrincipal=token(fid);
         account=db.insert("INSERT INTO lesson_account(student_id,course_id,balance,purchased) VALUES(?,?,2,2)",child,course(campus));secondAccount=db.insert("INSERT INTO lesson_account(student_id,course_id,balance,purchased) VALUES(?,?,8,8)",child,course(campus));
     }
+    @Test void dailyFeedbackAndClassStatisticsReadsAreAudited(){
+        long classroom=Db.id(db.one("SELECT class_id FROM student WHERE id=?",child),"classId");
+        get("/daily-feedback?studentId="+child,parent);
+        get("/class-satisfaction?classId="+classroom,principal);
+        for(String route:List.of("/api/daily-feedback","/api/class-satisfaction"))
+            assertThat(db.count("SELECT COUNT(*) FROM audit_log WHERE action='SENSITIVE_READ' AND detail=?","GET "+route)).as(route).isPositive();
+    }
+    @Test void dailyFeedbackIsIndependentForEachChildAndParentWithUnratedSatisfied(){
+        long classroom=Db.id(db.one("SELECT class_id FROM student WHERE id=?",child),"classId"),coparentId=user("PARENT"),sibling=student(classroom);
+        db.update("INSERT INTO parent_student VALUES(?,?)",coparentId,child);db.update("INSERT INTO parent_student VALUES(?,?)",parentId,sibling);
+        String coparent=token(coparentId),path="/students/"+child+"/daily-feedback",stats="/class-satisfaction?classId="+classroom;
+        assertThat(get("/daily-feedback?studentId="+child,parent).get(0).path("feedbackSubmitted").asBoolean()).isFalse();
+        assertThat(get(stats,principal).get(0).path("satisfactionPercent").asDouble()).isEqualTo(100);
+        put(path,parent,Map.of("satisfaction","DISSATISFIED","text","希望改善陪伴"));
+        assertThat(get("/daily-feedback?studentId="+child,coparent).get(0).path("feedbackSatisfaction").asText()).isEqualTo("SATISFIED");
+        assertThat(get("/daily-feedback?studentId="+sibling,parent).get(0).path("feedbackSubmitted").asBoolean()).isFalse();
+        var summary=get(stats,principal).get(0);assertThat(summary.path("parentCount").asInt()).isEqualTo(3);assertThat(summary.path("submittedCount").asInt()).isEqualTo(1);assertThat(summary.path("defaultCount").asInt()).isEqualTo(2);assertThat(summary.path("satisfactionPercent").asDouble()).isEqualTo(66.7);
+        put(path,coparent,Map.of("satisfaction","DISSATISFIED","text","另一个独立意见"));
+        assertThat(get(stats,boss).get(0).path("satisfactionPercent").asDouble()).isEqualTo(33.3);
+        put(path,parent,Map.of("satisfaction","SATISFIED","text",""));put(path,parent,Map.of("satisfaction","SATISFIED","text",""));
+        assertThat(db.count("SELECT COUNT(*) FROM daily_parent_feedback WHERE student_id=?",child)).isEqualTo(2);
+        assertThat(get(stats,principal).get(0).path("satisfactionPercent").asDouble()).isEqualTo(66.7);
+        db.update("DELETE FROM parent_student WHERE user_id=? AND student_id=?",coparentId,child);
+        assertThat(get(stats,principal).get(0).path("satisfactionPercent").asDouble()).isEqualTo(100);call(HttpMethod.PUT,path,coparent,null,Map.of("satisfaction","SATISFIED"),403);
+    }
+    @Test void dailyFeedbackIsTodayOnlyAndNeverVisibleToTeachersOrForeignCampuses(){
+        String path="/students/"+child+"/daily-feedback";long classroom=Db.id(db.one("SELECT class_id FROM student WHERE id=?",child),"classId");
+        for(var date:List.of(sec.today().minusDays(1),sec.today().plusDays(1))) call(HttpMethod.PUT,path,parent,null,Map.of("date",date.toString(),"satisfaction","SATISFIED"),400);
+        for(String route:List.of("/daily-feedback","/class-satisfaction")) call(HttpMethod.GET,route,teacher,null,null,403);
+        call(HttpMethod.GET,"/class-satisfaction?classId="+classroom,foreignPrincipal,null,null,403);
+        call(HttpMethod.GET,"/class-satisfaction?classId="+classroom,boss,otherCampus,null,403);
+        call(HttpMethod.PUT,path,teacher,null,Map.of("satisfaction","SATISFIED"),403);call(HttpMethod.PUT,path,stranger,null,Map.of("satisfaction","SATISFIED"),403);
+        long summary=db.insert("INSERT INTO daily_summary(student_id,date,status,content,published_content,feedback_text,feedback_satisfaction) VALUES(?,?,'PUBLISHED','虚构正文','虚构正文','旧隐私意见','DISSATISFIED')",child,sec.today());
+        put(path,parent,Map.of("satisfaction","DISSATISFIED","text","新隐私意见"));
+        for(String route:List.of("/summaries/"+summary,"/summaries?studentId="+child,"/workbench?classId="+classroom)) {
+            String result=get(route,teacher).toString();assertThat(result).doesNotContain("feedbackText","feedbackSatisfaction","parentFeedback","新隐私意见","旧隐私意见");
+        }
+        long empty=db.insert("INSERT INTO school_class(name,teacher_name,campus_id) VALUES('虚构空班','虚构老师',?)",campus);
+        assertThat(get("/class-satisfaction?classId="+empty,principal).get(0).path("satisfactionPercent").isNull()).isTrue();
+    }
+    @Test void homeworkTrendUsesGradedDailyAveragesLeavesGapsAndChecksScope(){
+        var today=sec.today();
+        for(int i=0;i<3;i++) {long task=db.insert("INSERT INTO homework_task(date,subject,type,title,description) VALUES(?,'数学','WRITTEN','虚构曲线题','')",i==2?today.minusDays(2):today);db.update("INSERT INTO homework(task_id,student_id,status,accuracy) VALUES(?,?,'COMPLETED',?)",task,child,i==0?80:i==1?100:0);}
+        long ungraded=db.insert("INSERT INTO homework_task(date,subject,type,title,description) VALUES(?,'语文','WRITTEN','虚构待批改','')",today);db.update("INSERT INTO homework(task_id,student_id,status) VALUES(?,?,'NOT_STARTED')",ungraded,child);
+        var seven=get("/homework-trend?studentId="+child+"&days=7",parent).path("points");assertThat(seven.size()).isEqualTo(7);assertThat(seven.get(0).path("date").asText()).isEqualTo(today.minusDays(6).toString());
+        assertThat(seven.get(6).path("accuracy").asDouble()).isEqualTo(90);assertThat(seven.get(6).path("errorRate").asDouble()).isEqualTo(10);assertThat(seven.get(6).path("gradedCount").asInt()).isEqualTo(2);
+        assertThat(seven.get(5).path("accuracy").isNull()).isTrue();assertThat(seven.get(4).path("accuracy").asDouble()).isZero();assertThat(seven.get(4).path("errorRate").asDouble()).isEqualTo(100);
+        assertThat(get("/homework-trend?studentId="+child+"&days=30",parent).path("points").size()).isEqualTo(30);
+        call(HttpMethod.GET,"/homework-trend?studentId="+child+"&days=8",parent,null,null,400);call(HttpMethod.GET,"/homework-trend?studentId="+child+"&date="+today.plusDays(1),parent,null,null,400);
+        call(HttpMethod.GET,"/homework-trend?studentId="+child,stranger,null,null,403);call(HttpMethod.GET,"/homework-trend?studentId="+child,teacher,null,null,403);
+    }
+    @Test void manualFitnessAcceptsCustomNamesAndEitherCountOrDuration(){
+        for(var item:List.of(Map.of("project","篮球运球","count",20),Map.of("project","自由拉伸","duration",120))) {
+            Map<String,Object> body=new LinkedHashMap<>(item);body.put("studentIds",List.of(child));body.put("date",sec.today().toString());
+            assertThat(call(HttpMethod.POST,"/fitness/batch",teacher,null,body,200).path("recordedCount").asInt()).isEqualTo(1);
+        }
+        call(HttpMethod.POST,"/fitness/batch",teacher,null,Map.of("studentIds",List.of(child),"project","无效空记录","count",0,"duration",0),400);
+        assertThat(get("/fitness?studentId="+child,parent).size()).isEqualTo(2);
+    }
     @Test void balancesAndParentIntentAreCourseSpecificScopedAndVersioned(){
         var first=get(page(),parent);assertThat(first.path("accounts").get(0).path("lowBalance").asBoolean()).isTrue();assertThat(first.path("accounts").get(1).path("lowBalance").asBoolean()).isFalse();
         var body=Map.of("intention","INTERESTED","expectedVersion",0);var saved=put(intent(),parent,body);assertThat(saved.path("parentId").asLong()).isEqualTo(parentId);
@@ -90,7 +149,7 @@ class FamilyIntegrationTest {
         long summary=db.insert("INSERT INTO daily_summary(student_id,date,status,content,published_content,published_comment) VALUES(?,?,'PUBLISHED','虚构小结','虚构小结','加油')",child,sec.today());String path="/summaries/"+summary+"/feedback";
         call(HttpMethod.POST,path,parent,null,Map.of("satisfaction","DISSATISFIED","text","  "),400);call(HttpMethod.POST,path,parent,null,Map.of("rating",5,"text","旧评分"),400);
         var response=call(HttpMethod.POST,path,parent,null,Map.of("satisfaction","DISSATISFIED","text","希望补充作业进展"),200);assertThat(response.path("feedbackSatisfaction").asText()).isEqualTo("DISSATISFIED");assertThat(response.path("feedbackRating").isNull()).isTrue();
-        assertThat(get("/summaries/"+summary,teacher).path("feedbackText").asText()).isEqualTo("希望补充作业进展");call(HttpMethod.POST,path,teacher,null,Map.of("satisfaction","SATISFIED"),403);call(HttpMethod.POST,path,stranger,null,Map.of("satisfaction","SATISFIED"),403);
+        assertThat(get("/summaries/"+summary,teacher).has("feedbackText")).isFalse();call(HttpMethod.POST,path,teacher,null,Map.of("satisfaction","SATISFIED"),403);call(HttpMethod.POST,path,stranger,null,Map.of("satisfaction","SATISFIED"),403);
         call(HttpMethod.POST,path,parent,null,Map.of("satisfaction","SATISFIED","text",""),200);
     }
     @Test void availableBalanceThresholdIncludesRefundReservationsAndExactBoundary(){

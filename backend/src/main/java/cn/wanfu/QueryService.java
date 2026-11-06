@@ -69,6 +69,21 @@ public class QueryService {
         String q="SELECT f.id,f.student_id,s.name student_name,f.date,f.project,f.count,f.duration,f.confirmed FROM fitness f JOIN student s ON s.id=f.student_id WHERE f.date=? AND "+activeScope();
         return student==null?db.list(q+" ORDER BY f.id DESC",date):db.list(q+" AND f.student_id=? ORDER BY f.id DESC",date,student);
     }
+    Map<String,Object> homeworkTrend(long student,int days,LocalDate end) {
+        sec.parent();sec.student(student);
+        if(days!=7&&days!=30) throw ApiException.bad("请选择7天或30天");
+        if(end.isAfter(sec.today())) throw ApiException.bad("不能查询未来的作业趋势");
+        LocalDate start=end.minusDays(days-1);
+        var graded=db.list("SELECT t.date,AVG(h.accuracy) accuracy,COUNT(*) graded_count FROM homework h JOIN homework_task t ON t.id=h.task_id WHERE h.student_id=? AND t.date>=? AND t.date<=? AND h.accuracy IS NOT NULL GROUP BY t.date ORDER BY t.date",student,start,end);
+        List<Map<String,Object>> points=new ArrayList<>();
+        for(LocalDate day=start;!day.isAfter(end);day=day.plusDays(1)) {
+            LocalDate current=day;var record=graded.stream().filter(r->current.equals(r.get("date"))).findFirst().orElse(null);
+            Map<String,Object> point=new LinkedHashMap<>();point.put("date",day);point.put("gradedCount",record==null?0:record.get("gradedCount"));
+            BigDecimal accuracy=record==null?null:new BigDecimal(record.get("accuracy").toString()).setScale(1,java.math.RoundingMode.HALF_UP);
+            point.put("accuracy",accuracy);point.put("errorRate",accuracy==null?null:BigDecimal.valueOf(100).subtract(accuracy));points.add(point);
+        }
+        return Map.of("studentId",student,"days",days,"startDate",start,"endDate",end,"points",points);
+    }
     List<Map<String,Object>> scoped(String sql,Long student,String studentColumn,String order) {
         if(student!=null) sec.student(student); sql+=" WHERE "+sec.scope("s");
         return student==null?db.list(sql+order):db.list(sql+" AND "+studentColumn+"=?"+order,student);

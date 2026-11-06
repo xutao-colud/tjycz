@@ -116,7 +116,9 @@ def main():
     assert len(visible) == 1 and visible[0]['content'] == published['content']
     request('POST', f'/summaries/{draft["id"]}/feedback', {'satisfaction': 'SATISFIED', 'text': '已收到，谢谢老师'}, parent)
     feedback = request('GET', f'/summaries?studentId={sid}&date={today}', token=teacher)[0]
-    assert feedback['feedbackSatisfaction'] == 'SATISFIED'
+    assert 'feedbackSatisfaction' not in feedback and 'feedbackText' not in feedback
+    own_feedback = request('GET', f'/summaries?studentId={sid}&date={today}', token=parent)[0]
+    assert own_feedback['feedbackSatisfaction'] == 'SATISFIED'
     request('PATCH', f'/summaries/{draft["id"]}', {'teacherComment': '不应覆盖已发布评语'}, teacher, expected=(400, 409))
     print('✓ 家长不能查看草稿，发布快照、评分反馈与禁止覆盖生效')
     points_body = {'studentId': sid, 'amount': 2, 'reason': '生产验证奖励', 'requestId': str(uuid.uuid4())}

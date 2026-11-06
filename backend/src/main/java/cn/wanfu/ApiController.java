@@ -68,6 +68,7 @@ public class ApiController {
     @PostMapping("/mistakes/{id}/review") public Object mistakeReview(@PathVariable long id,@RequestBody Map<String,Object> b) { return learn.reviewMistake(id,b); }
     @PostMapping("/mistakes/reviews/{reviewId}/complete") public Object reviewComplete(@PathVariable long reviewId) { return learn.completeReview(reviewId); }
     @GetMapping("/fitness") public Object fitness(@RequestParam(required=false) String date,@RequestParam(required=false) Long studentId) { return queries.fitness(sec.date(date),studentId); }
+    @GetMapping("/homework-trend") public Object homeworkTrend(@RequestParam long studentId,@RequestParam(defaultValue="7") int days,@RequestParam(required=false) String date) { return queries.homeworkTrend(studentId,days,sec.date(date)); }
     @PostMapping("/fitness/batch") public Object fitnessBatch(@RequestBody Map<String,Object> b) { return learn.fitness(b); }
     @GetMapping("/points") public Object points(@RequestParam(required=false) Long studentId) { return queries.points(studentId); }
     @PostMapping("/points") public Object manualPoints(@RequestBody Map<String,Object> b) { return finance.manualPoints(b); }

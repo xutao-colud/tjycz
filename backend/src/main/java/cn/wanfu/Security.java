@@ -133,7 +133,7 @@ public class Security {
         var actor=current.get();
         if(path.equals("/api/auth/login")&&status>=400 || status==401 || status==403) {
             db.update("INSERT INTO audit_log(actor_id,actor_name,campus_id,action,detail,created_at) VALUES(?,?,?,?,?,?)",actor==null?null:actor.id(),actor==null?"未认证":actor.name(),contextCampus(),path.equals("/api/auth/login")?"LOGIN_FAILED":"ACCESS_DENIED",method+" "+path+" status="+status,now());
-        } else if(actor!=null&&status<300&&method.equals("GET")&&path.matches("/api/(students|leaves|pickups|pickup-contacts|pickup-alerts|homework|mistakes|growth|principal-overview|follow-ups|summaries|fitness|points|attendance|accounts|lesson-ledger|renewals|family-services|renewal-intents|meal-orders|student-notifications|point-presets|reward-prizes|prize-redemptions|teaching-capture/jobs|privacy/(requests|consents)).*")) {
+        } else if(actor!=null&&status<300&&method.equals("GET")&&path.matches("/api/(students|leaves|pickups|pickup-contacts|pickup-alerts|homework|mistakes|growth|principal-overview|daily-feedback|class-satisfaction|follow-ups|summaries|fitness|points|attendance|accounts|lesson-ledger|renewals|family-services|renewal-intents|meal-orders|student-notifications|point-presets|reward-prizes|prize-redemptions|teaching-capture/jobs|privacy/(requests|consents)).*")) {
             if(auditCampuses.get().isEmpty()&&contextCampus()==null&&!isSuper()) for(var campus:db.list("SELECT id FROM campus WHERE id IN ("+grantedCampuses(actor.id(),actor.role())+")")) auditCampus(Db.id(campus,"id"));
             audit("SENSITIVE_READ",method+" "+path);
         }

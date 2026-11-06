@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LearningService {
-    final Db db; final Security sec; final FinanceService finance; final FileService files; final GrowthService growth;
-    public LearningService(Db db,Security sec,FinanceService finance,FileService files,GrowthService growth) { this.db=db; this.sec=sec; this.finance=finance; this.files=files; this.growth=growth; }
+    final Db db; final Security sec; final FinanceService finance; final FileService files; final GrowthService growth; final DailyFeedbackService feedback;
+    public LearningService(Db db,Security sec,FinanceService finance,FileService files,GrowthService growth,DailyFeedbackService feedback) { this.db=db; this.sec=sec; this.finance=finance; this.files=files; this.growth=growth; this.feedback=feedback; }
     String homeworkQuery() { return "SELECT h.id,h.task_id,h.student_id,s.name student_name,s.class_id,cl.name class_name,cl.campus_id,t.date,t.subject,t.type,t.title,t.description,h.status,h.accuracy,h.comment,h.version,h.submitted_at,h.reviewed_at,h.completed_at,h.updated_at,h.last_actor_id,(SELECT name FROM app_user WHERE id=h.last_actor_id) actor_name FROM homework h JOIN homework_task t ON t.id=h.task_id JOIN student s ON s.id=h.student_id JOIN school_class cl ON cl.id=s.class_id"; }
     Map<String,Object> homework(long id) {
         var h=db.one(homeworkQuery()+" WHERE h.id=?",id); sec.student(Db.id(h,"studentId")); h.put("attachments",files.linked("HOMEWORK",id));
@@ -132,7 +132,7 @@ public class LearningService {
     }
     @Transactional public Map<String,Object> fitness(Map<String,Object> b) {
         sec.staff(); var ids=Db.ids(b,"studentIds"); for(long sid:ids) sec.student(sid);
-        int count=Db.integer(b,"count",0),duration=Db.integer(b,"duration",0); if(count<0||duration<0) throw ApiException.bad("数量、时长不可为负");
+        int count=Db.integer(b,"count",0),duration=Db.integer(b,"duration",0); if(count<0||duration<0||count==0&&duration==0) throw ApiException.bad("次数与时长须为非负整数，至少填写一项大于0");
         LocalDate date=sec.date(Db.text(b,"date")); String project=Db.required(b,"project",80); int recorded=0;
         LocalDateTime at=growth.occurred(b,date);
         for(long sid:ids) {
@@ -184,7 +184,14 @@ public class LearningService {
         var history=staff?db.list("SELECT id,action,from_status,to_status,version,actor_id,actor_name,actor_role,comment,content,teacher_comment,created_at FROM summary_review_history WHERE summary_id=? ORDER BY id",d.get("id")):List.<Map<String,Object>>of();
         for(var row:history) row.put("photos",files.linked("SUMMARY_HISTORY",Db.id(row,"id")));
         d.put("reviewHistory",history);
-        if(!staff) d.remove("reviewComment"); return d;
+        if(!staff) {
+            d.remove("reviewComment");
+            var own=feedback.list((LocalDate)d.get("date"),Db.id(d,"studentId")).get(0);
+            for(String key:List.of("feedbackSatisfaction","feedbackText","feedbackSubmitted","feedbackSubmittedAt","canFeedback")) d.put(key,own.get(key));
+            d.put("feedbackRating",null);
+        } else if(sec.isAdmin()) d.put("parentFeedback",feedback.list((LocalDate)d.get("date"),Db.id(d,"studentId")));
+        else for(String key:List.of("feedbackRating","feedbackSatisfaction","feedbackText")) d.remove(key);
+        return d;
     }
     Map<String,Object> summary(long id) {
         var d=db.one(summaryQuery()+" WHERE d.id=?",id); sec.student(Db.id(d,"studentId"));
@@ -276,9 +283,6 @@ public class LearningService {
     }
     @Transactional public Map<String,Object> feedback(long id,Map<String,Object> b) {
         sec.parent(); var row=lockSummary(id); if(!row.get("status").equals("PUBLISHED")) throw ApiException.forbidden();
-        if(!Set.of("satisfaction","text").containsAll(b.keySet())) throw ApiException.bad("请选择满意或不满意，不再提交数字评分");
-        String satisfaction=Db.required(b,"satisfaction",20),text=Db.text(b,"text"); Db.choice(satisfaction,"SATISFIED","DISSATISFIED");
-        if(text.length()>2000||satisfaction.equals("DISSATISFIED")&&text.isBlank()) throw ApiException.bad("不满意时请填写原因（最多2000字）");
-        db.update("UPDATE daily_summary SET feedback_rating=NULL,feedback_satisfaction=?,feedback_text=? WHERE id=?",satisfaction,text,id); sec.audit("SUMMARY_FEEDBACK","summary="+id+", satisfaction="+satisfaction); return summary(id);
+        feedback.save(Db.id(row,"studentId"),(LocalDate)row.get("date"),b);return summary(id);
     }
 }
