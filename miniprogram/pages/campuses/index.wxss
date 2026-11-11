@@ -1,8 +1,8 @@
-.campus-stats { display: flex; flex-wrap: wrap; gap: 12rpx 28rpx; margin-top: 22rpx; color: #737783; font-size: 24rpx; }
-.small { flex-shrink: 0; padding: 14rpx 20rpx; font-size: 23rpx; }
-.campus-access { margin-top: 18rpx; color: #737783; font-size: 25rpx; }
-.access-editor { border-color: #e7e8ee; }
-.campus-choices { display: flex; flex-wrap: wrap; gap: 14rpx; margin: 24rpx 0; }
-.campus-choice { padding: 16rpx 20rpx; border: 1rpx solid #e7e8ee; background: #fafafd; color: #737783; font-size: 25rpx; }
-.campus-choice.chosen { color: #0071e3; background: #f4f4f7; border-color: #e7e8ee; }
+.campus-stats { display: flex; flex-wrap: wrap; gap: 16rpx 32rpx; margin-top: 24rpx; color: var(--secondary, #536168); font-size: 24rpx; }
+.small { flex-shrink: 0; padding: 16rpx 24rpx; font-size: 24rpx; }
+.campus-access { margin-top: 16rpx; color: var(--secondary, #536168); font-size: 24rpx; }
+.access-editor { border-color: var(--line, #dce2df); }
+.campus-choices { display: flex; flex-wrap: wrap; gap: 16rpx; margin: 24rpx 0; }
+.campus-choice { padding: 16rpx 24rpx; border: 1rpx solid var(--line, #dce2df); background: var(--subtle, #eef1ef); color: var(--secondary, #536168); font-size: 24rpx; }
+.campus-choice.chosen { color: var(--accent, #176b91); background: var(--subtle, #eef1ef); border-color: var(--line, #dce2df); }
 .access-editor .row button { flex: 1; }

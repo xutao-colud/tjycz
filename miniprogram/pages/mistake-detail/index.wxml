@@ -1,5 +1,5 @@
 <app-nav />
-<view class="page mistake-detail">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page mistake-detail">
   <view class="hero detail-hero">
     <view class="col">
       <view class="eyebrow">LEARN &amp; GROW</view>
@@ -7,7 +7,7 @@
       <view class="subtitle">理清一道错题，收获一次成长</view>
     </view>
     <view class="hero-icon">
-      <image src="/assets/icons/mistakes.png" mode="aspectFit" />
+      <image src="/assets/icons/mistakes.svg" mode="aspectFit" />
     </view>
   </view>
 
@@ -26,7 +26,7 @@
       <view class="question-title">{{item.title}}</view>
       <view class="student-panel">
         <view class="student-avatar">
-          <image src="/assets/icons/students.png" mode="aspectFit" />
+          <image src="/assets/icons/students.svg" mode="aspectFit" />
         </view>
         <view class="col">
           <view class="student-name">{{item.studentName}}</view>
@@ -86,7 +86,7 @@
         </view>
       </view>
       <view wx:if="{{!item.corrections.length}}" class="empty-panel">
-        <image src="/assets/icons/empty.png" mode="aspectFit" />
+        <image src="/assets/icons/empty.svg" mode="aspectFit" />
         <view class="empty-title">还没有订正记录</view>
         <view class="empty-description">写下解题思路，记录这一次的进步</view>
       </view>
@@ -117,14 +117,14 @@
       </view>
       <view class="upload-panel">
         <view class="upload-caption">
-          <image src="/assets/icons/upload.png" mode="aspectFit" />
+          <image src="/assets/icons/upload.svg" mode="aspectFit" />
           <text>添加订正照片</text>
           <text class="optional-caption">选填</text>
         </view>
         <media-field bindchange="media" binduploading="uploadState" reset-key="{{mediaReset}}" disabled="{{busy}}" />
       </view>
       <view wx:if="{{uploading}}" class="upload-hint">附件上传中，请稍候…</view>
-      <button class="primary submit-button" bindtap="correct" loading="{{busy}}" disabled="{{busy || uploading}}">提交订正，等待复核</button>
+      <button class="primary submit-button" bindtap="correct" loading="{{busy}}" disabled="{{busy || uploading}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">提交订正，等待复核</button>
     </view>
 
     <view wx:if="{{teacher && item.status === 'PENDING_REVIEW'}}" class="card detail-card teacher-card">
@@ -148,8 +148,8 @@
         <view class="field-hint small-gap">选择“继续订正”时，请填写具体原因。</view>
       </view>
       <view class="actions detail-actions">
-        <button class="secondary" data-approved="no" bindtap="review" disabled="{{busy}}">继续订正</button>
-        <button class="primary" data-approved="yes" bindtap="review" loading="{{busy}}" disabled="{{busy}}">通过，已掌握</button>
+        <button class="secondary" data-approved="no" bindtap="review" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">继续订正</button>
+        <button class="primary" data-approved="yes" bindtap="review" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">通过，已掌握</button>
       </view>
     </view>
 
@@ -188,7 +188,7 @@
               <text class="review-date">{{reviewItem.dueDate}}</text>
               <text class="badge {{reviewItem.status === 'PENDING' ? 'dim' : ''}}">{{reviewItem.statusText}}</text>
             </view>
-            <button wx:if="{{teacher && reviewItem.canComplete}}" class="secondary review-button" data-id="{{reviewItem.id}}" bindtap="complete" disabled="{{busy}}">我已完成本次复习</button>
+            <button wx:if="{{teacher && reviewItem.canComplete}}" class="secondary review-button" data-id="{{reviewItem.id}}" bindtap="complete" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">我已完成本次复习</button>
             <view wx:elif="{{reviewItem.status === 'PENDING'}}" class="review-hint">{{reviewItem.canComplete ? '已到复习日，完成后由老师确认' : '尚未到复习日期'}}</view>
             <view wx:else class="review-hint">完成于 {{reviewItem.completedText}}</view>
           </view>

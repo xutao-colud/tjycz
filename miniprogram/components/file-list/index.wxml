@@ -9,9 +9,9 @@
     </block>
     <block wx:else>
       <view class="file-icon file-icon-{{item.kind}}">
-        <image wx:if="{{item.kind === 'audio'}}" class="type-icon" src="/assets/icons/mic.png" mode="aspectFit" />
+        <image wx:if="{{item.kind === 'audio'}}" class="type-icon" src="/assets/icons/mic.svg" mode="aspectFit" />
         <view wx:elif="{{item.kind === 'video'}}" class="video-mark"></view>
-        <image wx:else class="type-icon" src="/assets/icons/homework.png" mode="aspectFit" />
+        <image wx:else class="type-icon" src="/assets/icons/homework.svg" mode="aspectFit" />
       </view>
       <view class="file-copy">
         <view class="file-name">{{item.displayName}}</view>

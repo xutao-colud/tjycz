@@ -6,7 +6,7 @@ const { definePage, toast, confirm } = require('../../utils/page');
 const fields = ['studentIds', 'panel', 'noteType', 'text', 'reason', 'measures', 'project', 'count', 'duration', 'attachmentIds', 'accuracy', 'comment', 'reviewStatus'];
 definePage({
   teacherOnly: true,
-  data: { batchMode: false, expandedId: null, today: format.today(), classId: '', classes: [], classNames: [], classIndex: 0, students: [], roster: [], homework: [], tasks: [], taskNames: [], taskIndex: 0, taskId: '', concerns: [], messages: [], summaries: [], scheduled: false, readOnly: false, filterIndex: 0, filters: ['全部学生', '未签到', '待批改', '需订正', '待复核', '需关注', '作业全完成', '已请假', '待回复'], counts: {}, panel: '', noteType: 0, noteTypes: ['课前准备', '学习表现', '老师点评', '体能活动', '运动暂停'], text: '', reason: '', measures: '', project: '跳绳', count: '', duration: '', attachmentIds: [], restoredIds: [], uploading: false, mediaReset: 0, accuracy: '', comment: '', reviewStatus: 0, reviewStatuses: ['批改完成', '退回订正'], reviewEntries: [], overrides: {}, summaryPreviews: [], confirmedIds: [], results: [], selectedCount: 0, historicalReason: '', pickupAlerts: [], pickupAlertPreview: null },
+  data: { statusGroup: 0, statusGroups: [{name:'作业',ids:[2,3,4,6]},{name:'考勤',ids:[1,7]},{name:'待办',ids:[5,8,9]}], statusTiles: [], batchMode: false, expandedId: null, today: format.today(), classId: '', classes: [], classNames: [], classIndex: 0, students: [], roster: [], homework: [], tasks: [], taskNames: [], taskIndex: 0, taskId: '', concerns: [], messages: [], summaries: [], scheduled: false, readOnly: false, filterIndex: 0, filters: ['全部学生', '未签到', '待批改', '需订正', '待复核', '需关注', '作业全完成', '已请假', '待回复'], counts: {}, panel: '', noteType: 0, noteTypes: ['课前准备', '学习表现', '老师点评', '体能活动', '运动暂停'], text: '', reason: '', measures: '', project: '跳绳', count: '', duration: '', attachmentIds: [], restoredIds: [], uploading: false, mediaReset: 0, accuracy: '', comment: '', reviewStatus: 0, reviewStatuses: ['批改完成', '退回订正'], reviewEntries: [], overrides: {}, summaryPreviews: [], confirmedIds: [], results: [], selectedCount: 0, historicalReason: '', pickupAlerts: [], pickupAlertPreview: null },
   onLoad(query) { this.setData({ classId: query.classId || '', batchMode: false, today: format.today() }); },
   scope() { return ['workbench', this.data.date, this.data.classId]; },
   saveDraft() { const d = {}; fields.forEach(k => { d[k] = this.data[k]; }); ui.draft(this.scope(), d); },
@@ -23,7 +23,7 @@ definePage({
       const summary = g.summaries.find(row => row.studentId === s.id);
       const pendingSummary = !g.readOnly && ['PRESENT', 'LEFT'].includes(s.attendanceStatus) && (!summary || summary.canEdit || summary.canPublish);
       const action = review ? (review.status === 'PENDING_RECHECK' ? '复核' : '批改') : s.attendanceStatus === 'NOT_ARRIVED' && attendance ? '拍照签到' : hs.length ? '查看作业' : attendance ? '拍照签退' : '查看档案';
-      return Object.assign(format.decorate(s), { action, needsReply, pendingSummary, avatarUrl: s.avatar ? api.fileUrl(s.avatar) : '', checkIn: s.checkInTime ? ui.clock(s.checkInTime) : '未签到', checkOut: s.checkOutTime ? ui.clock(s.checkOutTime) : s.attendanceStatus === 'LEFT' ? '时间未记录' : '未签退', taskSummary: hs.map(h => h.subject + ' ' + ui.status(h.status)).join(' · '), tasks: hs.length, done: hs.filter(h => h.status === 'COMPLETED').length, primary: ui.primary(hs), concernCount: open.length, selected: studentIds.includes(s.id), pendingReview: hs.some(h => h.status === 'PENDING_REVIEW'), correction: hs.some(h => h.status === 'CORRECTION'), recheck: hs.some(h => h.status === 'PENDING_RECHECK'), taskStates: hs.map(h => h.status), messageCount: g.messages.filter(m => m.studentId === s.id && ['OPEN', 'IN_PROGRESS'].includes(m.status)).length });
+      return Object.assign(format.decorate(s), { action, needsReply, pendingSummary, avatarUrl: s.avatar ? api.fileUrl(s.avatar) : '', checkIn: s.checkInTime ? ui.clock(s.checkInTime) : '未签到', checkOut: s.checkOutTime ? ui.clock(s.checkOutTime) : s.attendanceStatus === 'LEFT' ? '时间未记录' : '未签退', taskSummary: hs.map(h => h.subject + ' ' + ui.status(h.status)).join(' · '), homeworkPercent: hs.length ? Math.floor(hs.filter(h => h.status === 'COMPLETED').length * 100 / hs.length) : 0, tasks: hs.length, done: hs.filter(h => h.status === 'COMPLETED').length, primary: ui.primary(hs), concernCount: open.length, selected: studentIds.includes(s.id), pendingReview: hs.some(h => h.status === 'PENDING_REVIEW'), correction: hs.some(h => h.status === 'CORRECTION'), recheck: hs.some(h => h.status === 'PENDING_RECHECK'), taskStates: hs.map(h => h.status), messageCount: g.messages.filter(m => m.studentId === s.id && ['OPEN', 'IN_PROGRESS'].includes(m.status)).length });
     });
     const tasks = Array.from(new Map(g.homework.map(h => [h.taskId, { id: h.taskId, title: h.subject + ' · ' + h.title }])).values());
     const taskIndex = Math.max(0, tasks.findIndex(t => String(t.id) === String(this.data.taskId))), taskId = tasks[taskIndex] ? tasks[taskIndex].id : '';
@@ -34,6 +34,7 @@ definePage({
       concerns: g.concerns.filter(c => ['OPEN', 'IN_PROGRESS'].includes(c.status)).length,
       summaries: rows.filter(s => s.pendingSummary).length
     } });
+    data.statusTiles = this.tiles(rows, data.filters);
     data.reviewEntries = this.entries(g.homework, studentIds, taskId); data.summaryPreviews = this.previews(g.summaries, studentIds, g.concerns, this.data.confirmedIds);
     return data;
   },
@@ -69,12 +70,28 @@ definePage({
     const ok = await this.act(() => api.request('POST', '/pickup-alerts/' + row.id + '/handle', { action: 'HOLD', expectedVersion: row.version, note: '老师确认暂不离校，等待监护人与接送安排核对' }), '已记录暂不离校');
     if (ok) this.setData({ pickupAlertPreview: null });
   },
-  filterRows(rows) { const i = this.data.filterIndex; return rows.filter(s => !i || i === 1 && s.attendanceStatus === 'NOT_ARRIVED' || i === 2 && s.pendingReview || i === 3 && s.correction || i === 4 && s.recheck || i === 5 && s.concernCount || i === 6 && s.tasks > 0 && s.done === s.tasks || i === 7 && s.attendanceStatus === 'ON_LEAVE' || i === 8 && s.needsReply || i === 9 && s.pendingSummary); },
+  filterRows(rows, i = this.data.filterIndex) { return rows.filter(s => !i || i === 1 && s.attendanceStatus === 'NOT_ARRIVED' || i === 2 && s.pendingReview || i === 3 && s.correction || i === 4 && s.recheck || i === 5 && s.concernCount || i === 6 && s.tasks > 0 && s.done === s.tasks || i === 7 && s.attendanceStatus === 'ON_LEAVE' || i === 8 && s.needsReply || i === 9 && s.pendingSummary); },
   entries(homework, ids, tid) { return homework.filter(h => ids.includes(h.studentId) && h.taskId === tid && h.status !== 'COMPLETED').map(h => Object.assign(ui.decorate(h), this.data.overrides[h.id] || {}, { inputAccuracy: (this.data.overrides[h.id] || {}).accuracy || '', inputComment: (this.data.overrides[h.id] || {}).comment || '' })); },
   previews(summaries, ids, concerns, confirmed) { return summaries.filter(s => ids.includes(s.studentId)).map(s => Object.assign({}, s, { statusText: format.label(s.status), contentText: format.businessText(s.content), openConcerns: concerns.filter(c => c.studentId === s.studentId && ['OPEN', 'IN_PROGRESS'].includes(c.status)), confirmed: (confirmed || []).includes(s.studentId) })); },
   derive() {
     const ids = this.data.studentIds, roster = this.data.roster.map(s => Object.assign({}, s, { selected: ids.includes(s.id) }));
-    this.setData({ roster, students: this.filterRows(roster), selectedCount: ids.length, reviewEntries: this.entries(this.data.homework, ids, this.data.taskId), summaryPreviews: this.previews(this.data.summaries, ids, this.data.concerns, this.data.confirmedIds) });
+    this.setData({ roster, statusTiles: this.tiles(roster, this.data.filters), students: this.filterRows(roster), selectedCount: ids.length, reviewEntries: this.entries(this.data.homework, ids, this.data.taskId), summaryPreviews: this.previews(this.data.summaries, ids, this.data.concerns, this.data.confirmedIds) });
+  },
+  tiles(rows, labels) {
+    const icons = {1:'attendance',2:'homework',3:'mistakes',4:'summaries',5:'summaries',6:'homework',7:'attendance',8:'summaries',9:'summaries'};
+    return this.data.statusGroups[this.data.statusGroup].ids.map(index => ({ index, label: labels[index], count: this.filterRows(rows, index).length, icon: icons[index] }));
+  },
+  chooseStatusGroup(event) {
+    if (this.data.busy || this.data.uploading) return;
+    const index = Number(event.currentTarget.dataset.index);
+    if (!Number.isInteger(index) || index < 0 || index >= this.data.statusGroups.length) return;
+    this.setData({ statusGroup: index, filterIndex: 0 }); this.derive();
+  },
+  chooseStatus(event) {
+    if (this.data.busy || this.data.uploading) return;
+    const index = Number(event.currentTarget.dataset.index);
+    if (!Number.isInteger(index) || index < 0 || index >= this.data.filters.length) return;
+    this.filter({ detail: { value: index } });
   },
   filter(event) { this.setData({ filterIndex: Number(event.detail.value) }); this.derive(); },
   select(event) { if (this.data.busy || this.data.uploading) return; const id = Number(event.currentTarget.dataset.id), ids = this.data.studentIds; this.setData({ studentIds: ids.includes(id) ? ids.filter(s => s !== id) : ids.concat(id), confirmedIds: [] }); this.derive(); this.saveDraft(); },

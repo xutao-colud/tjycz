@@ -3,24 +3,40 @@
   <select-picker wx:if="{{campuses.length > 1}}" range="{{campusNames}}" value="{{campusIndex}}" bindchange="changeCampus" label="切换校区" plain="{{true}}"><view>{{campusName}}<text class="campus-arrow">⌄</text></view></select-picker>
   <text wx:else class="campus-name">{{campusName}}</text>
 </view>
-<view wx:if="{{open}}" class="nav-overlay" bindtap="close">
-  <view class="nav-sheet" catchtap="noop">
+<view wx:if="{{open && !owner}}" class="nav-overlay" bindtap="close">
+  <view class="nav-sheet {{parent ? 'parent-nav' : ''}} {{reducedMotion ? 'reduce-motion' : ''}}" catchtap="noop">
     <view class="sheet-handle"></view>
     <view class="sheet-head"><view class="sheet-title">{{sheetTitle}}</view><view class="sheet-close" bindtap="close">×</view></view>
-    <view class="sheet-account" bindtap="account"><view class="account-avatar">{{userName ? userName[0] : '我'}}</view><view class="account-copy"><view>{{userName || '当前账号'}}<text class="role">{{roleName}}</text></view><view class="account-tip">{{demo ? '本地演示 · 虚构学生数据' : '账号与登录管理'}}</view></view><text class="account-arrow">›</text></view>
+    <view class="sheet-account" bindtap="account"><view class="account-avatar">{{userName ? userName[0] : '我'}}</view><view class="account-copy"><view>{{userName || '当前账号'}}<text class="role">{{roleName}}</text></view><view class="account-tip">{{demo ? '本地体验 · 虚构学生数据' : '账号与登录管理'}}</view></view><text class="account-arrow">›</text></view>
+    <view wx:if="{{parent}}" class="motion-preference"><view><view>减少动态效果</view><view class="account-tip">关闭位移与回弹，保留状态提示</view></view><switch checked="{{reducedMotion}}" bindchange="toggleMotion" color="#176b91" aria-label="减少动态效果" /></view>
     <scroll-view scroll-y="{{true}}" class="app-list-scroll">
     <view wx:for="{{groups}}" wx:key="title" class="app-group">
       <view class="group-title">{{item.title}}</view>
       <view class="app-list">
-        <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="page" class="app-entry" data-page="{{entry.page}}" bindtap="navigate">
-          <image class="app-icon" src="/assets/icons/{{entry.icon}}.png" mode="aspectFit"/><text>{{entry.name}}</text><text class="entry-arrow">›</text>
+        <view wx:for="{{item.items}}" wx:for-item="entry" wx:key="page" hover-class="{{parent && !reducedMotion ? 'nav-pressed' : 'none'}}" class="app-entry" data-page="{{entry.page}}" bindtap="navigate">
+          <image class="app-icon" src="/assets/icons/{{entry.icon}}.svg" mode="aspectFit"/><text>{{entry.name}}</text><text class="entry-arrow">›</text>
         </view>
       </view>
     </view>
     </scroll-view>
   </view>
 </view>
+<view wx:if="{{open && owner}}" class="management-page">
+  <view class="management-header"><text class="management-campus">{{campusName}}</text><view class="management-title">我的账号</view><button class="management-message" data-page="follow-ups" data-kind="MESSAGE" bindtap="navigate"><image src="/assets/icons/summaries.svg"/><text>消息</text></button></view>
+  <scroll-view class="management-scroll" scroll-y="{{true}}">
+    <view class="management-content">
+      <view class="management-identity"><view class="management-avatar">{{userName ? userName[0] : '我'}}</view><view class="management-person"><view class="management-institution">{{campusName}}</view><view class="management-name">{{userName || '当前账号'}}</view><view class="management-role">{{roleName}}</view></view></view>
+      <view class="management-section"><view class="management-section-title">账号服务</view><view class="management-section-note">个人账号与登录管理</view></view>
+      <view class="management-list"><button class="management-row" bindtap="account"><view class="management-icon"><image src="/assets/icons/user.svg"/></view><text>账号与登录管理</text><text class="management-chevron">›</text></button></view>
+      <block wx:for="{{groups}}" wx:key="title">
+        <view class="management-section"><view class="management-section-title">{{item.title}}</view></view>
+        <view class="management-list"><button wx:for="{{item.items}}" wx:for-item="entry" wx:key="page" class="management-row" data-page="{{entry.page}}" bindtap="navigate"><view class="management-icon"><image src="/assets/icons/{{entry.icon}}.svg"/></view><text class="management-label">{{entry.name}}</text><text class="management-chevron">›</text></button></view>
+      </block>
+      <view class="management-list management-exit"><button class="management-row" bindtap="signOut" disabled="{{accountBusy}}" loading="{{accountBusy}}"><view class="management-icon"><image src="/assets/icons/user.svg"/></view><text>退出登录</text><text class="management-chevron">›</text></button></view>
+    </view>
+  </scroll-view>
+</view>
 <view class="bottom-nav">
-  <view wx:for="{{tabs}}" wx:key="key" class="tab {{item.selected && !open ? 'selected' : ''}}" data-page="{{item.page}}" data-section="{{item.section}}" data-kind="{{item.kind}}" bindtap="navigate" role="button" aria-label="{{item.name}}"><image src="/assets/icons/{{item.icon}}{{item.icon === 'home' && item.selected && !open ? '-active' : ''}}.png" mode="aspectFit"/><text>{{item.name}}</text></view>
-  <view class="tab {{open ? 'selected' : ''}}" bindtap="toggle" role="button" aria-label="{{sheetTitle}}"><image src="/assets/icons/user{{open ? '-active' : ''}}.png" mode="aspectFit"/><text>{{sheetTitle}}</text></view>
+  <view wx:for="{{tabs}}" wx:key="key" hover-class="{{parent && !reducedMotion ? 'nav-pressed' : 'none'}}" class="tab {{item.selected && !open ? 'selected' : ''}}" data-page="{{item.page}}" data-section="{{item.section}}" data-kind="{{item.kind}}" bindtap="navigate" role="button" aria-label="{{item.name}}"><image src="/assets/icons/{{item.icon}}{{item.icon === 'home' && item.selected && !open ? '-active' : ''}}.svg" mode="aspectFit"/><text>{{item.name}}</text></view>
+  <view hover-class="{{parent && !reducedMotion ? 'nav-pressed' : 'none'}}" class="tab {{open ? 'selected' : ''}}" bindtap="toggle" role="button" aria-label="{{sheetTitle}}"><image src="/assets/icons/user{{open ? '-active' : ''}}.svg" mode="aspectFit"/><text>{{sheetTitle}}</text></view>
 </view>

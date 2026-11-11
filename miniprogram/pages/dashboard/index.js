@@ -9,7 +9,7 @@ const applications = [
   { page: 'points', name: '成长积分', icon: 'points' }
 ];
 definePage({
-  data: { dashboard: null, settings: {}, metrics: [], operationMetrics: [], activities: [], progress: [], children: [], weekly: [], applications, management: [], percent: 0, arriving: false, roleName: '' },
+  data: { satisfactionStats: [], dashboard: null, settings: {}, metrics: [], operationMetrics: [], activities: [], progress: [], children: [], weekly: [], applications, management: [], percent: 0, arriving: false, roleName: '' },
   onLoad(query) {
     this.query = query || {};
     this._unloaded = false;
@@ -25,9 +25,10 @@ definePage({
   async loadData() {
     const value = session.current();
     const me = value.user;
-    const [dashboard, settings] = await Promise.all([api.dashboard(this.data.date), api.settings()]);
-    const teacher = session.isTeacher();
     const admin = session.isAdmin();
+    const owner = me.role === 'SUPER_ADMIN';
+    const [dashboard, settings, satisfactionStats] = await Promise.all([api.dashboard(this.data.date), api.settings(), admin && this.data.date <= format.today() ? api.classSatisfaction({ date: this.data.date }) : Promise.resolve([])]);
+    const teacher = session.isTeacher();
     const total = Number(dashboard.homeworkCount) || 0;
     const completed = Number(dashboard.completedHomeworkCount) || 0;
     const percent = total ? Math.min(100, Math.round(completed * 100 / total)) : 0;
@@ -41,7 +42,7 @@ definePage({
       { page: 'attendance', name: '今日到校', value: dashboard.presentCount || 0, suffix: '/' + (dashboard.studentCount || 0) + ' 人', icon: 'attendance', tone: 'blue' },
       { page: 'teacher-attendance', name: '老师签到', value: dashboard.checkedInTeacherCount || 0, suffix: '/' + (dashboard.teacherCount || 0) + ' 人次', icon: 'attendance', tone: 'coral' },
       { page: 'students', name: '学生总数', value: dashboard.studentCount || 0, suffix: '人', icon: 'students', tone: 'orange' },
-      { page: 'homework', name: '作业完成', value: completed, suffix: '/' + total + ' 份', icon: 'homework', tone: 'amber' }
+      owner ? { page: 'lessons', name: '课时预警', value: dashboard.lowBalanceCount || 0, suffix: '人', icon: 'lessons', tone: 'amber' } : { page: 'homework', name: '作业完成', value: completed, suffix: '/' + total + ' 份', icon: 'homework', tone: 'amber' }
     ];
     const management = [
       { page: 'growth', name: '今日成长', icon: 'home' },
@@ -55,7 +56,17 @@ definePage({
       { page: 'lessons', name: '课程课时', icon: 'lessons' },
       { page: 'summaries', name: '每日小结', icon: 'summaries' }
     ];
-    return { user: me, teacher, admin, roleName: format.label(me.role), demo: !!value.demo, dashboard, settings, metrics, operationMetrics: admin ? operationMetrics : [], management, percent,
+    return { user: me, teacher, admin, owner, roleName: format.label(me.role), demo: !!value.demo, dashboard, settings, satisfactionStats, metrics, operationMetrics: admin ? operationMetrics : [], management: owner ? [
+      { page: 'family-services', name: '续费意向与订餐', icon: 'lessons' },
+      { page: 'campus-reports', name: '校区总结', icon: 'summaries' },
+      { page: 'teacher-attendance', name: '教师考勤', icon: 'attendance' },
+      { page: 'follow-ups', name: '服务跟进', icon: 'summaries' }
+    ] : management, applications: owner ? [
+      { page: 'principal', name: '校区运营明细', icon: 'home' },
+      { page: 'lessons', name: '课时与续费', icon: 'lessons' },
+      { page: 'refunds', name: '退款与审核', icon: 'lessons' },
+      { page: 'campuses', name: '校区与权限', icon: 'students' }
+    ] : applications, percent,
       greeting: teacher ? '今天也要元气满满' : '陪伴每一个小小进步',
       children: (dashboard.students || []).map(format.decorate),
       activities: (dashboard.activities || []).slice(0, 5).map((row, index) => Object.assign({}, row, { timeText: format.time(row.time), tone: index % 3 })),

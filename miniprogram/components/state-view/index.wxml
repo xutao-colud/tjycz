@@ -18,7 +18,7 @@
 </view>
 <view wx:elif="{{empty}}" class="state state-empty">
   <view class="state-icon empty-icon-wrap">
-    <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit" />
+    <image class="empty-icon" src="/assets/icons/empty.svg" mode="aspectFit" />
   </view>
   <view class="state-title empty-title">{{emptyText}}</view>
 </view>

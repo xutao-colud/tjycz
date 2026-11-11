@@ -6,7 +6,7 @@
 
   <button wx:if="{{files.length < 6}}" class="upload-area" disabled="{{disabled || busy || recording}}" loading="{{uploadingFiles}}" bindtap="choose">
     <view class="upload-icon-wrap">
-      <image class="upload-icon" src="/assets/icons/upload.png" mode="aspectFit" />
+      <image class="upload-icon" src="/assets/icons/upload.svg" mode="aspectFit" />
     </view>
     <view class="upload-copy">
       <view class="upload-title">{{uploadingFiles ? '正在上传…' : '添加照片 / 视频'}}</view>
@@ -16,7 +16,7 @@
   </button>
 
   <button wx:if="{{audioEnabled && !recording && files.length < 6}}" class="record-button" bindtap="record" disabled="{{disabled || busy}}">
-    <image class="mic-icon" src="/assets/icons/mic.png" mode="aspectFit" />
+    <image class="mic-icon" src="/assets/icons/mic.svg" mode="aspectFit" />
     <text class="record-title">录制语音</text>
     <text class="record-limit">最长 60 秒</text>
   </button>

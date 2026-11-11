@@ -1,5 +1,5 @@
 <app-nav />
-<view class="page points-page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page points-page">
   <view class="hero">
     <view class="eyebrow">努力看得见</view>
     <view class="title">成长积分</view>
@@ -10,12 +10,12 @@
   <block wx:if="{{!loading && !error}}">
     <student-picker students="{{students}}" selected="{{studentIds}}" bindchange="pickStudents" />
 
-    <button class="secondary gap" data-url="/pages/rewards/index" bindtap="go">固定奖励与奖品兑换 ›</button>
+    <button class="secondary gap" data-url="/pages/rewards/index" bindtap="go" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">固定奖励与奖品兑换 ›</button>
     <view class="points-balance-card">
       <view class="points-balance-top">
         <text class="points-balance-label">当前可用积分</text>
         <view class="points-balance-icon">
-          <image src="/assets/icons/points.png" mode="aspectFit" />
+          <image src="/assets/icons/points.svg" mode="aspectFit" />
         </view>
       </view>
       <view class="points-balance-number">{{balance}}<text class="points-balance-unit">分</text></view>
@@ -27,7 +27,7 @@
     </view>
 
     <view wx:if="{{teacher}}" class="card points-editor">
-      <button class="points-editor-toggle" bindtap="toggleForm" disabled="{{busy}}">
+      <button class="points-editor-toggle" bindtap="toggleForm" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">
         <view>
           <view class="points-editor-title">奖励与调整</view>
           <view class="points-editor-note">为学生记录鼓励或调整积分</view>
@@ -44,7 +44,7 @@
           <textarea value="{{reason}}" data-field="reason" bindinput="field" maxlength="500" placeholder="例如：主动帮助同学" />
         </view>
         <view class="hint">奖励填正数，扣减填负数。扣减后积分不能小于 0。</view>
-        <button class="primary gap" bindtap="submit" disabled="{{busy || !studentIds.length}}" loading="{{busy}}">确认调整积分</button>
+        <button class="primary gap" bindtap="submit" disabled="{{busy || !studentIds.length}}" loading="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">确认调整积分</button>
       </view>
     </view>
     <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
@@ -56,7 +56,7 @@
     <view class="card points-ledger">
       <view wx:for="{{items}}" wx:key="id" class="points-ledger-row">
         <view class="points-entry-icon points-icon-{{item.tone}}">
-          <image src="/assets/icons/{{item.icon}}.png" mode="aspectFit" />
+          <image src="/assets/icons/{{item.icon}}.svg" mode="aspectFit" />
         </view>
         <view class="col">
           <view class="points-entry-title">{{item.reason || item.typeText}}</view>
@@ -69,7 +69,7 @@
         </view>
       </view>
       <view wx:if="{{!items.length}}" class="points-empty">
-        <image src="/assets/icons/empty.png" mode="aspectFit" />
+        <image src="/assets/icons/empty.svg" mode="aspectFit" />
         <view>还没有积分变动记录</view>
         <text>每一点进步都值得期待</text>
       </view>
@@ -78,7 +78,7 @@
     <view wx:if="{{rules.length}}" class="card points-rules">
       <view class="points-rules-head">
         <view class="points-rules-icon">
-          <image src="/assets/icons/points.png" mode="aspectFit" />
+          <image src="/assets/icons/points.svg" mode="aspectFit" />
         </view>
         <view class="card-title">积分小规则</view>
       </view>

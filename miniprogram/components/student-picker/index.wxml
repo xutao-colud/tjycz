@@ -1,7 +1,7 @@
 <view class="picker">
   <view class="head" bindtap="togglePanel" role="button" aria-label="{{title}}，已选{{count}}人，{{expanded ? '收起' : '展开'}}">
     <view class="head-icon">
-      <image class="students-icon" src="/assets/icons/students.png" mode="aspectFit" />
+      <image class="students-icon" src="/assets/icons/students.svg" mode="aspectFit" />
     </view>
     <view class="head-copy">
       <view class="title">{{title}}</view>
@@ -29,7 +29,7 @@
       </button>
     </view>
     <view wx:if="{{!students.length}}" class="empty">
-      <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit" />
+      <image class="empty-icon" src="/assets/icons/empty.svg" mode="aspectFit" />
       <text>暂无可选学生，请联系机构核实授权</text>
     </view>
     <scroll-view wx:else class="student-scroll" scroll-y="{{true}}" style="height: {{listHeight}}rpx;">

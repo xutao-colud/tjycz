@@ -1,5 +1,5 @@
 <app-nav />
-<view class="page lessons-page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page lessons-page">
   <view class="hero">
     <view class="eyebrow">每一节课都清楚</view>
     <view class="title">课程与课时</view>
@@ -8,8 +8,39 @@
 
   <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
   <block wx:if="{{!loading && !error}}">
-    <student-picker students="{{students}}" selected="{{studentIds}}" bindchange="pickStudents" /><view wx:if="{{teacher}}" class="card gap"><button class="secondary" bindtap="toggleGrant" disabled="{{busy}}">为孩子增加课程课时</button><view wx:if="{{grantOpen}}"><view class="field"><text class="label">课程（晚辅、周末、假期等）</text><select-picker range="{{courseNames}}" value="{{courseIndex}}" bindchange="course" label="选择增加课时的课程"><view class="form-pick">{{courseNames[courseIndex] || '选择增加课时的课程'}}</view></select-picker></view><view class="field"><text class="label">增加课时</text><input value="{{grantUnits}}" data-field="grantUnits" bindinput="field" type="digit" /></view><view class="field"><text class="label">增加原因</text><textarea value="{{grantReason}}" data-field="grantReason" bindinput="field" maxlength="800" /></view><view class="hint">仅记入增补课时，不登记收款；老师只能操作自己负责的学生。</view><button class="primary gap" bindtap="grant" disabled="{{busy}}">确认增加课时</button></view></view>
+    <student-picker students="{{students}}" selected="{{studentIds}}" bindchange="pickStudents" /><view wx:if="{{teacher}}" class="card gap"><button class="secondary" bindtap="toggleGrant" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">为孩子增加课程课时</button><view wx:if="{{grantOpen}}"><view class="field"><text class="label">课程（晚辅、周末、假期等）</text><select-picker range="{{courseNames}}" value="{{courseIndex}}" bindchange="course" label="选择增加课时的课程"><view class="form-pick">{{courseNames[courseIndex] || '选择增加课时的课程'}}</view></select-picker></view><view class="field"><text class="label">增加课时</text><input value="{{grantUnits}}" data-field="grantUnits" bindinput="field" type="digit" /></view><view class="field"><text class="label">增加原因</text><textarea value="{{grantReason}}" data-field="grantReason" bindinput="field" maxlength="800" /></view><view class="hint">仅记入增补课时，不登记收款；老师只能操作自己负责的学生。</view><button class="primary gap" bindtap="grant" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">确认增加课时</button></view></view>
 
+    <view wx:if="{{admin && studentIds.length}}" class="card gap">
+      <view class="section-title">缴费与课程设置</view>
+      <view class="actions"><button id="finance-renewal-entry" class="primary" bindtap="toggleRenewal" disabled="{{busy}}">登记缴费 / 续费</button><button id="finance-catalog-entry" class="text-button" bindtap="toggleCatalog" disabled="{{busy}}">课程归类</button></view>
+      <view wx:if="{{renewalOpen}}">
+        <view class="field"><text class="label">收费课程</text><select-picker range="{{courseNames}}" value="{{courseIndex}}" bindchange="course" disabled="{{busy}}" label="收费课程"><view class="form-pick">{{courseNames[courseIndex]}}</view></select-picker></view>
+        <view wx:if="{{courseIndex}}" class="hint">后台单价：¥{{courses[courseIndex - 1].priceText}} / {{courses[courseIndex - 1].unit}}。修改购买课时后重新计算金额，赠送课时不收费；优惠后的实收金额可核对修改。</view>
+        <view class="field"><text class="label">实收金额（元）</text><input value="{{amountYuan}}" data-field="amountYuan" bindinput="field" type="digit" disabled="{{busy}}" /></view>
+        <view class="form-grid"><view class="field col"><text class="label">购买课时</text><input value="{{paidUnits}}" data-field="paidUnits" bindinput="renewalUnits" type="digit" disabled="{{busy}}" /></view><view class="field col"><text class="label">赠送课时</text><input value="{{giftUnits}}" data-field="giftUnits" bindinput="field" type="digit" disabled="{{busy}}" /></view></view>
+        <select-picker range="{{paymentNames}}" value="{{paymentIndex}}" data-field="paymentIndex" bindchange="chooseFinance" disabled="{{busy}}" label="收款方式"><view class="form-pick">{{paymentNames[paymentIndex]}}</view></select-picker>
+        <textarea class="gap" value="{{renewalNote}}" data-field="renewalNote" bindinput="field" maxlength="1000" placeholder="收费备注（选填）" disabled="{{busy}}" />
+        <view class="hint">未报名的课程会建立独立账户。保存后仍需确认收款；此处不发起在线支付。</view>
+        <button class="primary gap" bindtap="saveRenewal" disabled="{{busy}}" loading="{{busy}}">保存续费单</button>
+      </view>
+      <view wx:if="{{catalogOpen}}">
+        <select-picker range="{{catalogTargets}}" value="{{existingIndex}}" data-field="existingIndex" bindchange="chooseFinance" disabled="{{busy}}" label="选择已有课程"><view class="form-pick">{{catalogTargets[existingIndex] || '选择已有课程'}}</view></select-picker>
+        <view class="hint">课程与单价由后台课程管理维护。这里仅调整已有课程的名称与归属。</view>
+        <select-picker range="{{coursePresets}}" value="{{presetIndex}}" data-field="presetIndex" bindchange="chooseFinance" disabled="{{busy}}" label="课程名称"><view class="form-pick">{{coursePresets[presetIndex]}}</view></select-picker>
+        <select-picker wx:if="{{presetIndex}}" range="{{rootNames}}" value="{{rootIndex}}" data-field="rootIndex" bindchange="chooseFinance" disabled="{{busy}}" label="所属大类"><view class="form-pick">{{rootNames[rootIndex] || '请先创建成长营大类'}}</view></select-picker>
+        <button class="primary" bindtap="saveCourse" disabled="{{busy || !existingIndex}}" loading="{{busy}}">保存课程归属</button>
+      </view>
+    </view>
+    <view wx:if="{{teacher && studentIds.length}}" class="card gap">
+      <view class="section-title">实际上课确认</view>
+      <date-picker value="{{date}}" bindchange="changeDate" disabled="{{busy}}"><view class="filter-pill">{{date}} ⌄</view></date-picker>
+      <view class="hint">仅显示需老师确认的已报名排课。到校且课程结束后确认；已批准整日请假不扣课。</view>
+      <view wx:if="{{!consumptionAvailable}}" class="notice">当前后台尚未支持上课确认，请更新服务后使用。</view>
+      <view wx:for="{{lessonSessions}}" wx:key="id" class="detail-row"><view class="col"><view>{{item.courseName}}</view><view class="muted">{{item.startTime}}–{{item.endTime}} · 本次 {{item.units}} {{item.unit}}</view><view class="muted">{{item.status === 'SETTLED' ? '已扣课' : item.status === 'PENDING' ? '待补扣' : '待确认'}}{{item.reason ? ' · ' + item.reason : ''}}</view></view><button wx:if="{{item.canConfirm}}" class="text-button" data-id="{{item.id}}" bindtap="confirmLesson" disabled="{{busy}}">确认上课</button><button wx:elif="{{item.status === 'PENDING'}}" class="text-button" data-id="{{item.settlementId}}" bindtap="retrySettlement" disabled="{{busy}}">补扣</button></view>
+      <textarea wx:if="{{admin}}" value="{{lessonReason}}" data-field="lessonReason" bindinput="field" maxlength="800" placeholder="上课核对说明（历史补录必填）" disabled="{{busy}}" />
+      <view wx:if="{{consumptionAvailable && !lessonSessions.length}}" class="empty-inline">当日没有需确认的排课</view>
+    </view>
+    <view wx:if="{{courseGroups.length}}" class="card gap"><view class="section-title">课程分类汇总</view><view wx:for="{{courseGroups}}" wx:key="id" class="detail-row"><view class="col">{{item.name}}<view class="muted">{{item.count}} 个已报名独立账户</view></view><text>{{item.balanceText}}</text></view><view class="hint">可用课时按单位汇总，仅供查看；晚辅与子课程独立使用、独立扣减。</view></view>
     <view class="section-head">
       <view class="section-title">我的课程</view>
       <text class="lessons-section-note">{{accounts.length}} 门课程</text>
@@ -17,10 +48,10 @@
     <view wx:for="{{accounts}}" wx:key="id" class="card lessons-account">
       <view class="lessons-account-head">
         <view class="lessons-course-icon lessons-tone-{{item.tone}}">
-          <image src="/assets/icons/lessons.png" mode="aspectFit" />
+          <image src="/assets/icons/lessons.svg" mode="aspectFit" />
         </view>
         <view class="col">
-          <view class="lessons-course-name">{{item.courseName}}</view>
+          <view wx:if="{{item.parentCourseName}}" class="muted">{{item.parentCourseName}} / 子课程</view><view class="lessons-course-name">{{item.courseName}}</view><view class="muted">{{item.consumptionText}}</view>
           <view class="lessons-account-caption">独立课时账户</view>
         </view>
         <text class="badge {{item.low ? 'warn' : ''}}">{{item.low ? '余额不足提醒' : '正常'}}</text>
@@ -32,7 +63,7 @@
           <text class="lessons-balance-unit">{{item.unit || '课时'}}</text>
         </view>
       </view>
-      <view class="hint">可用 {{item.availableBalance}} {{item.unit}} · 退款预留 {{item.refundReserved}} {{item.unit}}</view><button wx:if="{{!teacher || admin}}" class="text-button" data-url="/pages/refunds/index?studentId={{item.studentId}}" bindtap="go">退款申请与记录 ›</button><view class="lessons-account-stats">
+      <view class="hint">可用 {{item.availableBalance}} {{item.unit}} · 退款预留 {{item.refundReserved}} {{item.unit}}</view><button wx:if="{{!teacher || admin}}" class="text-button" data-url="/pages/refunds/index?studentId={{item.studentId}}" bindtap="go" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">退款申请与记录 ›</button><view class="lessons-account-stats">
         <view class="lessons-account-stat">
           <view class="lessons-stat-value">{{item.purchased}}</view>
           <view class="lessons-stat-label">净购买课时</view>
@@ -46,7 +77,7 @@
           <view class="lessons-stat-label">累计消耗</view>
         </view>
       </view>
-      <view class="lessons-threshold {{item.low ? 'lessons-threshold-low' : ''}}">{{item.low ? '请留意续费，保持学习不中断' : '余额提醒线'}} · {{item.warningThreshold}} {{item.unit || '课时'}}</view>
+      <view class="lessons-threshold {{item.low ? 'lessons-threshold-low' : ''}}">{{item.balanceWarning || ('余额提醒线 · ' + item.warningThreshold + ' ' + (item.unit || '课时'))}}</view>
     </view>
     <state-view empty="{{!accounts.length}}" empty-text="暂无课程账户，请联系机构确认报名" />
 
@@ -60,10 +91,10 @@
       </view>
       <view wx:for="{{settlements}}" wx:key="id" class="lessons-pending-row">
         <view class="col">
-          <view class="lessons-pending-course">{{item.courseName}} · {{item.date}}</view>
+          <view class="lessons-pending-course">{{item.courseName}} · {{item.date}}<text wx:if="{{item.chargeUnits}}"> · {{item.chargeUnits}} {{item.unit}}</text></view>
           <view class="lessons-pending-reason">{{item.reason || '请核对账户余额与排课'}}</view>
         </view>
-        <button class="lessons-retry" data-id="{{item.id}}" bindtap="retrySettlement" disabled="{{busy}}" loading="{{busy}}">重新结算</button>
+        <button class="lessons-retry" data-id="{{item.id}}" bindtap="retrySettlement" disabled="{{busy}}" loading="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">重新结算</button>
       </view>
     </view>
 
@@ -98,7 +129,7 @@
         </view>
       </view>
       <view wx:if="{{!ledger.length}}" class="lessons-empty">
-        <image src="/assets/icons/empty.png" mode="aspectFit" />
+        <image src="/assets/icons/empty.svg" mode="aspectFit" />
         <view>当前课程暂无课时明细</view>
       </view>
     </view>
@@ -120,11 +151,11 @@
             <view>赠送 <text>{{item.giftLessons}}</text> 课时</view>
           </view>
         </view>
-        <view class="lessons-renewal-time">{{item.createdText}}</view>
+        <button wx:if="{{admin && item.status === 'PENDING'}}" class="text-button" data-id="{{item.id}}" bindtap="confirmRenewal" disabled="{{busy}}">核实收款并入账</button><view class="lessons-renewal-time">{{item.createdText}}</view>
         <view wx:if="{{item.note}}" class="lessons-renewal-note">{{item.note}}</view>
       </view>
       <view wx:if="{{!renewals.length}}" class="lessons-empty-inline">暂无续费记录</view>
     </view>
-    <view class="lessons-footer-note">续费与冲正请联系机构管理员办理。</view>
+    <view class="lessons-footer-note">{{admin ? '续费确认后计入对应课程；冲正与退款请在费用管理核对原流水。' : '续费与冲正请联系机构管理员办理。'}}</view>
   </block>
 </view>

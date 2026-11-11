@@ -1,0 +1,26 @@
+<app-nav />
+<view class="page {{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}}">
+  <view class="hero"><view class="title">投诉与建议</view><view class="subtitle">认真听取每一份意见，跟进每一次回应。</view></view>
+  <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
+  <block wx:if="{{!loading && !error}}">
+    <view class="notice">仅提交家长及有权限的校长、管理员可查看。教师和其他家长不可见。</view>
+    <button wx:if="{{!teacher && !detail}}" class="primary gap" bindtap="newComplaint" disabled="{{busy}}">{{showForm ? '收起表单' : '提交投诉或建议'}}</button>
+    <view wx:if="{{showForm && !teacher}}" class="card gap">
+      <view class="field"><text class="label">关联孩子</text><select-picker range="{{childNames}}" value="{{childIndex}}" bindchange="chooseChild" disabled="{{busy}}" label="选择孩子"><view class="form-pick">{{childNames[childIndex] || '暂无绑定孩子'}}</view></select-picker></view>
+      <view class="field"><text class="label">标题</text><input value="{{title}}" data-field="title" bindinput="field" maxlength="200" disabled="{{busy}}" placeholder="请简要说明希望反馈的事情" /></view>
+      <view class="field"><text class="label">具体情况</text><textarea value="{{content}}" data-field="content" bindinput="field" maxlength="3000" disabled="{{busy}}" placeholder="请描述时间、经过和希望改进的内容" /></view>
+      <view class="field"><text class="label">联系方式（选填）</text><input value="{{contact}}" data-field="contact" bindinput="field" maxlength="140" disabled="{{busy}}" placeholder="也可以仅通过站内回复沟通" /></view>
+      <button class="secondary" bindtap="photo" disabled="{{busy || photos.length >= 6}}">添加图片 · {{photos.length}} / 6</button><file-list files="{{photos}}" removable disabled="{{busy}}" bindremove="removePhoto" />
+      <button class="primary gap" bindtap="submit" loading="{{busy}}" disabled="{{busy || !studentId}}">确认提交</button>
+    </view>
+    <block wx:if="{{detail}}">
+      <button class="text-button gap" bindtap="back" disabled="{{busy}}">‹ 返回投诉列表</button>
+      <view class="card"><view class="row"><view class="card-title col">{{detail.title}}</view><text class="badge">{{detail.statusText}}</text></view><view class="hint">{{detail.studentName}} · {{detail.campusName}} · {{detail.createdText}}</view><view class="hint" wx:if="{{detail.contact}}">联系方式：{{detail.contact}}</view>
+        <view wx:for="{{detail.logs}}" wx:key="id" class="complaint-log"><view class="row"><text>{{item.actorName}}</text><text wx:if="{{item.internal}}" class="badge warn">内部记录</text><text class="muted">{{item.createdText}}</text></view><view class="complaint-text">{{item.text}}</view><file-list files="{{item.attachments}}" /></view>
+      </view>
+      <view class="card"><view class="field"><select-picker range="{{actionNames}}" value="{{actionIndex}}" bindchange="action" disabled="{{busy}}" label="选择处理方式"><view class="form-pick">{{actionNames[actionIndex]}}</view></select-picker></view><view class="field"><textarea value="{{reply}}" data-field="reply" bindinput="field" maxlength="3000" disabled="{{busy}}" placeholder="{{teacher ? '填写处理记录或给家长的回复' : '补充情况，校区会继续跟进'}}" /></view><button class="secondary" bindtap="photo" disabled="{{busy || photos.length >= 6}}">添加图片 · {{photos.length}} / 6</button><file-list files="{{photos}}" removable disabled="{{busy}}" bindremove="removePhoto" /><button class="primary gap" bindtap="send" loading="{{busy}}" disabled="{{busy}}">{{teacher ? '保存处理记录' : '发送补充反馈'}}</button></view>
+    </block>
+    <block wx:if="{{!detail && !showForm}}"><button wx:for="{{items}}" wx:key="id" class="card complaint-item" data-id="{{item.id}}" bindtap="open" disabled="{{busy}}"><view class="row"><view class="card-title col">{{item.title}}</view><text class="badge">{{item.statusText}}</text></view><view class="hint">{{item.studentName}} · {{item.campusName}} · {{item.createdText}}</view></button><state-view empty="{{!items.length}}" empty-text="暂无投诉或建议" /></block>
+    <view wx:if="{{actionError}}" class="error">{{actionError}}<button class="text-button" bindtap="retry" disabled="{{busy}}">刷新最新记录</button></view>
+  </block>
+</view>

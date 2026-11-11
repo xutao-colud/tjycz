@@ -112,10 +112,14 @@ async function main() {
   assert.equal(app.globalData.session, null);
   failLogin = false;
   remembered.switchMode(event({ mode: 'phone' }));
+  assert.equal(remembered.data.loginMode, 'account', '已隐藏的手机号入口回退账号密码模式');
+  assert.equal(screen({ stage: 'login', mode: 'phone' }).data.loginMode, 'account', '旧手机号链接也打开账号密码登录');
+  remembered.usePhone();
+  assert.equal(remembered.data.loginMode, 'account');
   remembered.setData({ phone: '13800008888', code: '123456' });
   const beforePhone = loginCalls;
-  await remembered.submit(event());
-  assert.equal(loginCalls, beforePhone, '手机号未接入时不误调用账号登录接口');
+  remembered.requestCode();
+  assert.equal(loginCalls, beforePhone, '找回密码验证码提示不能调用登录接口');
   assert.equal(remembered.data.infoOpen, true);
   assert.match(remembered.data.infoText, /不会发送验证码/);
   remembered.closeInfo();

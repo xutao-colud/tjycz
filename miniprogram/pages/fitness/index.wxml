@@ -1,5 +1,5 @@
 <app-nav />
-<view class="page fitness-page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page fitness-page">
   <view class="hero">
     <view class="eyebrow">每天动一动</view>
     <view class="title">体能记录</view>
@@ -27,7 +27,7 @@
 
     <view class="card fitness-overview">
       <view class="fitness-overview-icon">
-        <image src="/assets/icons/fitness.png" mode="aspectFit" />
+        <image src="/assets/icons/fitness.svg" mode="aspectFit" />
       </view>
       <view class="col">
         <view class="fitness-overview-title">每一次坚持都算数</view>
@@ -40,7 +40,7 @@
     </view>
 
     <view wx:if="{{teacher}}" class="card fitness-editor">
-      <button class="fitness-editor-toggle" bindtap="toggleForm" disabled="{{busy}}">
+      <button class="fitness-editor-toggle" bindtap="toggleForm" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">
         <view class="fitness-editor-label">
           <text class="fitness-add">+</text>
           <view>
@@ -52,21 +52,21 @@
       </button>
       <view wx:if="{{formOpen}}" class="fitness-form">
         <view class="field">
-          <text class="label">运动项目 *</text>
-          <input value="{{project}}" data-field="project" bindinput="field" maxlength="80" placeholder="例如：跳绳、跑步" />
+          <text class="label">手动填写运动项目 *</text>
+          <input value="{{project}}" data-field="project" bindinput="field" maxlength="80" placeholder="自由输入，例如：篮球、跑步、平板支撑" />
         </view>
         <view class="row">
           <view class="field col">
             <text class="label">次数</text>
-            <input type="number" value="{{count}}" data-field="count" bindinput="field" placeholder="不适用填 0" />
+            <input type="number" value="{{count}}" data-field="count" bindinput="field" placeholder="选填，不适用可留空" />
           </view>
           <view class="field col">
             <text class="label">时长 / 秒</text>
-            <input type="number" value="{{duration}}" data-field="duration" bindinput="field" placeholder="不适用填 0" />
+            <input type="number" value="{{duration}}" data-field="duration" bindinput="field" placeholder="选填，不适用可留空" />
           </view>
         </view>
         <view class="hint">次数与时长至少填一项大于 0。同一学生每天同一项目只记录一次，积分按机构规则奖励。</view>
-        <button class="primary gap" bindtap="submit" disabled="{{busy || !studentIds.length}}" loading="{{busy}}">为 {{studentIds.length}} 位学生打卡</button>
+        <button class="primary gap" bindtap="submit" disabled="{{busy || !studentIds.length}}" loading="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">为 {{studentIds.length}} 位学生打卡</button>
       </view>
     </view>
 
@@ -80,7 +80,7 @@
     <view wx:for="{{records}}" wx:key="id" class="card fitness-record">
       <view class="fitness-record-head">
         <view class="fitness-project-icon fitness-tone-{{item.tone}}">
-          <image src="/assets/icons/fitness.png" mode="aspectFit" />
+          <image src="/assets/icons/fitness.svg" mode="aspectFit" />
         </view>
         <view class="col">
           <view class="fitness-project-name">{{item.project}}</view>

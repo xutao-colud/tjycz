@@ -4,6 +4,7 @@
     "pages/dashboard/index",
     "pages/principal/index",
     "pages/growth/index",
+    "pages/adventure/index",
     "pages/workbench/index",
     "pages/follow-ups/index",
     "pages/students/index",
@@ -29,13 +30,15 @@
     "pages/capture/index",
     "pages/scan/index",
     "pages/rewards/index",
-    "pages/notifications/index"
+    "pages/notifications/index",
+    "pages/homework-drafts/index",
+    "pages/complaints/index"
   ],
   "window": {
     "navigationBarTitleText": "晚辅智管",
-    "navigationBarBackgroundColor": "#f5f5f7",
+    "navigationBarBackgroundColor": "#f5f6f4",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f5f5f7",
+    "backgroundColor": "#f5f6f4",
     "backgroundTextStyle": "dark",
     "enablePullDownRefresh": true
   },
@@ -46,7 +49,8 @@
     "media-field": "/components/media-field/index",
     "file-list": "/components/file-list/index",
     "date-picker": "/components/date-picker/index",
-    "select-picker": "/components/select-picker/index"
+    "select-picker": "/components/select-picker/index",
+    "homework-trend": "/components/homework-trend/index"
   },
   "permission": {
     "scope.record": {

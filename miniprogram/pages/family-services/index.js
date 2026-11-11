@@ -22,7 +22,7 @@ definePage({
     const campus = available.find(c => String(c.id) === String(configChosen)) || available[0];
     const config = campus ? await api.request('GET', '/campuses/' + campus.id + '/family-services') : null;
     return { students, studentId, childNames: (staff ? ['全部授权学生'] : []).concat(students.map(s => s.name + ' · ' + s.className)), childIndex: Math.max(0, students.findIndex(s => s.id === studentId) + (staff ? 1 : 0)), family,
-      avatarUrl: family && family.student.avatar ? api.fileUrl(family.student.avatar) : '/assets/icons/students.png', mediaBlocked: false, mediaCanConsent: false,
+      avatarUrl: family && family.student.avatar ? api.fileUrl(family.student.avatar) : '/assets/icons/students.svg', mediaBlocked: false, mediaCanConsent: false,
       accounts: family ? family.accounts.map(a => Object.assign({}, a, { intentIndex: a.intention === 'INTERESTED' ? 1 : a.intention === 'NOT_NOW' ? 2 : 0, available: a.availableBalance === undefined ? a.balance : a.availableBalance })) : [],
       lowCount: family ? family.accounts.filter(a => a.lowBalance).length : 0,
       mealPriceText: family && family.settings.mealPrice !== null ? money(family.settings.mealPrice) : '', mealAmountText: family && family.meal ? money(family.meal.amount) : '',

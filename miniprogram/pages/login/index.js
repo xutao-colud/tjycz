@@ -7,7 +7,7 @@ const ROLE_KEY = 'wanfu.login.role.v1';
 const identities = [
   { code: 'PARENT', userRole: 'PARENT', name: '家长', title: '我是家长', image: 'parent', tone: 'parent', lines: ['查看孩子学习情况', '接收每日小结', '参与家校互动'] },
   { code: 'TEACHER', userRole: 'TEACHER', name: '老师', title: '我是老师', image: 'teacher', tone: 'teacher', lines: ['作业管理', '学生打卡', '日小结与点评'] },
-  { code: 'CAMPUS_ADMIN', userRole: 'ADMIN', name: '校长', title: '我是校长', image: 'admin', tone: 'principal', lines: ['查看授权校区运营', '班级情况与教师点评', '校区总结与师生考勤'] },
+  { code: 'CAMPUS_ADMIN', userRole: 'ADMIN', name: '校长', title: '我是校长', image: 'principal', tone: 'principal', lines: ['查看授权校区运营', '班级情况与教师点评', '校区总结与师生考勤'] },
   { code: 'ADMIN', userRole: 'SUPER_ADMIN', name: '管理员', title: '我是管理员', image: 'admin', tone: 'admin', lines: ['老板与总管理员工作台', '查看各校区整体运营', '管理校区与账号权限'] }
 ];
 Page({
@@ -29,7 +29,7 @@ Page({
     const requested = (query || {}).stage;
     const stage = stages.includes(requested) ? requested : (wx.getStorageSync(INTRO_KEY) || current ? 'login' : 'roles');
     wx.setStorageSync(INTRO_KEY, true);
-    this.setData({ stage, loginMode: (query || {}).mode === 'phone' ? 'phone' : 'account', username: typeof remembered === 'string' ? remembered : '', remember: !!remembered });
+    this.setData({ stage, loginMode: 'account', username: typeof remembered === 'string' ? remembered : '', remember: !!remembered });
     this.setIdentity(role || identities.find(item => item.code === this.data.selectedRole));
   },
   onShow() {
@@ -97,7 +97,7 @@ Page({
   },
   skipIdentity() { this.setData({ stage: 'login', error: '' }); },
   changeIdentity() { if (!this.data.busy) this.setData({ stage: 'roles', error: '' }); },
-  switchMode(event) { if (!this.data.busy) this.setData({ loginMode: event.currentTarget.dataset.mode, error: '', password: '', code: '' }); },
+  switchMode() { if (!this.data.busy) this.setData({ loginMode: 'account', error: '', password: '', code: '' }); },
   back() {
     if (this.data.busy) return;
     const stage = this.data.stage === 'roles' ? 'welcome' : this.data.stage === 'login' ? 'roles' : this.data.stage === 'reset' ? 'forgot' : 'login';
@@ -123,13 +123,13 @@ Page({
   wechat() { if (this.data.busy) return; this.setData({ stage: 'wechat', error: '' }); },
   authorizeWechat() { this.unavailable('微信登录暂未开通', '当前机构尚未接入微信身份登录和账号绑定。请返回使用机构账号密码登录。'); },
   useAccount() { this.clearSuccessTimers(); this.setData({ stage: 'login', loginMode: 'account', error: '', successLeaving: false }); },
-  usePhone() { this.setData({ stage: 'login', loginMode: 'phone', error: '' }); },
+  usePhone() { this.useAccount(); },
   contact() { this.unavailable('联系机构管理员', '请通过机构提供的联系电话或线下服务台，办理账号开通、身份绑定或密码重置。'); },
   showLegal(event) {
     const privacy = event.currentTarget.dataset.kind === 'privacy';
     this.setData({ legalOpen: true, legalTitle: privacy ? '隐私政策' : '用户协议', legalText: privacy
-      ? '当前为本地演示版本说明，正式隐私政策请向机构获取。账号仅用于验证登录身份；登录会话保存在本机，用于访问当前账号有权查看的学习记录。记住账号仅保存账号名称，不保存密码。当前页面不会通过微信获取头像、昵称或手机号。'
-      : '当前为本地演示版本说明，正式用户协议请向机构获取。请使用机构分配给本人的账号。页面选择的身份仅用于引导，本地演示凭据可按所选身份体验虚构数据，正式账号的访问权限以后台分配角色为准。' });
+      ? '当前为本地体验版本说明，正式隐私政策请向机构获取。账号仅用于验证登录身份；登录会话保存在本机，用于访问当前账号有权查看的学习记录。记住账号仅保存账号名称，不保存密码。当前页面不会通过微信获取头像、昵称或手机号。'
+      : '当前为本地体验版本说明，正式用户协议请向机构获取。请使用机构分配给本人的账号。页面选择的身份仅用于引导，本地体验凭据可按所选身份体验虚构数据，正式账号的访问权限以后台分配角色为准。' });
   },
   closeLegal() { this.setData({ legalOpen: false }); },
   async submit(event) {

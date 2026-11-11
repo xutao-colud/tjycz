@@ -2,7 +2,7 @@ const api = require('./api');
 const format = require('./format');
 const states = { ACTIVE: '有效', UPCOMING: '未生效', NOT_YET_VALID: '未生效', OUTSIDE_WINDOW: '非接送时段', EXPIRED: '已失效', INVALIDATED: '已失效', USED: '已使用', USED_TODAY: '今日已接送', REVOKED: '已撤销' };
 function contact(row) {
-  return Object.assign({}, row, { hasAvatar: !!row.avatar, avatarUrl: row.avatar ? api.fileUrl(row.avatar) : '/assets/icons/user.png', displayPhone: row.phoneMasked || (row.phone ? '•••• ' + String(row.phone).slice(-4) : '电话待确认') });
+  return Object.assign({}, row, { hasAvatar: !!row.avatar, avatarUrl: row.avatar ? api.fileUrl(row.avatar) : '/assets/icons/user.svg', displayPhone: row.phoneMasked || (row.phone ? '•••• ' + String(row.phone).slice(-4) : '电话待确认') });
 }
 function decorate(row) {
   const effective = row.effectiveStatus || row.status;

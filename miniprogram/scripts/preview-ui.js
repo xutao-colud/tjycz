@@ -16,6 +16,7 @@ const appConfig = JSON.parse(read('app.json'));
 const pages = appConfig.pages.map(route => route.split('/')[1]);
 const labels = { login: '登录', dashboard: '首页', principal: '校长工作台', growth: '今日成长', workbench: '教师工作台', 'follow-ups': '关注与沟通', students: '学生', attendance: '出勤', homework: '作业', 'homework-detail': '作业详情', mistakes: '错题', 'mistake-detail': '错题详情', fitness: '体能', points: '积分', lessons: '课时', summaries: '小结', 'teacher-attendance': '老师签到', campuses: '校区权限', safety: '接送管理', 'pickup-authorization': '临时接送授权', refunds: '退款与记录', privacy: '隐私与授权' };
 labels['student-detail'] = '学生详情';
+labels.adventure = '成长乐园';
 const names = pages.map(page => labels[page] || page);
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function sources() {
@@ -65,8 +66,8 @@ function browserPreview(files) {
     corrections: [{ id: 11, text: '虚构订正：重新列竖式，标出进位后完成验算。', createdAt: time, attachments: [photo] }],
     reviews: [{ id: 12, dueDate: date, status: 'PENDING' }, { id: 13, dueDate: date, status: 'DONE', completedAt: time }]
   }));
-  const settings = { institutionName: '虚构成长学堂', campusName: '样例校区', pointsRules: [{ event: 'HOMEWORK_COMPLETED', points: 5 }, { event: 'MISTAKE_MASTERED', points: 3 }, { event: 'FITNESS_COMPLETED', points: 2 }] };
-  const account = { id: 1, studentId: 1, studentName: students[0].name, courseId: 1, courseName: '虚构晚辅课程', unit: '课时', balance: 18, refundReserved: 1, availableBalance: 17, purchased: 29, gifted: 2, consumed: 13, warningThreshold: 5 };
+  const settings = { institutionName: '虚构成长学堂', campusName: '样例校区', pointsRules: [{ event: 'HOMEWORK_COMPLETED', points: 5 }, { event: 'MISTAKE_MASTERED', points: 3 }, { event: 'FITNESS', points: 2 }, { event: 'SUMMARY_PUBLISHED', points: 2 }], experienceRules: [{ category: 'LEARNING', experience: 10 }, { category: 'FITNESS', experience: 6 }] };
+  const account = { id: 1, studentId: 1, studentName: students[0].name, courseId: 1, courseName: '虚构晚辅课程', unit: '课时', balance: 18, refundReserved: 1, availableBalance: 17, purchased: 29, gifted: 2, consumed: 13, warningThreshold: 5, lowBalance: false, twoWeekUnits: 10, warningBasis: 'TWO_WEEKS', balanceWarning: '未来14天待上课需 10 课时，不足时自动预警' };
   const fixtures = {
     '/health': { status: 'UP', demo: true }, '/me': user, '/settings': settings, '/campuses': campuses,
     '/users': [{ id: 9010, name: '虚构主校区校长', username: 'fictional-principal', role: 'ADMIN', campusIds: [1], campusNames: ['虚构主校区'] }],
@@ -80,12 +81,12 @@ function browserPreview(files) {
     '/homework': tasks, '/mistakes': mistakes,
     '/fitness': ['跳绳', '慢跑', '拉伸'].map((project, i) => Object.assign({}, identity, { id: i + 1, project, count: [120, 0, 20][i], duration: [60, 300, 90][i], confirmed: i !== 1 })),
     '/points': ['HOMEWORK_COMPLETED', 'MISTAKE_MASTERED', 'ADJUSTMENT'].map((type, i) => Object.assign({}, identity, { id: i + 1, type, amount: [5, 3, -2][i], balance: [128, 123, 120][i], reason: ['虚构作业完成奖励', '虚构错题掌握奖励', '虚构积分调整说明'][i] })),
-    '/courses': [{ id: 1, name: account.courseName }, { id: 2, name: '虚构周末课程' }], '/accounts': [account, Object.assign({}, account, { id: 2, courseId: 2, courseName: '虚构周末课程', balance: 3, refundReserved: 0, availableBalance: 3, purchased: 10, gifted: 0, consumed: 7 })],
+    '/courses': [{ id: 1, name: account.courseName }, { id: 2, name: '虚构周末课程' }], '/accounts': [account, Object.assign({}, account, { id: 2, courseId: 2, courseName: '虚构周末课程', balance: 3, refundReserved: 0, availableBalance: 3, purchased: 10, gifted: 0, consumed: 7, lowBalance: true, twoWeekUnits: 4, balanceWarning: '未来14天待上课需 4 课时，不足时自动预警' })],
     '/lesson-ledger': [{ id: 1, studentId: 1, accountId: 1, courseName: account.courseName, type: 'CONSUME', amount: -1, balanceBefore: 19, balanceAfter: 18, createdAt: time, reason: '虚构晚辅出勤消课' }, { id: 2, studentId: 1, accountId: 1, courseName: account.courseName, type: 'PURCHASE', amount: 30, balanceBefore: 0, balanceAfter: 30, createdAt: time, reason: '虚构课程购买' }],
     '/renewals': [{ id: 1, studentId: 1, accountId: 1, courseName: account.courseName, amount: 180000, lessons: 30, giftLessons: 2, status: 'CONFIRMED', createdAt: time, note: '虚构续费样例，无真实交易' }],
     '/settlements': [{ id: 1, studentId: 1, courseName: '虚构周末课程', date, status: 'PENDING', reason: '虚构待结算样例，请核对课程余额' }],
     '/summaries': ['PUBLISHED', 'DRAFT', 'IN_REVIEW', 'APPROVED', 'REJECTED'].map((status, i) => Object.assign({}, identity, {
-      id: i + 1, studentId: i % 2 + 1, studentName: students[i % 2].name, status, version: i + 1, publishedAt: status === 'PUBLISHED' ? time : null, notificationStatus: 'NOT_CONFIGURED',
+      id: i + 1, studentId: i % 2 + 1, studentName: students[i % 2].name, status, version: i + 1, photos: [], publishedAt: status === 'PUBLISHED' ? time : null, notificationStatus: 'NOT_CONFIGURED',
       teacherComment: '虚构评语：今天专注认真，明天继续加油。', feedbackRating: null, feedbackSatisfaction: status === 'PUBLISHED' ? 'SATISFIED' : null, feedbackText: status === 'PUBLISHED' ? '虚构家长反馈：谢谢老师的细心陪伴。' : '',
       submittedBy: 9012, submittedName: '虚构授课老师', submittedAt: time, reviewedBy: 9013, reviewedName: '虚构另一位校长', reviewedAt: time, reviewComment: '虚构审核：已核对学习与关注记录。', reviewVersion: i + 1,
       canEdit: teacher && ['DRAFT', 'REJECTED'].includes(status), canSubmit: teacher && ['DRAFT', 'REJECTED'].includes(status), canWithdraw: false, canReview: admin && status === 'IN_REVIEW', canPublish: teacher && status === 'APPROVED',
@@ -104,7 +105,23 @@ function browserPreview(files) {
     '/privacy/requests': [{ id: 1, studentId: 1, studentName: students[0].name, type: 'EXPORT', status: 'OPEN', reason: '虚构申请：希望查看孩子的托管记录副本。', createdAt: time }, { id: 2, studentId: 2, studentName: students[1].name, type: 'ERASURE', status: 'APPROVED', reason: '虚构申请：离校后请求资料脱敏。', reviewNote: '虚构审核意见：已完成身份与范围核对。', createdAt: time }, { id: 3, studentId: 1, studentName: students[0].name, type: 'EXPORT', status: 'COMPLETED', reason: '虚构申请：一份已完成的资料副本。', createdAt: time }]
 
   };
-  fixtures['/family-services'] = { student: children[0], date, accounts: fixtures['/accounts'].map(a => ({ ...a, lowBalance: a.availableBalance <= a.warningThreshold, intention: null, intentVersion: 0 })), settings: { campusId: 1, campusName: campuses[0].name, mealPrice: 1800, paymentQr: null, version: 0 }, meal: null };
+  const complaintSample = { id: 1, studentId: 1, studentName: children[0].name, campusId: 1, campusName: campuses[0].name, parentId: user.id, title: '虚构反馈：希望提前告知作业安排', content: '虚构情况，仅用于界面验收。希望能更清楚地了解当天作业安排。', contact: '', status: 'REPLIED', version: 2, createdAt: time, updatedAt: time, logs: [
+    { id: 1, actorName: '虚构家长', text: '虚构情况，仅用于界面验收。希望能更清楚地了解当天作业安排。', internal: false, createdAt: time, attachments: [] },
+    ...(admin ? [{ id: 2, actorName: '虚构校长', text: '虚构内部处理记录，仅管理端显示。', internal: true, createdAt: time, attachments: [] }] : []),
+    { id: 3, actorName: '虚构校长', text: '已了解反馈，我们会在每天作业录入完成后及时更新。', internal: false, createdAt: time, attachments: [] }
+  ] };
+  fixtures['/complaints'] = role === 'TEACHER' || state === 'empty' ? [] : [complaintSample];
+  fixtures['/complaints/1'] = complaintSample;
+  fixtures['/complaints/1/read'] = { success: true };
+  fixtures['/complaint-notices'] = role === 'TEACHER' || state === 'empty' ? [] : [{ id: 1, unread: true, updatedAt: time }];
+  const draftSample = { id: 1, scanId: 1, studentId: 1, studentName: children[0].name, campusId: 1, subject: '数学', date, status: 'DRAFT', version: 0, canManage: true, createdAt: time, taskIds: [], items: [
+    { id: 1, displayNumber: '3', title: '根据图示选择条件', questionText: '虚构题干：根据下面的图示，选择条件，组成一道两步计算的实际问题。' },
+    { id: 2, displayNumber: '4', title: '怎样买票最划算', questionText: '虚构题干：3位家长带6名儿童去公园划船，怎样买票最划算？' },
+    { id: 3, displayNumber: '附加题', title: '纸盒的展开', questionText: '虚构题干：桌上有3个纸盒，拿一个长方体纸盒，准备剪开平铺在桌面上，请说明理由。' }
+  ] };
+  fixtures['/homework-drafts'] = state === 'empty' ? [] : [draftSample];
+  fixtures['/homework-drafts/1'] = draftSample;
+  fixtures['/family-services'] = { student: children[0], date, accounts: fixtures['/accounts'].map(a => ({ ...a, intention: null, intentVersion: 0 })), settings: { campusId: 1, campusName: campuses[0].name, mealPrice: 1800, paymentQr: null, version: 0 }, meal: null };
   if (files['__scanPreview.json']) {
     const sample = JSON.parse(files['__scanPreview.json']);
     const scanPhoto = { id: 891, url: '/files/scan.png', contentType: 'image/png' };
@@ -127,11 +144,48 @@ function browserPreview(files) {
     return { date, students: state === 'empty' ? [] : children, student: state === 'empty' ? null : student, readOnly: date > new Date(Date.now() + 28800000).toISOString().slice(0, 10), homework: tasks.filter(h => h.studentId === student?.id), teachers: [{ id: 9001, name: '虚构林老师' }], timeline: feed, points: fixtures['/points'], pointsDelta: 6, fitness: state === 'concern' ? [] : fixtures['/fitness'], fitnessPause: state === 'concern' ? { reason: '虚构情况：身体不适', measures: '安排休息，减少作业量' } : null, concerns: issueRows.filter(i => i.studentId === student?.id), messages: messageRows, openConcernCount: issueRows.filter(i => i.studentId === student?.id && ['OPEN', 'IN_PROGRESS'].includes(i.status)).length, pickup: { defaultContact: { id: 1, name: '虚构妈妈', relationship: '妈妈' }, planned: state === 'planned' ? { pickupName: '虚构亲属', relationship: '亲属', endTime: '20:00', mode: 'SINGLE' } : null, openAlertCount: fixtures['/pickup-alerts'].filter(row => row.studentId === student?.id && row.status !== 'RESOLVED').length, expectedCheckout: '19:00' }, summary: null };
   }
   function followDetail(id) { const item = issueRows.concat(messageRows).find(i => i.id === id); if (!item) return undefined; const history = logs.get(id) || []; return Object.assign({}, item, { logs: history, lastLogId: history.at(-1)?.id || 0, canManage: teacher }); }
+  fixtures['/point-presets'] = [{ id: 1, campusId: 1, campusName: campuses[0].name, name: '主动思考', points: 3, experience: 8, enabled: true, version: 1 }, { id: 2, campusId: 1, campusName: campuses[0].name, name: '帮助同学', points: 2, experience: 6, enabled: true, version: 1 }];
+  fixtures['/reward-prizes'] = [{ id: 1, campusId: 1, campusName: campuses[0].name, name: '成长贴纸', pointsCost: 20, requiredLevel: 1, stock: 20, enabled: true, image: null, version: 1 }, { id: 2, campusId: 1, campusName: campuses[0].name, name: '探险笔记本', pointsCost: 60, requiredLevel: 3, stock: 5, enabled: true, image: null, version: 1 }, { id: 3, campusId: 1, campusName: campuses[0].name, name: '阅读拼图', pointsCost: 200, requiredLevel: 1, stock: 3, enabled: true, image: null, version: 1 }];
+  fixtures['/prize-redemptions'] = [];
+  const adventureProfiles = new Map();
   function response(options) {
     const url = new URL(options.url, location.origin), route = url.pathname.replace(/^\/__fixtures/, ''), method = options.method || 'GET';
     if (state === 'error') return { statusCode: 503, data: { message: '虚构错误样例：服务暂不可用，请重试。' } };
     let value = fixtures[route];
     const sid = Number(url.searchParams.get('studentId') || 1), body = options.data || {};
+    if (route === '/settings' && method === 'PATCH') { Object.assign(settings, body); return { statusCode: 200, data: copy(settings) }; }
+    const rewardEditor = route.match(/^\/(point-presets|reward-prizes)(?:\/(\d+))?$/);
+    if (rewardEditor) {
+      const source = fixtures['/' + rewardEditor[1]], id = Number(rewardEditor[2]);
+      if (method === 'POST' || method === 'PUT') {
+        if (!admin) return { statusCode: 403, data: { message: '仅管理员可设置奖励规则' } };
+        let row = source.find(item => item.id === id);
+        if (!row) { row = { id: source.length + 1, campusName: campuses[0].name, image: null, version: 0 }; source.push(row); }
+        Object.assign(row, body, { version: row.version + 1 });
+        return { statusCode: 200, data: copy(row) };
+      }
+      value = source;
+      if (rewardEditor[1] === 'reward-prizes') value = source.map(row => {
+        const child = url.searchParams.get('studentId') ? children.find(item => item.id === sid) : null, level = state === 'evolved' ? 5 : 2;
+        const hint = !child ? '请选择孩子' : row.campusId !== child.campusId ? '仅限孩子所属校区' : !row.enabled ? '已下架' : row.stock < 1 ? '已兑完' : level < row.requiredLevel ? 'Lv.' + row.requiredLevel + ' 解锁' : child.points < row.pointsCost ? '还差 ' + (row.pointsCost - child.points) + ' 积分' : '可兑换';
+        return Object.assign({}, row, { studentLevel: child ? level : null, canRedeem: hint === '可兑换', redemptionHint: hint });
+      });
+      return { statusCode: 200, data: copy(value) };
+    }
+    if (route === '/point-awards' && method === 'POST') return { statusCode: 200, data: { id: 1 } };
+    if (route === '/growth/adventure') {
+      const profile = adventureProfiles.get(sid) || { mode: 'ADVENTURE', pet: 'CAT', petName: '小蓝' };
+      if (method === 'PATCH') { Object.assign(profile, body); adventureProfiles.set(sid, profile); }
+      const evolved = state === 'evolved';
+      value = Object.assign({ studentId: sid, studentName: children.find(child => child.id === sid)?.name, points: 128, date, xp: evolved ? 210 : 46, level: evolved ? 5 : 2, levelXp: evolved ? 10 : 26, nextLevelXp: evolved ? 100 : 40, stage: evolved ? 3 : 1, todayXp: 16, chapter: 1, seals: 2, badges: 0,
+        tasks: [{ key: 'LEARNING', title: '完成一次学习挑战', description: '作业完成或错题订正通过，任一即可', xp: 10, points: 5, done: true }, { key: 'FITNESS', title: '完成一次体能活动', description: '由老师确认适合自己的运动', xp: 6, points: 2, done: true }, { key: 'EFFORT', title: '收获一次努力鼓励', description: '由老师记录一项具体的努力', xp: 8, points: 3, variableExperience: true, variablePoints: true, done: false }], recent: [{ date, category: 'LEARNING', amount: 10, points: 5 }, { date, category: 'FITNESS', amount: 6, points: 2 }] }, profile);
+    }
+    if (route === '/daily-feedback') value = teacher ? [] : children.filter(child => !url.searchParams.get('studentId') || child.id === sid).map(child => ({ studentId: child.id, studentName: child.name, parentId: user.id, parentName: user.name, date, feedbackSatisfaction: 'SATISFIED', feedbackText: '', feedbackSubmitted: false, canFeedback: true }));
+    if (route === '/class-satisfaction') value = admin ? fixtures['/classes'].map(c => ({ classId: c.id, className: c.name, campusName: campuses.find(campus => campus.id === c.campusId)?.name, parentCount: 4, submittedCount: 3, defaultCount: 1, satisfiedCount: state === 'concern' ? 3 : 4, dissatisfiedCount: state === 'concern' ? 1 : 0, satisfactionPercent: state === 'concern' ? 75 : 100 })) : [];
+    if (route === '/homework-trend') {
+      const days = Number(url.searchParams.get('days') || 7);
+      value = { days, points: Array.from({ length: days }, (_, i) => { const accuracy = state === 'empty' || i % 8 === 1 ? null : [78, 82, 74, 88, 85, 92, 90][i % 7]; return { date: new Date(Date.parse(date + 'T00:00:00Z') - (days - 1 - i) * 86400000).toISOString().slice(0, 10), accuracy, errorRate: accuracy === null ? null : 100 - accuracy, gradedCount: accuracy === null ? 0 : 3 }; }) };
+    }
     if (route === '/teaching-capture/jobs/1/questions' && method === 'PATCH') { const saved = fixtures['/teaching-capture/jobs/1']; saved.questions = body.questions.map((q, i) => ({ ...q, id: q.id || 100+i, warnings: [], importedMistakeId: null })); saved.version++; return { statusCode: 200, data: copy(saved) }; }
     if (route === '/pickup-face/verify') return { statusCode: 503, data: { code: 'FACE_NOT_CONFIGURED', message: '人脸核验服务待接入；请先登记并在接送时现场核验。' } };
     if (route === '/growth') value = growthValue(sid);
@@ -219,6 +273,16 @@ function browserPreview(files) {
     location.href = '/?' + next;
   }
   const wx = {
+    createSelectorQuery() {
+      let owner, selector, callback;
+      return { in(value) { owner = value; return this; }, select(value) { selector = value; return this; }, boundingClientRect(value) { callback = value; return this; }, exec() { callback?.((owner?.__previewRoot || root).querySelector(selector)?.getBoundingClientRect()); } };
+    },
+    createCanvasContext(_id, owner) {
+      const canvas = owner.__previewRoot.querySelector('canvas');
+      canvas.width = canvas.getBoundingClientRect().width; canvas.height = 200;
+      const ctx = canvas.getContext('2d');
+      return { clearRect: (...args) => ctx.clearRect(...args), beginPath: () => ctx.beginPath(), moveTo: (...args) => ctx.moveTo(...args), lineTo: (...args) => ctx.lineTo(...args), stroke: () => ctx.stroke(), arc: (...args) => ctx.arc(...args), fill: () => ctx.fill(), fillText: (...args) => ctx.fillText(...args), setFontSize: size => { ctx.font = size + 'px sans-serif'; }, setFillStyle: color => { ctx.fillStyle = color; }, setStrokeStyle: color => { ctx.strokeStyle = color; }, setLineWidth: width => { ctx.lineWidth = width; }, setTextAlign: align => { ctx.textAlign = align; }, draw() {} };
+    },
     request(options) {
       const method = (options.method || 'GET').toUpperCase(), controller = new AbortController();
       requests.push({ url: options.url, method });
@@ -302,7 +366,7 @@ function browserPreview(files) {
   function evaluate(code, scope) { try { if (!expressionCache.has(code)) expressionCache.set(code, new Function('scope', 'with(scope){ return (' + code + '); }')); return expressionCache.get(code)(scope); } catch (error) { failure(new Error('WXML 表达式 ' + code + ': ' + error.message)); return undefined; } }
   function interpolate(value, scope) { if (typeof value !== 'string') return value; const exact = value.match(/^{{((?:(?!{{|}})[\s\S])*?)}}$/); return exact ? evaluate(exact[1], scope) : value.replace(/{{([\s\S]*?)}}/g, (_, code) => String(evaluate(code, scope) ?? '')); }
   const truth = value => value !== false && value !== undefined && value !== null && value !== '' && value !== 'false' && value !== 0;
-  const rpx = css => css.replace(/(-?(?:\d*\.)?\d+)rpx\b/g, (_, n) => Number(n) / 2 + 'px');
+  const rpx = css => css.replace(/(-?(?:\d*\.)?\d+)rpx\b/g, (_, n) => 'calc(' + Number(n) / 750 + ' * min(100vw,375px))');
   const css = value => rpx(value).replace(/(^|[\s,>+~])image(?=[\s,.#:[>+~{]|$)/g, '$1img').replace(/(^|[\s,])page(?=\s*\{)/g, '$1body');
   // Keep WeChat's higher-specificity default button sizing visible during layout checks.
   const reset = 'view,scroll-view,picker{display:block}text{display:inline}view,text,picker,scroll-view,input,textarea,button,img{box-sizing:border-box}img{display:inline-block;width:150px;height:112.5px;vertical-align:middle}button{display:block;border:0;margin:0;padding:0;background:#f8f8f8;color:inherit;font:inherit;text-align:center;cursor:pointer}' + (config.style === 'v2' ? 'button:not([size=mini]){width:184px;margin-left:auto;margin-right:auto}' : '') + 'input,textarea,select{font:inherit;color:inherit}textarea{resize:none}input{min-width:0}input::placeholder,textarea::placeholder{color:#a5adba}picker{position:relative}a{color:inherit;text-decoration:none}[hidden]{display:none!important}';
@@ -343,8 +407,10 @@ function browserPreview(files) {
     object.triggerEvent = (name, detail) => invoke(owner, values['bind' + name] || values['bind:' + name], host, detail);
     if (!cached.mounted) { definition.lifetimes?.attached?.call(object); definition.pageLifetimes?.show?.call(object); if (node.tag === 'app-nav' && query.get('sheet') === '1') object.data.open = true; cached.mounted = true; }
     const shadow = host.attachShadow({ mode: 'open' }), style = document.createElement('style');
-    style.textContent = ':host{display:block;font:inherit;color:inherit}' + reset + css(files[route + '.wxss'] || '') + (node.tag === 'app-nav' ? '.bottom-nav,.nav-overlay{left:max(0px,calc((100vw - 375px)/2));right:auto;width:375px}' : '');
-    shadow.append(style, render(parse(files[route + '.wxml']), object.data, object, key)); return host;
+    style.textContent = ':host{display:block;font:inherit;color:inherit}' + reset + css(files[route + '.wxss'] || '') + (node.tag === 'app-nav' ? '.bottom-nav,.nav-overlay{left:max(0px,calc((100vw - 375px)/2));right:auto;width:min(100vw,375px)}' : '');
+    shadow.append(style, render(parse(files[route + '.wxml']), object.data, object, key)); object.__previewRoot = shadow;
+    if (node.tag === 'homework-trend') queueMicrotask(() => object.draw());
+    return host;
   }
   function render(nodes, scope, owner, prefix) {
     const result = document.createDocumentFragment(); let chain = false, matched = false;
@@ -387,7 +453,7 @@ function browserPreview(files) {
     finally { drawing = false; }
   }
   async function start() {
-    const style = document.createElement('style'); style.textContent = reset + css(files['app.wxss']) + css(files['pages/' + pageName + '/index.wxss']) + 'html{width:375px;margin:0 auto}body{width:375px;margin:0;min-height:100vh}'; document.head.append(style);
+    const style = document.createElement('style'); style.textContent = reset + css(files['app.wxss']) + css(files['pages/' + pageName + '/index.wxss']) + 'html{width:min(100%,375px);margin:0 auto}body{width:100%;margin:0;min-height:100vh}'; document.head.append(style);
     if (pageName === 'login' && query.get('session') !== '1') storage.delete('wanfu.session.v1');
     load('app.js'); app.onLaunch?.(); app.globalData.selectedStudentIds = state === 'empty' ? [] : teacher ? [1, 2] : [1];
     const route = 'pages/' + pageName + '/index';
@@ -408,7 +474,7 @@ function html(url) {
   const page = pages.includes(url.searchParams.get('page')) ? url.searchParams.get('page') : 'dashboard';
   const role = ['PARENT', 'TEACHER', 'ADMIN', 'SUPER_ADMIN'].includes(url.searchParams.get('role')) ? url.searchParams.get('role') : 'TEACHER';
   const payload = JSON.stringify(sources()).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=375,initial-scale=1"><title>UI 样式预览 · 虚构样例 · ${escape(page)} · ${role}</title><style>#\_\_preview-toolbar{position:relative;z-index:150;width:375px;box-sizing:border-box;padding:5px 9px;background:#fff;border-bottom:1px solid #e8edf3;font:10px/1.5 -apple-system,sans-serif;color:#7a8797}#\_\_preview-toolbar form{display:flex;gap:6px;align-items:center;margin:0}#\_\_preview-toolbar select{font:11px sans-serif;max-width:110px;border:1px solid #dde5ee;border-radius:4px;background:white;padding:2px}#\_\_preview-toolbar a{font:10px sans-serif;color:#728395}#\_\_preview-note{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style></head><body><aside id="__preview-toolbar"><form method="get"><label>角色 <select name="role" onchange="this.form.submit()"><option${role === 'TEACHER' ? ' selected' : ''}>TEACHER</option><option${role === 'PARENT' ? ' selected' : ''}>PARENT</option><option${role === 'ADMIN' ? ' selected' : ''}>ADMIN</option><option${role === 'SUPER_ADMIN' ? ' selected' : ''}>SUPER_ADMIN</option></select></label><label>页面 <select name="page" onchange="this.form.submit()">${pages.map((name, i) => `<option value="${name}"${name === page ? ' selected' : ''}>${names[i]} · ${name}</option>`).join('')}</select></label><a href="/gallery?role=${role}">全部</a>${['sheet', 'form', 'state'].filter(key => url.searchParams.has(key)).map(key => `<input type="hidden" name="${key}" value="${escape(url.searchParams.get(key))}">`).join('')}</form><small id="__preview-note">UI 样式预览 · 全部为虚构样例</small></aside><main id="__preview-app"></main><script src="/__preview.js"></script><script>(${browserPreview.name})(${payload});</script></body></html>`;
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UI 样式预览 · 虚构样例 · ${escape(page)} · ${role}</title><style>#\_\_preview-toolbar{position:relative;z-index:150;width:100%;max-width:375px;box-sizing:border-box;padding:5px 9px;background:#fff;border-bottom:1px solid #e8edf3;font:10px/1.5 -apple-system,sans-serif;color:#7a8797}#\_\_preview-toolbar form{display:flex;gap:6px;align-items:center;margin:0}#\_\_preview-toolbar select{font:11px sans-serif;max-width:110px;border:1px solid #dde5ee;border-radius:4px;background:white;padding:2px}#\_\_preview-toolbar a{font:10px sans-serif;color:#728395}#\_\_preview-note{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style></head><body><aside id="__preview-toolbar"><form method="get"><label>角色 <select name="role" onchange="this.form.submit()"><option${role === 'TEACHER' ? ' selected' : ''}>TEACHER</option><option${role === 'PARENT' ? ' selected' : ''}>PARENT</option><option${role === 'ADMIN' ? ' selected' : ''}>ADMIN</option><option${role === 'SUPER_ADMIN' ? ' selected' : ''}>SUPER_ADMIN</option></select></label><label>页面 <select name="page" onchange="this.form.submit()">${pages.map((name, i) => `<option value="${name}"${name === page ? ' selected' : ''}>${names[i]} · ${name}</option>`).join('')}</select></label><a href="/gallery?role=${role}">全部</a>${['sheet', 'form', 'state'].filter(key => url.searchParams.has(key)).map(key => `<input type="hidden" name="${key}" value="${escape(url.searchParams.get(key))}">`).join('')}</form><small id="__preview-note">UI 样式预览 · 全部为虚构样例</small></aside><main id="__preview-app"></main><script src="/__preview.js"></script><script>(${browserPreview.name})(${payload});</script></body></html>`;
 }
 function serve(request, response) {
   try {

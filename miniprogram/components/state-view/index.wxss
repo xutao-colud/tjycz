@@ -1,19 +1,20 @@
+@import "../../styles/tokens.wxss";
 :host {
   display: block;
 }
 
 .state {
   box-sizing: border-box;
-  padding: 36rpx 24rpx;
-  margin: 18rpx 0;
+  padding: 40rpx 24rpx;
+  margin: 16rpx 0;
   border: 0;
-  border-radius: 30rpx;
-  background: #fff;
-  color: #1d1d1f;
-  font-size: 26rpx;
+  border-radius: 14px;
+  background: var(--surface, #ffffff);
+  color: var(--ink, #263238);
+  font-size: var(--text-body);
   line-height: 1.6;
   text-align: center;
- box-shadow: 0 8rpx 32rpx rgba(29,29,31,.025);}
+ box-shadow: none;}
 
 .state-icon {
   display: flex;
@@ -21,39 +22,39 @@
   justify-content: center;
   width: 96rpx;
   height: 96rpx;
-  margin: 0 auto 18rpx;
-  border-radius:28rpx;
-  background: #fafafd;
+  margin: 0 auto 16rpx;
+  border-radius:32rpx;
+  background: var(--subtle, #eef1ef);
 }
 
 .loading-icon {
-  background: #f4f4f7;
+  background: var(--subtle, #eef1ef);
 }
 
 .spinner {
   box-sizing: border-box;
   width: 42rpx;
   height: 42rpx;
-  border: 5rpx solid #e7e8ee;
-  border-top-color: #c9cdd7;
+  border: 5rpx solid var(--line, #dce2df);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin .85s linear infinite;
 }
 
 .state-title {
-  color: #1d1d1f;
-  font-size: 27rpx;
+  color: var(--ink, #263238);
+  font-size: var(--text-body);
   font-weight: 500;
 }
 
 .state-description {
   margin-top: 8rpx;
-  color: #737783;
-  font-size: 23rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
 }
 
 .error-icon {
-  background: #fff4f0;
+  background: var(--subtle, #eef1ef);
 }
 
 .error-mark {
@@ -62,17 +63,17 @@
   justify-content: center;
   width: 40rpx;
   height: 40rpx;
-  border: 3rpx solid #d48a75;
+  border: 3rpx solid var(--line, #dce2df);
   border-radius: 50%;
-  color: #d48a75;
-  font-size: 30rpx;
+  color: var(--danger, #b33740);
+  font-size: 32rpx;
   font-weight: 600;
   line-height: 1;
 }
 
 .error-description {
   max-width: 560rpx;
-  margin: 10rpx auto 0;
+  margin: 8rpx auto 0;
   word-break: break-all;
 }
 
@@ -80,13 +81,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 16rpx 30rpx;
-  margin: 18rpx 0 0;
+  min-height: var(--tap-size);
+  padding: 10px 16px;
+  margin: 16rpx 0 0;
   border: 0;
-  border-radius:28rpx;
-  background: #0071e3;
-  color: #fff;
-  font-size: 24rpx;
+  border-radius:32rpx;
+  background: var(--accent, #176b91);
+  color: var(--surface, #ffffff);
+  font-size: var(--text-note);
   font-weight: 500;
   line-height: 1.5;
 }
@@ -96,8 +98,8 @@
 }
 
 .retry-icon {
-  margin-right: 12rpx;
-  font-size: 31rpx;
+  margin-right: 16rpx;
+  font-size: 32rpx;
   line-height: 1;
 }
 
@@ -109,8 +111,8 @@
 .empty-title {
   max-width: 560rpx;
   margin: 0 auto;
-  color: #737783;
-  font-size: 25rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
   font-weight: 400;
   word-break: break-all;
 }
@@ -119,3 +121,5 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.spinner { animation-play-state:var(--parent-motion-state,running); }

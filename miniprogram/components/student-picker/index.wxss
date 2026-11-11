@@ -1,18 +1,19 @@
+@import "../../styles/tokens.wxss";
 :host {
   display: block;
 }
 
 .picker {
   box-sizing: border-box;
-  padding: 22rpx;
-  margin-bottom: 18rpx;
-  border: 1rpx solid #fff;
-  border-radius: 30rpx;
-  background: #fff;
-  color: #1d1d1f;
-  font-size: 26rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid var(--line, #dce2df);
+  border-radius: 14px;
+  background: var(--surface, #ffffff);
+  color: var(--ink, #263238);
+  font-size: var(--text-body);
   line-height: 1.5;
- box-shadow: 0 8rpx 32rpx rgba(29,29,31,.035);}
+ box-shadow: none;}
 
 .head {
   display: flex;
@@ -27,8 +28,8 @@
   width: 64rpx;
   height: 64rpx;
   margin-right: 16rpx;
-  border-radius:28rpx;
-  background: #f0f2f7;
+  border-radius:32rpx;
+  background: var(--subtle, #eef1ef);
 }
 
 .students-icon {
@@ -42,20 +43,20 @@
 }
 
 .title {
-  color: #1d1d1f;
-  font-size: 28rpx;
+  color: var(--ink, #263238);
+  font-size: var(--text-body);
   font-weight: 600;
   word-break: break-all;
 }
 
 .count {
   margin-top: 2rpx;
-  color: #737783;
-  font-size: 22rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
 }
 
 .count-number {
-  color: #0071e3;
+  color: var(--accent, #176b91);
   font-weight: 600;
 }
 
@@ -63,22 +64,22 @@
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  padding: 12rpx 0 12rpx 16rpx;
-  color: #737783;
-  font-size: 22rpx;
+  padding: 16rpx 0 16rpx 16rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
 }
 
 .chevron {
   width: 10rpx;
   height: 10rpx;
-  margin: -6rpx 4rpx 0 12rpx;
-  border-right: 3rpx solid #c9cdd7;
-  border-bottom: 3rpx solid #c9cdd7;
+  margin: -8rpx 8rpx 0 16rpx;
+  border-right: 3rpx solid var(--line, #dce2df);
+  border-bottom: 3rpx solid var(--line, #dce2df);
   transform: rotate(45deg);
 }
 
 .chevron-up {
-  margin-top: 6rpx;
+  margin-top: 8rpx;
   transform: rotate(225deg);
 }
 
@@ -86,7 +87,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 18rpx;
+  margin-top: 16rpx;
   margin-bottom: -8rpx;
 }
 
@@ -94,56 +95,56 @@
 .selected-more {
   box-sizing: border-box;
   max-width: 100%;
-  padding: 6rpx 16rpx;
-  margin: 0 10rpx 8rpx 0;
-  border-radius:28rpx;
-  font-size: 23rpx;
+  padding: 8rpx 16rpx;
+  margin: 0 8rpx 8rpx 0;
+  border-radius:32rpx;
+  font-size: var(--text-note);
   word-break: break-all;
 }
 
 .selected-name {
-  background: #f4f4f7;
-  color: #0071e3;
+  background: var(--subtle, #eef1ef);
+  color: var(--accent, #176b91);
 }
 
 .selected-more {
-  background: #fafafd;
-  color: #737783;
+  background: var(--subtle, #eef1ef);
+  color: var(--secondary, #536168);
 }
 
 .selection-placeholder {
   padding-top: 16rpx;
-  color: #737783;
-  font-size: 23rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
 }
 
 .panel {
-  padding-top: 18rpx;
-  margin-top: 18rpx;
-  border-top: 1rpx solid #e7e8ee;
+  padding-top: 16rpx;
+  margin-top: 16rpx;
+  border-top: 1rpx solid var(--line, #dce2df);
 }
 
 .panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 48rpx;
-  margin-bottom: 12rpx;
+  min-height: var(--tap-size);
+  margin-bottom: 16rpx;
 }
 
 .panel-hint {
-  color: #737783;
-  font-size: 22rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
 }
 
 .all {
-  padding: 12rpx 20rpx;
+  padding: 16rpx 24rpx;
   margin: 0;
   border: 0;
-  border-radius:28rpx;
-  background: #f4f4f7;
-  color: #0071e3;
-  font-size: 23rpx;
+  border-radius:32rpx;
+  background: var(--subtle, #eef1ef);
+  color: var(--accent, #176b91);
+  font-size: var(--text-note);
   font-weight: 500;
   line-height: 1.4;
 }
@@ -160,17 +161,17 @@
   display: flex;
   box-sizing: border-box;
   align-items: center;
-  height: 104rpx;
+  min-height: 56px;
   padding: 16rpx;
-  margin-bottom: 18rpx;
+  margin-bottom: 16rpx;
   border: 1rpx solid transparent;
-  border-radius:28rpx;
-  background: #f5f5f7;
+  border-radius:32rpx;
+  background: var(--subtle, #eef1ef);
 }
 
 .student-selected {
   border-color: transparent;
-  background: #eaf2ff;
+  background: var(--subtle, #eef1ef);
 }
 
 .avatar {
@@ -181,10 +182,10 @@
   width: 60rpx;
   height: 60rpx;
   margin-right: 16rpx;
-  border-radius:28rpx;
-  background: #fff;
-  color: #0071e3;
-  font-size: 27rpx;
+  border-radius:32rpx;
+  background: var(--surface, #ffffff);
+  color: var(--accent, #176b91);
+  font-size: var(--text-body);
   font-weight: 600;
 }
 
@@ -195,8 +196,8 @@
 
 .name {
   overflow: hidden;
-  color: #1d1d1f;
-  font-size: 26rpx;
+  color: var(--ink, #263238);
+  font-size: var(--text-body);
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -205,8 +206,8 @@
 .class-name {
   overflow: hidden;
   margin-top: 2rpx;
-  color: #737783;
-  font-size: 21rpx;
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -219,23 +220,23 @@
   justify-content: center;
   width: 34rpx;
   height: 34rpx;
-  margin-left: 18rpx;
-  border: 2rpx solid #e7e8ee;
-  border-radius:14rpx;
-  background: #fff;
+  margin-left: 16rpx;
+  border: 2rpx solid var(--line, #dce2df);
+  border-radius:16rpx;
+  background: var(--surface, #ffffff);
 }
 
 .checkbox-checked {
-  border-color: #c9cdd7;
-  background: #0071e3;
+  border-color: var(--line, #dce2df);
+  background: var(--accent, #176b91);
 }
 
 .checkmark {
   width: 9rpx;
   height: 17rpx;
-  margin-top: -4rpx;
-  border-right: 3rpx solid #fff;
-  border-bottom: 3rpx solid #fff;
+  margin-top: 0rpx;
+  border-right: 3rpx solid var(--surface, #ffffff);
+  border-bottom: 3rpx solid var(--surface, #ffffff);
   transform: rotate(45deg);
 }
 
@@ -244,15 +245,15 @@
   flex-direction: column;
   align-items: center;
   padding: 24rpx 16rpx;
-  border-radius:28rpx;
-  background: #fafafd;
-  color: #737783;
-  font-size: 23rpx;
+  border-radius:32rpx;
+  background: var(--subtle, #eef1ef);
+  color: var(--secondary, #536168);
+  font-size: var(--text-note);
   text-align: center;
 }
 
 .empty-icon {
   width: 64rpx;
   height: 64rpx;
-  margin-bottom: 12rpx;
+  margin-bottom: 16rpx;
 }

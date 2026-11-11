@@ -1,5 +1,5 @@
 <app-nav />
-<view class="page authorization-page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page authorization-page">
   <view class="authorization-heading"><view class="title">{{step === 3 ? '确认授权' : step === 4 ? '授权已登记' : '申请临时接送授权'}}</view><view class="subtitle">{{step === 4 ? '每一次安心交接，都有明确的安排。' : '为孩子安排一位可信赖的接送人。'}}</view></view>
   <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
   <block wx:if="{{!loading && !error}}">
@@ -16,21 +16,21 @@
       </view>
       <view class="card authorization-form">
         <view class="authorization-section-title">有效时间</view>
-        <view class="authorization-segment"><button class="{{mode === 'SINGLE' ? 'segment-selected' : ''}}" data-mode="SINGLE" bindtap="changeMode" aria-pressed="{{mode === 'SINGLE'}}">单次接送</button><button class="{{mode === 'MULTI' ? 'segment-selected' : ''}}" data-mode="MULTI" bindtap="changeMode" aria-pressed="{{mode === 'MULTI'}}">多次接送</button></view>
+        <view class="authorization-segment"><button class="{{mode === 'SINGLE' ? 'segment-selected' : ''}}" data-mode="SINGLE" bindtap="changeMode" aria-pressed="{{mode === 'SINGLE'}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">单次接送</button><button class="{{mode === 'MULTI' ? 'segment-selected' : ''}}" data-mode="MULTI" bindtap="changeMode" aria-pressed="{{mode === 'MULTI'}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">多次接送</button></view>
         <view class="field"><text class="label">{{mode === 'MULTI' ? '开始日期' : '接送日期'}}</text><date-picker value="{{startDate}}" bindchange="changeStartDate" label="接送开始日期" disabled="{{busy}}"><view>{{startDate}}</view></date-picker></view>
         <view wx:if="{{mode === 'MULTI'}}" class="field"><text class="label">结束日期</text><date-picker value="{{endDate}}" bindchange="changeEndDate" label="接送结束日期" disabled="{{busy}}"><view>{{endDate}}</view></date-picker></view>
-        <view class="authorization-choice"><button class="{{timePreset === 'AFTER_SCHOOL' ? 'choice-selected' : ''}}" data-preset="AFTER_SCHOOL" bindtap="changePreset">放学接走<text>18:30 – 20:00</text></button><button class="{{timePreset === 'CUSTOM' ? 'choice-selected' : ''}}" data-preset="CUSTOM" bindtap="changePreset">指定时间<text>自选接送时段</text></button></view>
+        <view class="authorization-choice"><button class="{{timePreset === 'AFTER_SCHOOL' ? 'choice-selected' : ''}}" data-preset="AFTER_SCHOOL" bindtap="changePreset" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">放学接走<text>18:30 – 20:00</text></button><button class="{{timePreset === 'CUSTOM' ? 'choice-selected' : ''}}" data-preset="CUSTOM" bindtap="changePreset" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">指定时间<text>自选接送时段</text></button></view>
         <view wx:if="{{timePreset === 'CUSTOM'}}" class="authorization-time-row"><view class="field"><text class="label">开始时间</text><select-picker range="{{times}}" value="{{startIndex}}" data-field="startTime" bindchange="changeTime" label="接送开始时间"><view>{{startTime}}</view></select-picker></view><view class="field"><text class="label">结束时间</text><select-picker range="{{times}}" value="{{endIndex}}" data-field="endTime" bindchange="changeTime" label="接送结束时间"><view>{{endTime}}</view></select-picker></view></view>
         <view wx:if="{{mode === 'MULTI'}}" class="hint">授权日期内，每天仅可在选定时段接送一次。</view>
         <view class="field"><text class="label">备注说明</text><textarea value="{{note}}" data-field="note" bindinput="field" maxlength="1000" disabled="{{busy}}" aria-label="授权备注说明" placeholder="选填，例如姑姑来接，请老师留意" /></view>
       </view>
-      <view class="authorization-footer"><button class="primary" bindtap="next" disabled="{{busy}}">下一步</button></view>
+      <view class="authorization-footer"><button class="primary" bindtap="next" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">下一步</button></view>
     </block>
 
     <block wx:elif="{{step === 3}}">
       <view class="card authorization-confirm">
         <view class="authorization-section-title">临时接送人信息</view>
-        <view class="authorization-person"><view class="person-icon"><image src="/assets/icons/user.png" mode="aspectFit" /></view><view><view class="person-name">{{pickupName}}<text>{{relationship}}</text></view><view class="person-phone">{{phone}}</view></view></view>
+        <view class="authorization-person"><view class="person-icon"><image src="/assets/icons/user.svg" mode="aspectFit" /></view><view><view class="person-name">{{pickupName}}<text>{{relationship}}</text></view><view class="person-phone">{{phone}}</view></view></view>
         <view class="authorization-section-title gap">授权信息</view>
         <view class="confirm-line"><text>授权类型</text><view>{{mode === 'MULTI' ? '多次接送 · 每日一次' : '单次接送'}}</view></view>
         <view class="confirm-line"><text>接送日期</text><view>{{startDate}}{{mode === 'MULTI' ? ' 至 ' + endDate : ''}}</view></view>
@@ -38,16 +38,16 @@
         <view class="confirm-line"><text>核验方式</text><view>现场人工核验</view></view>
         <view wx:if="{{note}}" class="confirm-line"><text>备注说明</text><view>{{note}}</view></view>
         <view class="authorization-warm">请将接送码私下交给指定接送人。老师须当面核对姓名、电话后四位与接送码，核对通过后才可离校。</view>
-        <button class="authorization-check" bindtap="authorizationCheck" role="checkbox" aria-checked="{{authorizationChecked}}" disabled="{{busy}}"><checkbox checked="{{authorizationChecked}}" disabled="{{busy}}" /><text>我已核对接送人及有效时段，并知悉老师仍须现场核验</text></button>
+        <button class="authorization-check" bindtap="authorizationCheck" role="checkbox" aria-checked="{{authorizationChecked}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}"><checkbox checked="{{authorizationChecked}}" disabled="{{busy}}" /><text>我已核对接送人及有效时段，并知悉老师仍须现场核验</text></button>
       </view>
-      <view class="authorization-footer"><button class="secondary" bindtap="previous" disabled="{{busy}}">上一步</button><button class="primary" bindtap="create" loading="{{busy}}" disabled="{{busy || !authorizationChecked}}">确认授权</button></view>
+      <view class="authorization-footer"><button class="secondary" bindtap="previous" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">上一步</button><button class="primary" bindtap="create" loading="{{busy}}" disabled="{{busy || !authorizationChecked}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">确认授权</button></view>
     </block>
 
     <block wx:else>
-      <view class="authorization-success"><image src="/assets/icons/attendance.png" mode="aspectFit" /><view>临时接送授权已登记</view><text>老师可查看此安排，交接时还会现场核验。</text></view>
-      <view wx:if="{{issuedAuthorization}}" class="card authorization-confirm"><view class="authorization-person"><view class="person-icon"><image src="/assets/icons/user.png" mode="aspectFit" /></view><view><view class="person-name">{{issuedAuthorization.pickupName}}<text>{{issuedAuthorization.relationship}}</text></view><view class="person-phone">{{issuedAuthorization.phoneMasked}}</view></view></view><view class="confirm-line"><text>接送日期</text><view>{{issuedAuthorization.datesText}}</view></view><view class="confirm-line"><text>接送时段</text><view>{{issuedAuthorization.windowText}}</view></view><view class="confirm-line"><text>授权类型</text><view>{{issuedAuthorization.modeText}}</view></view></view>
+      <view class="authorization-success"><image src="/assets/icons/attendance.svg" mode="aspectFit" /><view>临时接送授权已登记</view><text>老师可查看此安排，交接时还会现场核验。</text></view>
+      <view wx:if="{{issuedAuthorization}}" class="card authorization-confirm"><view class="authorization-person"><view class="person-icon"><image src="/assets/icons/user.svg" mode="aspectFit" /></view><view><view class="person-name">{{issuedAuthorization.pickupName}}<text>{{issuedAuthorization.relationship}}</text></view><view class="person-phone">{{issuedAuthorization.phoneMasked}}</view></view></view><view class="confirm-line"><text>接送日期</text><view>{{issuedAuthorization.datesText}}</view></view><view class="confirm-line"><text>接送时段</text><view>{{issuedAuthorization.windowText}}</view></view><view class="confirm-line"><text>授权类型</text><view>{{issuedAuthorization.modeText}}</view></view></view>
       <view class="card authorization-code"><view class="label">本次接送码 · 仅显示一次</view><view wx:if="{{issuedCode}}" class="pickup-code">{{issuedCode}}</view><view wx:else class="hint">接送码已隐藏，如未保存可在管理页重置。</view><view class="hint">请妥善保管，仅向本次接送人私下分享。</view></view>
-      <view class="authorization-footer"><button class="secondary" bindtap="shareCode" disabled="{{!issuedCode}}">复制后分享接送码</button><button class="primary" bindtap="backToManagement">返回接送管理</button></view>
+      <view class="authorization-footer"><button class="secondary" bindtap="shareCode" disabled="{{!issuedCode}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">复制后分享接送码</button><button class="primary" bindtap="backToManagement" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">返回接送管理</button></view>
     </block>
     <view wx:if="{{actionError}}" class="error authorization-error">{{actionError}}</view>
   </block>

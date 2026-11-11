@@ -1,5 +1,5 @@
 <app-nav />
-<view class="page summaries-page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page summaries-page">
   <view class="hero">
     <view wx:if="{{!quick}}" class="eyebrow">一天的成长，认真记录</view>
     <view class="title">每日小结</view>
@@ -17,6 +17,24 @@
   </view>
   <state-view loading="{{loading}}" error="{{error}}" bindretry="retry" />
   <block wx:if="{{!loading && !error}}">
+    <view wx:if="{{admin && satisfactionStats.length}}" class="card satisfaction-overview">
+      <view class="section-title">{{date}} · 日小结满意度</view>
+      <view wx:for="{{satisfactionStats}}" wx:key="classId" class="satisfaction-class">
+        <view class="summary-feedback-head"><text>{{item.className}} · {{item.campusName}}</text><text class="satisfaction-percent">{{item.satisfactionPercent === null ? '暂无统计' : item.satisfactionPercent + '%'}}</text></view>
+        <view class="hint">家长评价对象 {{item.parentCount}} · 已评价 {{item.submittedCount}} · 默认满意 {{item.defaultCount}} · 不满意 {{item.dissatisfiedCount}}</view>
+      </view>
+      <view class="hint">按每个孩子的每位绑定家长计算；未评价计为满意。</view>
+    </view>
+    <view wx:if="{{!teacher}}" wx:for="{{dailyFeedback}}" wx:key="studentId" class="card daily-feedback-card">
+      <view class="summary-feedback-head"><view class="section-title">{{item.studentName}} · 每日满意度</view><text>{{item.feedbackSubmitted ? (item.feedbackSatisfaction === 'SATISFIED' ? '满意' : '不满意') : '未评价 · 默认满意'}}</text></view>
+      <view class="hint">每位家长独立评价。请评价今天的陪伴；未提交时按满意统计。</view>
+      <view wx:if="{{feedbackStudentId === item.studentId}}" class="summary-feedback-form">
+        <view class="summary-rating"><button wx:for="{{satisfactions}}" wx:for-item="score" wx:key="value" class="summary-rating-item {{satisfaction === score.value ? 'summary-rating-active' : ''}}" data-satisfaction="{{score.value}}" bindtap="rate" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">{{score.label}}</button></view>
+        <textarea value="{{feedbackText}}" data-field="feedbackText" bindinput="field" maxlength="2000" placeholder="{{satisfaction === 'DISSATISFIED' ? '请填写不满意的原因（必填）' : '留下鼓励或建议（可选）'}}" />
+        <view class="actions"><button class="secondary" bindtap="cancelFeedback" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">取消</button><button class="primary" bindtap="sendFeedback" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">提交评价</button></view>
+      </view>
+      <block wx:else><view wx:if="{{item.feedbackText}}" class="summary-feedback-text">{{item.feedbackText}}</view><button wx:if="{{item.canFeedback}}" class="secondary gap" data-student-id="{{item.studentId}}" bindtap="feedback" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">{{item.feedbackSubmitted ? '修改今天的评价' : '评价今天的满意度'}}</button></block>
+    </view>
     <view wx:if="{{quick}}" class="section-title">{{quickName}} · 当日小结</view>
     <student-picker wx:else
       students="{{students}}"
@@ -26,12 +44,12 @@
       bindchange="pickStudents"
     />
 
-    <button wx:if="{{quick && !items.length && !readOnly}}" class="primary" bindtap="generate" loading="{{busy}}" disabled="{{busy}}">汇总记录并预览</button>
+    <button wx:if="{{quick && !items.length && !readOnly}}" class="primary" bindtap="generate" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">汇总记录并预览</button>
     <view wx:if="{{teacher && !quick}}" class="card summaries-generator">
-      <button class="summaries-generator-toggle" bindtap="toggleGenerate" disabled="{{busy}}">
+      <button class="summaries-generator-toggle" bindtap="toggleGenerate" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">
         <view class="summaries-generator-label">
           <view class="summaries-generator-icon">
-            <image src="/assets/icons/summaries.png" mode="aspectFit" />
+            <image src="/assets/icons/summaries.svg" mode="aspectFit" />
           </view>
           <view>
             <view class="summaries-generator-title">生成小结草稿</view>
@@ -42,7 +60,7 @@
       </button>
       <view wx:if="{{generateOpen}}" class="summaries-generator-body">
         <view class="hint">汇总当天记录后，可编辑正文和寄语，提交给另一位校长或老板审核，通过后再发布。待审、已通过和已发布的小结会保留。</view>
-        <button class="primary gap" bindtap="generate" loading="{{busy}}" disabled="{{busy || !studentIds.length}}">生成 {{studentIds.length}} 人的小结草稿</button>
+        <button class="primary gap" bindtap="generate" loading="{{busy}}" disabled="{{busy || !studentIds.length}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">生成 {{studentIds.length}} 人的小结草稿</button>
       </view>
     </view>
     <view wx:if="{{generated}}" class="notice">{{generated}}</view>
@@ -66,7 +84,7 @@
         <view wx:for="{{item.sections}}" wx:for-item="section" wx:key="id" class="summary-section">
           <view class="summary-section-heading">
             <view class="summary-section-icon summary-tone-{{section.tone}}">
-              <image src="/assets/icons/{{section.icon}}.png" mode="aspectFit" />
+              <image src="/assets/icons/{{section.icon}}.svg" mode="aspectFit" />
             </view>
             <text class="summary-section-name">{{section.title}}</text>
           </view>
@@ -98,17 +116,17 @@
           <textarea class="summary-content-input" value="{{editContent}}" data-field="editContent" bindinput="field" maxlength="12000" placeholder="认真记录孩子今天的学习与成长" />
           <view class="label">教师评语</view>
           <view class="chips">
-            <button class="chip" data-text="作业完成认真" bindtap="quickComment">作业认真</button>
-            <button class="chip" data-text="课堂专注，主动参与" bindtap="quickComment">课堂专注</button>
-            <button class="chip" data-text="积极参与运动" bindtap="quickComment">积极运动</button>
+            <button class="chip" data-text="作业完成认真" bindtap="quickComment" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">作业认真</button>
+            <button class="chip" data-text="课堂专注，主动参与" bindtap="quickComment" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">课堂专注</button>
+            <button class="chip" data-text="积极参与运动" bindtap="quickComment" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">积极运动</button>
           </view>
           <textarea value="{{teacherComment}}" data-field="teacherComment" bindinput="field" maxlength="2000" placeholder="写下孩子今天的亮点与建议" />
           <file-list wx:if="{{draftPhoto}}" files="{{[draftPhoto]}}" />
-          <button wx:if="{{draftPhoto}}" class="text-button" bindtap="removePhoto" disabled="{{busy}}">移除作品图</button>
-          <button wx:else class="text-button" bindtap="choosePhoto" disabled="{{busy}}">添加一张作品图</button>
+          <button wx:if="{{draftPhoto}}" class="text-button" bindtap="removePhoto" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">移除作品图</button>
+          <button wx:else class="text-button" bindtap="choosePhoto" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">添加一张作品图</button>
           <view class="actions">
-            <button class="secondary" bindtap="cancelEdit" disabled="{{busy}}">取消</button>
-            <button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存小结</button>
+            <button class="secondary" bindtap="cancelEdit" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">取消</button>
+            <button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">保存小结</button>
           </view>
         </view>
 
@@ -117,27 +135,27 @@
           <view class="hint">请核对上方正文和教师寄语，说明通过原因或需修改的内容。</view>
           <textarea value="{{reviewComment}}" data-field="reviewComment" bindinput="field" maxlength="2000" placeholder="填写本次核对结果或修改建议" />
           <view class="actions">
-            <button class="secondary" bindtap="cancelReview" disabled="{{busy}}">取消</button>
-            <button class="secondary summary-return-button" data-approved="no" bindtap="decideReview" disabled="{{busy}}">退回修改</button>
-            <button class="primary" data-approved="yes" bindtap="decideReview" loading="{{busy}}" disabled="{{busy}}">审核通过</button>
+            <button class="secondary" bindtap="cancelReview" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">取消</button>
+            <button class="secondary summary-return-button" data-approved="no" bindtap="decideReview" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">退回修改</button>
+            <button class="primary" data-approved="yes" bindtap="decideReview" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">审核通过</button>
           </view>
         </view>
         <view wx:else class="actions summary-actions">
-          <button wx:if="{{item.canEdit}}" class="secondary" data-id="{{item.id}}" bindtap="edit" disabled="{{busy}}">编辑小结</button>
-          <button wx:if="{{item.canSubmit}}" class="primary" data-id="{{item.id}}" bindtap="submitReview" loading="{{busy}}" disabled="{{busy}}">提交审核</button>
-          <button wx:if="{{item.canWithdraw}}" class="secondary" data-id="{{item.id}}" bindtap="withdrawReview" disabled="{{busy}}">撤回修改</button>
-          <button wx:if="{{item.canReview}}" class="primary" data-id="{{item.id}}" bindtap="beginReview" disabled="{{busy}}">审核小结</button>
-          <button wx:if="{{item.canPublish}}" class="primary" data-id="{{item.id}}" bindtap="publish" loading="{{busy}}" disabled="{{busy}}">发布小结</button>
+          <button wx:if="{{item.canEdit}}" class="secondary" data-id="{{item.id}}" bindtap="edit" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">编辑小结</button>
+          <button wx:if="{{item.canSubmit}}" class="primary" data-id="{{item.id}}" bindtap="submitReview" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">提交审核</button>
+          <button wx:if="{{item.canWithdraw}}" class="secondary" data-id="{{item.id}}" bindtap="withdrawReview" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">撤回修改</button>
+          <button wx:if="{{item.canReview}}" class="primary" data-id="{{item.id}}" bindtap="beginReview" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">审核小结</button>
+          <button wx:if="{{item.canPublish}}" class="primary" data-id="{{item.id}}" bindtap="publish" loading="{{busy}}" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">发布小结</button>
         </view>
 
         <view wx:if="{{item.reviewHistory.length}}" class="summary-history">
-          <button class="summary-history-toggle" data-id="{{item.id}}" bindtap="toggleHistory">提交与审核记录 · {{item.reviewHistory.length}}<text>{{historyId === item.id ? '收起' : '查看'}}</text></button>
+          <button class="summary-history-toggle" data-id="{{item.id}}" bindtap="toggleHistory" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">提交与审核记录 · {{item.reviewHistory.length}}<text>{{historyId === item.id ? '收起' : '查看'}}</text></button>
           <view wx:if="{{historyId === item.id}}" class="summary-history-list">
             <view wx:for="{{item.reviewHistory}}" wx:for-item="entry" wx:key="id" class="summary-history-entry">
               <view class="summary-history-title">{{entry.actionText}} · {{entry.actorName}}</view>
               <view class="summary-history-meta">{{entry.createdText}} · 版本 {{entry.version}} · {{entry.statusText}}</view>
               <view wx:if="{{entry.comment}}" class="summary-history-comment">{{entry.comment}}</view>
-              <button class="summary-version-toggle" data-id="{{entry.id}}" bindtap="toggleHistoryVersion">{{historyEntryId === entry.id ? '收起此版本内容' : '查看此版本内容'}}</button>
+              <button class="summary-version-toggle" data-id="{{entry.id}}" bindtap="toggleHistoryVersion" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">{{historyEntryId === entry.id ? '收起此版本内容' : '查看此版本内容'}}</button>
               <view wx:if="{{historyEntryId === entry.id}}" class="summary-history-content">
                 <text selectable>{{entry.content}}</text>
                 <view wx:if="{{entry.teacherComment}}" class="summary-history-comment">教师寄语：{{entry.teacherComment}}</view>
@@ -150,35 +168,16 @@
 
       <view wx:if="{{item.status === 'PUBLISHED'}}" class="summary-published">
         <view class="summary-published-meta">发布于 {{item.publishedText}}</view>
+        <view wx:if="{{admin}}" wx:for="{{item.parentFeedback}}" wx:for-item="feedback" wx:key="parentId" class="summary-feedback"><view class="summary-feedback-head"><text>{{feedback.parentName}}</text><text>{{feedback.feedbackSatisfaction === 'SATISFIED' ? '满意' : '不满意'}}{{feedback.feedbackSubmitted ? '' : '（默认）'}}</text></view><view wx:if="{{feedback.feedbackText}}" class="summary-feedback-text">{{feedback.feedbackText}}</view></view>
         <view wx:if="{{teacher}}" class="summary-published-meta">通知：{{item.notificationText}}</view>
-        <view wx:if="{{item.feedbackSatisfaction}}" class="summary-feedback">
+        <view wx:if="{{(!teacher && item.feedbackSubmitted || admin) && item.feedbackSatisfaction}}" class="summary-feedback">
           <view class="summary-feedback-head">
-            <text class="summary-feedback-title">家长反馈</text>
+            <text class="summary-feedback-title">{{admin ? '历史反馈（旧版共用）' : '我的评价'}}</text>
             <text class="summary-feedback-score">{{item.feedbackSatisfaction === 'SATISFIED' ? '满意' : '不满意'}}</text>
           </view>
           <view class="summary-feedback-text">{{item.feedbackText || '暂无文字反馈'}}</view>
         </view>
-        <block wx:if="{{!teacher}}">
-          <view wx:if="{{feedbackId === item.id}}" class="summary-feedback-form">
-            <view class="label">今天的小结，您觉得如何？</view>
-            <view class="summary-rating">
-              <view
-                wx:for="{{satisfactions}}"
-                wx:for-item="score"
-                wx:key="value"
-                class="summary-rating-item {{satisfaction === score.value ? 'summary-rating-active' : ''}}"
-                data-satisfaction="{{score.value}}"
-                bindtap="rate"
-              >{{score.label}}</view>
-            </view>
-            <textarea value="{{feedbackText}}" data-field="feedbackText" bindinput="field" maxlength="2000" placeholder="{{satisfaction === 'DISSATISFIED' ? '请填写不满意的原因（必填）' : '留下鼓励或建议（可选）'}}" />
-            <view class="actions">
-              <button class="secondary" bindtap="cancelFeedback" disabled="{{busy}}">取消</button>
-              <button class="primary" bindtap="sendFeedback" loading="{{busy}}" disabled="{{busy}}">提交反馈</button>
-            </view>
-          </view>
-          <button wx:else class="secondary gap" data-id="{{item.id}}" bindtap="feedback" disabled="{{busy}}">{{item.feedbackSatisfaction ? '更新我的反馈' : '满意度反馈'}}</button>
-        </block>
+
       </view>
     </view>
     <state-view empty="{{!items.length}}" empty-text="{{teacher ? '当日暂无小结，可选择学生生成草稿' : '老师暂未发布当日小结，请稍后查看'}}" />

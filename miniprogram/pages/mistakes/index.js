@@ -1,6 +1,6 @@
 const api = require('../../utils/api');
 const format = require('../../utils/format');
-const { definePage, toast } = require('../../utils/page');
+const { definePage, toast, navigate } = require('../../utils/page');
 const { selection } = require('../../utils/students');
 const statuses = ['', 'UNCORRECTED', 'PENDING_REVIEW', 'MASTERED'];
 const subjectStyles = {
@@ -45,6 +45,6 @@ definePage({
     await this.act(async () => { const book = await api.request('POST', '/mistake-books', { studentId: this.data.studentIds[0], mistakeIds: this.data.items.map(item => item.id) }); this.setData({ book }); }, 'PDF打印本已生成', false);
   },
   openBook() { if (this.data.book) return this.act(() => require('../../utils/teaching').openBook(this, this.data.book), '', false); },
-  capture() { wx.navigateTo({ url: '/pages/capture/index?kind=MISTAKE&studentId=' + this.data.studentIds[0] }); },
-  open(event) { wx.navigateTo({ url: '/pages/mistake-detail/index?id=' + event.currentTarget.dataset.id + '&studentId=' + this.data.studentIds[0] }); }
+  capture() { navigate(this, '/pages/capture/index?kind=MISTAKE&studentId=' + this.data.studentIds[0]); },
+  open(event) { navigate(this, '/pages/mistake-detail/index?id=' + event.currentTarget.dataset.id + '&studentId=' + this.data.studentIds[0]); }
 });

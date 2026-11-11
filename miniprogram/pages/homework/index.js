@@ -1,6 +1,6 @@
 const api = require('../../utils/api');
 const format = require('../../utils/format');
-const { definePage, toast } = require('../../utils/page');
+const { definePage, toast, navigate } = require('../../utils/page');
 const { selection } = require('../../utils/students');
 const statuses = ['', 'NOT_STARTED', 'IN_PROGRESS', 'PENDING_REVIEW', 'CORRECTION', 'PENDING_RECHECK', 'COMPLETED'];
 const subjectStyles = {
@@ -24,6 +24,8 @@ definePage({
   pickStudents(event) { this.setData({ studentIds: event.detail.ids }); this.refresh(); },
   filter(event) { this.setData({ [event.currentTarget.dataset.field]: Number(event.detail.value) }); this.refresh(); },
   selectForm(event) { this.setData({ [event.currentTarget.dataset.field]: Number(event.detail.value) }); },
+  photoHomework() { navigate(this, '/pages/scan/index?studentId=' + (this.data.studentIds[0] || '')); },
+  drafts() { navigate(this, '/pages/homework-drafts/index'); },
   toggleCreate() { this.setData({ showCreate: !this.data.showCreate }); },
   media(event) { this.setData({ attachmentIds: event.detail.ids }); },
   uploadState(event) { this.setData({ uploading: event.detail.busy }); },
@@ -35,5 +37,5 @@ definePage({
       this.setData({ title: '', description: '', attachmentIds: [], mediaReset: this.data.mediaReset + 1, showCreate: false, created: '已为 ' + value.assignedCount + ' 位学生创建作业' });
     }, '作业已创建');
   },
-  open(event) { wx.navigateTo({ url: '/pages/homework-detail/index?id=' + event.currentTarget.dataset.id + '&date=' + this.data.date }); }
+  open(event) { navigate(this, '/pages/homework-detail/index?id=' + event.currentTarget.dataset.id + '&date=' + this.data.date); }
 });

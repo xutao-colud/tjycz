@@ -36,6 +36,8 @@ function loadPage(name) {
   return instance(page);
 }
 async function main() {
+  const rosterTemplate = require('node:fs').readFileSync(path.join(root, 'pages/workbench/index.wxml'), 'utf8');
+  assert.match(rosterTemplate, /<image[^>]*src="{{item.avatarUrl}}"/, '教师名单必须将取得的学生头像渲染为图片');
   app.setSession(identity('TEACHER'));
   require(path.join(root, 'components/app-nav/index.js'));
   const nav = instance(component);
@@ -67,6 +69,7 @@ async function main() {
 
   api.me = async () => Object.assign({}, app.globalData.session.user, { demo: true });
   api.settings = async () => ({ institutionName: '样例机构' });
+  api.classSatisfaction = async () => [{ classId: 1, className: '样例班级', parentCount: 2, submittedCount: 1, defaultCount: 1, satisfactionPercent: 50 }];
   api.dashboard = async () => ({ studentCount: 2, presentCount: 1, homeworkCount: 4, completedHomeworkCount: 1, subjectProgress: [{ subject: '数学', total: 4, completed: 1 }], weeklyAttendance: [{ date: '2026-10-27', total: 2, present: 1 }], students: [], activities: [] });
   const dashboard = loadPage('dashboard');
   dashboard.setData(await dashboard.loadData());
@@ -166,7 +169,8 @@ async function main() {
     assert.equal(adminDashboard.data.admin, true);
     assert.equal(adminDashboard.data.teacher, true, '老板不能误显示为家长端');
     assert.deepEqual(app.globalData.session.user.campusIds, [1, 2], '刷新首页保留校区授权');
-    assert.ok(adminDashboard.data.management.some(item => item.page === 'campuses'));
+    assert.ok(adminDashboard.data.applications.concat(adminDashboard.data.management).some(item => item.page === 'campuses'));
+    assert.equal(adminDashboard.data.satisfactionStats[0].satisfactionPercent, 50);
     assert.equal(adminDashboard.data.operationMetrics.find(item => item.page === 'teacher-attendance').value, 2);
     adminDashboard.go({ currentTarget: { dataset: { page: 'attendance' } } });
     assert.equal(navigated, '/pages/attendance/index?date=2026-10-27');

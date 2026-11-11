@@ -2,18 +2,18 @@
   <view wx:if="{{stage !== 'welcome'}}" class="background-waves"><view class="wave wave-green"></view><view class="wave wave-mint"></view><view class="wave wave-blue"></view><view class="wave wave-sky"></view></view>
 
   <view wx:if="{{stage === 'welcome'}}" class="welcome-screen">
-    <view class="welcome-glow" aria-hidden="true"></view>
+
     <view class="welcome-content">
-      <view class="welcome-brand"><image class="brand-logo welcome-logo" src="/assets/login/auth-logo.png" mode="aspectFit" aria-label="悦成长中心 Logo"/><view class="brand-name">天健悦成长</view><view class="brand-sub"><text></text>托管中心<text></text></view></view>
+      <view class="welcome-brand"><image class="brand-logo welcome-logo" src="/assets/login/auth-logo.png" mode="aspectFit" aria-label="悦成长中心 Logo"/><view class="welcome-brand-copy"><view class="brand-name">天健悦成长</view><view class="brand-sub">托管中心 · 向上向善</view></view></view>
       <view class="welcome-intro">
         <view class="welcome-eyebrow">用心托管 · 陪伴成长</view>
         <view class="welcome-headline">放学后的时光<text>充实，也温暖</text></view>
         <view class="welcome-description"><view>从一道题的思考，到一个好习惯的养成，</view><view>陪孩子走好成长的每一步。</view></view>
       </view>
       <view class="welcome-services">
-        <view class="welcome-service"><image src="/assets/icons/homework.png" mode="aspectFit" aria-hidden="true"/><view class="welcome-service-title">作业辅导</view><view class="welcome-service-caption">陪伴解题思路</view></view>
-        <view class="welcome-service"><image src="/assets/icons/points.png" mode="aspectFit" aria-hidden="true"/><view class="welcome-service-title">习惯养成</view><view class="welcome-service-caption">培养专注自律</view></view>
-        <view class="welcome-service"><image src="/assets/icons/summaries.png" mode="aspectFit" aria-hidden="true"/><view class="welcome-service-title">家校共育</view><view class="welcome-service-caption">分享每日成长</view></view>
+        <view class="welcome-service welcome-service-study"><image src="/assets/icons/homework.svg" mode="aspectFit" aria-hidden="true"/><view class="welcome-service-title">作业辅导</view><view class="welcome-service-caption">陪伴解题思路</view></view>
+        <view class="welcome-service welcome-service-habit"><image src="/assets/icons/points.svg" mode="aspectFit" aria-hidden="true"/><view class="welcome-service-title">习惯养成</view><view class="welcome-service-caption">培养专注自律</view></view>
+        <view class="welcome-service welcome-service-family"><image src="/assets/icons/summaries.svg" mode="aspectFit" aria-hidden="true"/><view class="welcome-service-title">家校共育</view><view class="welcome-service-caption">分享每日成长</view></view>
       </view>
     </view>
     <view class="welcome-bottom"><view class="welcome-title">每一天进步，看得见</view><view class="welcome-caption">一份用心的陪伴，连接孩子、老师与家长</view><button class="primary welcome-start" bindtap="start">开启成长之旅</button></view>
@@ -32,14 +32,9 @@
     <view class="auth-brand"><image class="brand-logo auth-logo" src="/assets/login/auth-logo.png" mode="aspectFit" aria-label="悦成长中心 Logo"/></view>
     <view wx:if="{{hasSession}}" class="existing-session"><view><view class="existing-title">您已登录</view><view class="existing-caption">继续查看今天的学习与成长</view></view><button bindtap="resume">进入首页</button><view class="session-logout" bindtap="logout">退出</view></view>
     <view class="auth-form">
-      <view class="login-tabs"><view class="login-tab {{loginMode === 'phone' ? 'tab-active' : ''}}" data-mode="phone" bindtap="switchMode">手机号登录</view><view class="login-tab {{loginMode === 'account' ? 'tab-active' : ''}}" data-mode="account" bindtap="switchMode">账号密码登录</view></view>
-      <block wx:if="{{loginMode === 'phone'}}">
-        <view class="input-row"><view class="phone-prefix">+86<text>⌄</text></view><input type="number" maxlength="11" value="{{phone}}" data-field="phone" bindinput="field" placeholder="请输入手机号" disabled="{{busy}}"/><view wx:if="{{phone}}" class="input-clear" bindtap="clearPhone">×</view></view>
-        <view class="input-row"><input type="number" maxlength="6" value="{{code}}" data-field="code" bindinput="field" placeholder="请输入验证码" disabled="{{busy}}"/><button class="code-button" bindtap="requestCode">获取验证码</button></view>
-        <view class="capability-note">手机号登录暂未开通，可使用账号密码登录</view>
-      </block>
-      <block wx:else>
-        <view class="input-row"><view class="input-icon person-icon"><view></view></view><input value="{{username}}" data-field="username" bindinput="field" placeholder="请输入账号/手机号" disabled="{{busy}}" confirm-type="next"/></view>
+      <view class="account-login-title">账号密码登录</view>
+      <block>
+        <view class="input-row"><view class="input-icon person-icon"><view></view></view><input value="{{username}}" data-field="username" bindinput="field" placeholder="请输入账号" disabled="{{busy}}" confirm-type="next"/></view>
         <view class="input-row"><view class="input-icon lock-icon"><view></view></view><input value="{{password}}" password="{{!showPassword}}" data-field="password" bindinput="field" placeholder="请输入密码" disabled="{{busy}}" bindconfirm="submit" confirm-type="go"/><view class="eye-action {{showPassword ? 'eye-visible' : ''}}" data-target="showPassword" bindtap="togglePassword" role="button" aria-label="{{showPassword ? '隐藏密码' : '显示密码'}}"><view class="eye-shape"><view></view></view></view></view>
         <view class="account-options"><view class="check-label" bindtap="toggleRemember"><view class="check-box {{remember ? 'checked' : ''}}">{{remember ? '✓' : ''}}</view><text>记住账号</text></view><view class="forgot-link" bindtap="forgot">忘记密码？</view></view>
       </block>
@@ -47,7 +42,6 @@
       <button class="primary login-submit" bindtap="submit" data-mode="account" loading="{{busy}}" disabled="{{busy}}">登录</button>
       <view class="agreement-row"><view class="agreement-check {{agreed ? 'checked' : ''}}" bindtap="toggleAgreement" role="checkbox" aria-checked="{{agreed}}" aria-label="同意用户协议和隐私政策">{{agreed ? '✓' : ''}}</view><view class="agreement-copy"><text bindtap="toggleAgreement">我已阅读并同意 </text><text class="legal-link" data-kind="terms" bindtap="showLegal">《用户协议》</text><text> 和 </text><text class="legal-link" data-kind="privacy" bindtap="showLegal">《隐私政策》</text></view></view>
     </view>
-    <view class="other-login"><view class="other-heading"><view></view><text>其他登录方式</text><view></view></view><view class="wechat-entry" bindtap="wechat" role="button" aria-label="微信一键登录"><image src="/assets/login/wechat.png" mode="aspectFit"/><view>微信一键登录</view></view></view>
     <view wx:if="{{demoAvailable}}" class="demo-credentials">本地体验账号：admin · 密码：admin<view>可切换家长、老师、校长或管理员身份体验</view></view>
     <view class="connection-state"><view class="connection-dot {{connected ? 'connected' : ''}}"></view>{{health}}</view>
   </block>

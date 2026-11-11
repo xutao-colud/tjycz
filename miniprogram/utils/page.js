@@ -1,8 +1,17 @@
 const session = require('./session');
 const { today } = require('./format');
 const { normalizeDate } = require('./calendar');
+const motion = require('./parent-motion');
 function message(error) { return error && error.message ? error.message : '操作失败，请稍后重试'; }
 function toast(text) { wx.showToast({ title: text, icon: 'none', duration: 2400 }); }
+function navigate(page, url) {
+  const current = session.current();
+  const parent = current && current.user.role === 'PARENT';
+  if (!parent) { wx.navigateTo({ url }); return; }
+  if (parent && (page._navigating || page._unloaded || page.data.loading || page.data.error)) return;
+  if (parent) page._navigating = true;
+  wx.navigateTo({ url, fail() { page._navigating = false; toast('页面暂未打开，请重试'); } });
+}
 function confirm(title, content) {
   const context = session.context();
   return new Promise(resolve => wx.showModal({ title, content, success: result => resolve(result.confirm && session.isCurrentContext(context)), fail: () => resolve(false) }));
@@ -15,9 +24,10 @@ function definePage(options) {
     onUnload() { this._unloaded = true; this._loadGeneration = (this._loadGeneration || 0) + 1; },
     async onShow() {
       if (!session.requireSession(teacherOnly, adminOnly)) return;
+      this._navigating = false;
       this._visible = true;
       const context = session.context();
-      this.setData({ loading: true, error: '' });
+      this.setData({ loading: true, error: '', reducedMotion: motion.reduced() });
       try {
         const me = await require('./api').me();
         if (!session.isCurrentContext(context) || this._unloaded) return;
@@ -65,7 +75,10 @@ function definePage(options) {
       try {
         await action();
         if (!session.isCurrentContext(context) || this._unloaded) return false;
-        if (successText) toast(successText);
+        if (successText) {
+          if (session.current().user.role === 'PARENT') wx.showToast({ title: successText, icon: 'success', duration: 1600 });
+          else toast(successText);
+        }
         if (reload !== false) await this.refresh();
         return session.isCurrentContext(context) && !this._unloaded;
       } catch (error) {
@@ -80,7 +93,7 @@ function definePage(options) {
     pickStudents(event) { this.setData({ studentIds: event.detail.ids }); },
     go(event) {
       const url = event.currentTarget.dataset.url;
-      if (url) wx.navigateTo({ url });
+      if (url) navigate(this, url);
     }
   }, options);
   page.data = Object.assign({ loading: true, error: '', busy: false, actionError: '', date: today(), teacher: false, user: {}, demo: false, studentIds: [] }, options.data || {});
@@ -95,4 +108,4 @@ function definePage(options) {
   delete page.adminOnly;
   Page(page);
 }
-module.exports = { definePage, toast, confirm, message };
+module.exports = { definePage, toast, confirm, message, navigate };

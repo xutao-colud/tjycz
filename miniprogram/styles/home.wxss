@@ -1,0 +1,88 @@
+/* The three daily home pages share a layout; business detail pages keep their own density. */
+.role-home {
+  --paper: #f7f8f5;
+  --accent-soft: #edf3f3;
+  background: var(--paper);
+  padding: 24px var(--page-inset) calc(112px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+  font-size: var(--text-body);
+  line-height: 1.6;
+}
+.role-home .title, .role-home .hero .title { color: var(--ink); font-size: var(--text-title); line-height: 1.4; }
+.role-home .hero, .role-home .principal-cover { padding: 0; margin: 0 0 var(--section-gap); border: 0; border-radius: 0; background: transparent; }
+.role-home .subtitle, .role-home .principal-kicker, .role-home .eyebrow { font-size: var(--text-note); color: var(--secondary); line-height: 1.6; }
+.role-home .card { padding: var(--content-inset); margin: 0 0 var(--section-gap); border: 1px solid var(--line); border-radius: 14px; box-shadow: none; }
+.role-home .section-title, .role-home .card-title { font-size: var(--text-section); line-height: 1.5; }
+.role-home .card-head, .role-home .section-head { flex-wrap: wrap; gap: 8px; }
+.role-home .muted, .role-home .hint, .role-home .empty-inline { font-size: var(--text-note); line-height: 1.65; }
+.role-home .body-text { font-size: var(--text-body); line-height: 1.7; overflow-wrap: anywhere; }
+.role-home .text-button { min-height: var(--tap-size); padding: 10px 0; font-size: var(--text-note); white-space: normal; }
+.role-home .primary, .role-home .secondary { min-height: 48px; font-size: var(--text-body); padding: 12px 16px; border-radius: 10px; }
+.role-home .detail-row { min-height: 56px; padding: 14px 0; font-size: var(--text-body); gap: 12px; }
+.role-home .filter-pill, .role-home .filter-value { font-size: var(--text-note); white-space: normal; overflow-wrap: anywhere; }
+.role-home .filter-bar { padding: 0 0 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; gap: 12px; flex-wrap: wrap; margin-bottom: var(--section-gap); }
+.role-home .filter-bar .filter-item { flex: 1 1 140px; }
+.role-home .growth-heading { align-items: flex-start; flex-wrap: wrap; margin-bottom: var(--section-gap); gap: 8px 12px; }
+.role-home .parent-child-hero { padding: var(--content-inset); min-height: 176px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 14px; background: #eef4ef; align-items: center; gap: 8px; }
+.role-home .parent-child-copy { flex: 1; min-width: 0; }
+.role-home .parent-kicker, .role-home .parent-child-meta { font-size: var(--text-note); line-height: 1.65; }
+.role-home .parent-child-name { font-size: 24px; line-height: 1.4; overflow-wrap: anywhere; }
+.role-home .child-switch { font-size: var(--text-note); white-space: nowrap; }
+.role-home .parent-character { position: static; width: 88px; height: 138px; flex-shrink: 0; }
+.role-home .parent-attendance { font-size: var(--text-body); padding: 4px 8px; border-radius: 6px; }
+.role-home .parent-shortcuts { gap: 12px; margin-bottom: 12px; }
+.role-home .parent-shortcuts button { padding: 12px 8px; }
+.role-home .pickup-line { margin: 0 0 var(--section-gap); padding: 12px 16px; border-radius: 12px; font-size: var(--text-body); }
+.role-home .parent-day-grid { gap: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); margin-bottom: var(--section-gap); }
+.role-home .parent-day-card { width: 50%; padding: 16px; margin: 0; border: 0; border-radius: 0; background: transparent; }
+.role-home .parent-day-card:nth-child(odd) { border-right: 1px solid var(--line); }
+.role-home .parent-day-card:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+.role-home .day-card-heading { gap: 6px; font-size: var(--text-note); }
+.role-home .day-card-heading image { width: 18px; height: 18px; }
+.role-home .day-card-value { margin: 8px 0 4px; font-size: 22px; line-height: 1.5; }
+.role-home .day-card-value text, .role-home .day-card-note { font-size: var(--text-note); line-height: 1.65; }
+.role-home .parent-progress { margin: 8px 0; height: 4px; }
+.role-home .parent-disclosure { font-size: var(--text-note); padding: 16px 0; }
+.role-home .selection-bar { margin: 12px 0; gap: 12px; flex-wrap: wrap; }
+.role-home .workbench-summary { padding: 16px 0; margin: 0 0 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.workbench-metrics { display: flex; gap: 12px; }
+.workbench-metrics > view { flex: 1; min-width: 0; }
+.metric-label { color: var(--secondary); font-size: var(--text-note); }
+.metric-value { font-size: var(--text-number); font-weight: 600; color: var(--ink); line-height: 1.5; overflow-wrap: anywhere; }
+.metric-value text { font-size: var(--text-note); font-weight: 400; color: var(--secondary); }
+.workbench-note { margin-top: 12px; color: var(--secondary); font-size: var(--text-note); }
+.role-home .student-roster { padding: 0 var(--content-inset); }
+.role-home .student-roster .roster-row { padding: 16px 0; margin: 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.role-home .student-roster .roster-row:last-child { border-bottom: 0; }
+.role-home .student-roster .row-selected { background: var(--accent-soft); }
+.role-home .roster-identity { gap: 8px; flex-wrap: wrap; }
+.role-home .roster-identity .col { flex: 1 1 96px; }
+.role-home .roster-avatar { width: 36px; height: 36px; border-radius: 10px; }
+.role-home .student-link { font-size: 16px; line-height: 1.6; }
+.role-home .roster-state { display: inline-block; margin-left: 4px; font-size: var(--text-note); }
+.role-home .row-primary { min-height: var(--tap-size); }
+.role-home .row-more { margin-left: auto; background: transparent; color: var(--secondary); }
+.role-home .row-detail { padding: 8px 0 0; border-top: 1px dashed var(--line); }
+.role-home .row-detail button { padding: 10px 8px 10px 0; }
+.role-home .principal-cover { align-items: flex-start; flex-wrap: wrap; gap: 8px 12px; }
+.role-home .principal-cover .title { margin: 4px 0 0; }
+.role-home .principal-metrics { margin-bottom: var(--section-gap); gap: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.role-home .principal-metric { flex: 0 0 50%; min-width: 0; padding: 16px; border: 0; border-radius: 0; background: transparent; font-size: var(--text-note); }
+.role-home .principal-metric:nth-child(odd) { border-right: 1px solid var(--line); }
+.role-home .principal-metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+.role-home .principal-metric view { margin-top: 6px; font-size: var(--text-number); line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
+.role-home .principal-link { align-items: flex-start; flex-wrap: wrap; }
+.role-home .principal-link .col { flex: 1 1 150px; }
+.role-home .principal-link > text, .role-home .class-counts { font-size: var(--text-note); }
+.role-home .principal-warning { margin: 0; }
+.role-home .notice, .role-home .error, .role-home .work-pickup-banner { font-size: var(--text-body); overflow-wrap: anywhere; }
+@media (max-width: 350px) {
+  .role-home .parent-character { width: 66px; height: 120px; }
+  .role-home .parent-child-name { font-size: 22px; }
+  .role-home .parent-day-card { padding: 12px; }
+}
+
+.role-home.workbench-page .hero { margin-bottom: 12px; }
+.role-home.workbench-page .filter-bar { margin-bottom: 0; }
+.role-home .roster-quick-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.role-home .roster-quick-actions .row-more { min-width: 44px; text-align: right; }

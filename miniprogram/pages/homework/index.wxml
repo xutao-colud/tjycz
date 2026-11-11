@@ -1,12 +1,12 @@
 <app-nav />
-<view class="page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page">
   <view class="hero homework-hero">
     <view>
       <view class="eyebrow">学习任务</view>
       <view class="title">今日作业</view>
       <view class="subtitle">{{teacher ? '布置与批改，让学习有回应' : '查看学习任务，记录每一次进步'}}</view>
     </view>
-    <image class="hero-icon" src="/assets/icons/homework.png" mode="aspectFit" />
+    <image class="hero-icon" src="/assets/icons/homework.svg" mode="aspectFit" />
   </view>
 
   <view class="card homework-filter">
@@ -41,7 +41,8 @@
     <student-picker students="{{students}}" selected="{{studentIds}}" multiple="{{teacher}}" title="{{teacher ? '选择学生' : '选择孩子'}}" bindchange="pickStudents" />
 
     <view wx:if="{{created}}" class="created-notice">{{created}}</view>
-    <view wx:if="{{teacher}}" class="card create-entry" bindtap="toggleCreate">
+    <view wx:if="{{teacher}}" class="actions"><button class="primary" bindtap="photoHomework" disabled="{{busy}}">拍照自动录入</button><button class="secondary" bindtap="drafts" disabled="{{busy}}">作业草稿</button></view>
+    <view wx:if="{{teacher}}" class="card create-entry" bindtap="toggleCreate" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'none'}}" hover-stay-time="80">
       <view class="create-entry-main">
         <view class="create-plus">{{showCreate ? '−' : '+'}}</view>
         <view>
@@ -77,14 +78,14 @@
       </view>
       <media-field audio-enabled="{{typeIndex === 1}}" bindchange="media" binduploading="uploadState" reset-key="{{mediaReset}}" disabled="{{busy}}" />
       <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
-      <button class="primary gap" bindtap="create" loading="{{busy}}" disabled="{{busy || uploading || !studentIds.length}}">创建并分配</button>
+      <button class="primary gap" bindtap="create" loading="{{busy}}" disabled="{{busy || uploading || !studentIds.length}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">创建并分配</button>
     </view>
 
     <view class="section-head task-list-head">
       <text class="section-title">作业列表</text>
       <text class="hint">共 {{items.length}} 项</text>
     </view>
-    <view wx:for="{{items}}" wx:key="id" class="card homework-card" data-id="{{item.id}}" bindtap="open">
+    <view wx:for="{{items}}" wx:key="id" class="card homework-card" data-id="{{item.id}}" bindtap="open" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'none'}}" hover-stay-time="80">
       <view class="task-top">
         <view class="subject-icon subject-{{item.subjectTone}}">{{item.subjectIcon}}</view>
         <view class="task-subject">

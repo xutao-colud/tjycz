@@ -76,15 +76,22 @@ function contentSections(content) {
   return sections;
 }
 definePage({
-  data: { quick: false, quickName: '', readOnly: false, draftPhoto: null, photoChanged: false,  students: [], items: [], editingId: '', editingVersion: 0, editContent: '', teacherComment: '', reviewingId: '', reviewVersion: 0, reviewComment: '', historyId: '', historyEntryId: '', feedbackId: '', satisfaction: 'SATISFIED', feedbackText: '', satisfactions: [{ value: 'SATISFIED', label: '满意' }, { value: 'DISSATISFIED', label: '不满意' }], generated: '', generateOpen: false },
+  data: { quick: false, quickName: '', readOnly: false, draftPhoto: null, photoChanged: false,  students: [], items: [], editingId: '', editingVersion: 0, editContent: '', teacherComment: '', reviewingId: '', reviewVersion: 0, reviewComment: '', historyId: '', historyEntryId: '', dailyFeedback: [], satisfactionStats: [], feedbackStudentId: '', satisfaction: 'SATISFIED', feedbackText: '', satisfactions: [{ value: 'SATISFIED', label: '满意' }, { value: 'DISSATISFIED', label: '不满意' }], generated: '', generateOpen: false },
   async loadData() {
     const selected = await selection(this, this.data.teacher);
     const quick = this.data.teacher && this.query.quick === '1' && selected.studentIds.length === 1;
-    let items = await api.summaries({ date: this.data.date, studentId: selected.studentIds.length === 1 ? selected.studentIds[0] : '' });
+    const params = { date: this.data.date, studentId: selected.studentIds.length === 1 ? selected.studentIds[0] : '' };
+    let [items, dailyFeedback, satisfactionStats] = await Promise.all([
+      api.summaries(params),
+      !this.data.teacher ? api.dailyFeedback(params) : Promise.resolve([]),
+      this.data.admin && this.data.date <= format.today() ? api.classSatisfaction({ date: this.data.date }) : Promise.resolve([])
+    ]);
+    const selectedClasses = new Set(selected.students.filter(s => selected.studentIds.includes(Number(s.id))).map(s => Number(s.classId)));
+    if (selectedClasses.size) satisfactionStats = satisfactionStats.filter(s => selectedClasses.has(Number(s.classId)));
     if (selected.studentIds.length > 1) items = items.filter(row => selected.studentIds.includes(Number(row.studentId)));
     if (!this.data.teacher) items = items.filter(row => row.status === 'PUBLISHED');
     const quickStudent = quick && selected.students.find(row => Number(row.id) === selected.studentIds[0]);
-    return Object.assign({}, selected, { quick, readOnly: this.data.date > format.today(), quickName: quickStudent ? quickStudent.name : '', items: items.map(row => Object.assign(reviewFlow.decorate(row), {
+    return Object.assign({}, selected, { quick, dailyFeedback, satisfactionStats, readOnly: this.data.date > format.today(), quickName: quickStudent ? quickStudent.name : '', items: items.map(row => Object.assign(reviewFlow.decorate(row), {
       sections: contentSections(row.content),
       initial: Array.from(String(row.studentName || '生'))[0],
       publishedText: format.time(row.publishedAt)
@@ -93,9 +100,9 @@ definePage({
   toggleGenerate() { this.setData({ generateOpen: !this.data.generateOpen }); },
   cancelEdit() { this.setData({ editingId: '', editContent: '', teacherComment: '', draftPhoto: null, photoChanged: false }); },
   cancelReview() { this.setData({ reviewingId: '', reviewComment: '' }); },
-  cancelFeedback() { this.setData({ feedbackId: '', feedbackText: '' }); },
-  pickStudents(event) { if (this.data.busy) return; this.cancelEdit(); this.setData({ studentIds: event.detail.ids, reviewingId: '', feedbackId: '', historyId: '', historyEntryId: '' }); this.refresh(); },
-  changeDate(event) { if (this.data.busy) return; this.cancelEdit(); this.setData({ date: event.detail.value, reviewingId: '', feedbackId: '', historyId: '', historyEntryId: '' }); this.refresh(); },
+  cancelFeedback() { this.setData({ feedbackStudentId: '', feedbackText: '' }); },
+  pickStudents(event) { if (this.data.busy) return; this.cancelEdit(); this.setData({ studentIds: event.detail.ids, reviewingId: '', feedbackStudentId: '', historyId: '', historyEntryId: '' }); this.refresh(); },
+  changeDate(event) { if (this.data.busy) return; this.cancelEdit(); this.setData({ date: event.detail.value, reviewingId: '', feedbackStudentId: '', historyId: '', historyEntryId: '' }); this.refresh(); },
   async generate() {
     if (!this.data.studentIds.length) { toast('请先选择学生'); return; }
     await this.act(async () => {
@@ -173,12 +180,14 @@ definePage({
     this.act(() => api.publishSummary(item.id, confirmedConcerns), '小结已发布，可在小程序内阅读');
   },
   feedback(event) {
-    const item = this.data.items.find(row => String(row.id) === String(event.currentTarget.dataset.id));
-    this.setData({ feedbackId: item.id, satisfaction: item.feedbackSatisfaction || 'SATISFIED', feedbackText: item.feedbackText || '' });
+    const item = this.data.dailyFeedback.find(row => String(row.studentId) === String(event.currentTarget.dataset.studentId));
+    if (!item || !item.canFeedback) return;
+    this.setData({ feedbackStudentId: item.studentId, satisfaction: item.feedbackSatisfaction, feedbackText: item.feedbackText || '' });
   },
   rate(event) { this.setData({ satisfaction: event.currentTarget.dataset.satisfaction }); },
   async sendFeedback() {
+    if (this.data.date !== format.today() || !this.data.feedbackStudentId) { toast('仅可评价今天的满意度'); return; }
     if (this.data.satisfaction === 'DISSATISFIED' && !this.data.feedbackText.trim()) { toast('请填写不满意的原因'); return; }
-    await this.act(async () => { await api.feedbackSummary(this.data.feedbackId, { satisfaction: this.data.satisfaction, text: this.data.feedbackText.trim() }); this.setData({ feedbackId: '' }); }, '感谢反馈，已提交');
+    await this.act(async () => { await api.saveDailyFeedback(this.data.feedbackStudentId, { date: this.data.date, satisfaction: this.data.satisfaction, text: this.data.feedbackText.trim() }); this.setData({ feedbackStudentId: '' }); }, '感谢反馈，已提交');
   }
 });

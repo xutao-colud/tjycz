@@ -1,0 +1,38 @@
+/* Parent-only surfaces; staff pages retain their existing design and controls. */
+.parent-view { --paper:#f8f7f2; --subtle:#f1f3ee; --line:#dfe5dc; --accent-soft:#e9f2f5; background:var(--paper); min-height:calc(100vh - 160rpx); }
+.parent-view { --parent-panel-duration:.2s; --parent-motion-state:running; --parent-ease:cubic-bezier(.2,.8,.2,1); }
+.parent-view.parent-ready { animation:parent-enter .24s var(--parent-ease) both; }
+.parent-view button { transition:transform .16s var(--parent-ease),opacity .16s var(--parent-ease); }
+.parent-view button.parent-pressed:not([disabled]) { transform:translateY(2rpx) scale(.985); opacity:.88; }
+.parent-view.reduce-motion { --parent-panel-duration:0s; --parent-motion-state:paused; }
+.parent-view.reduce-motion,.parent-view.reduce-motion button { animation:none !important; transition:none !important; }
+.parent-view.reduce-motion button.parent-pressed { transform:none; opacity:.8; }
+@keyframes parent-enter { from { opacity:.2; transform:translateY(6rpx); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion:reduce) {
+  .parent-view { --parent-panel-duration:0s; --parent-motion-state:paused; animation:none !important; }
+  .parent-view button { transition:none; }
+  .parent-view button.parent-pressed { transform:none; }
+}
+.parent-view .hero { background:transparent; border:0; box-shadow:none; padding:8rpx 0 24rpx; margin-bottom:8rpx; }
+.parent-view .hero .title,.parent-view > .title { font-size:38rpx; line-height:1.4; }
+.parent-view .subtitle,.parent-view .hint,.parent-view .muted { line-height:1.65; }
+.parent-view .card { border-color:var(--line); border-radius:24rpx; box-shadow:none; }
+.parent-view .card-title,.parent-view .section-title { font-size:30rpx; line-height:1.5; }
+.parent-view .card-head { gap:16rpx; flex-wrap:wrap; }
+.parent-view .card-head .text-button { min-height:72rpx; }
+.parent-view .detail-row { padding:24rpx 0; line-height:1.6; }
+.parent-view .primary { background:var(--accent); box-shadow:none; border-radius:16rpx; }
+.parent-view .secondary { background:var(--accent-soft); color:var(--accent); border-radius:16rpx; }
+.parent-view .col { min-width:0; }
+.parent-view .body-text,.parent-view .student-name,.parent-view .card-title { overflow-wrap:anywhere; word-break:break-word; }
+.parent-view input,.parent-view textarea { background:#f2f4f0; }
+.parent-view .hero-icon { width:64rpx; height:64rpx; padding:8rpx; background:#e8efdf; border-radius:16rpx; }
+.parent-view .status { font-weight:500; }
+.parent-view .error,.parent-view .attention { color:var(--danger); background:var(--danger-soft); }
+@media (max-width:360px) { .parent-view .title { font-size:34rpx; } .parent-view .card { padding:24rpx; } }
+
+.parent-view .card { transition:transform .16s var(--parent-ease),opacity .16s var(--parent-ease); }
+.parent-view view.parent-pressed { transform:translateY(2rpx) scale(.985); opacity:.88; }
+.parent-view.reduce-motion .card { transition:none; }
+.parent-view.reduce-motion view.parent-pressed { transform:none; }
+@media (prefers-reduced-motion:reduce) { .parent-view .card { transition:none; } .parent-view view.parent-pressed { transform:none; } }

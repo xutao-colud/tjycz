@@ -6,7 +6,7 @@
       <view class="title">学生考勤</view>
       <view class="subtitle">记录每一次准时抵达与安心离校</view>
     </view>
-    <image class="hero-icon" src="/assets/icons/attendance.png" mode="aspectFit" />
+    <image class="hero-icon" src="/assets/icons/attendance.svg" mode="aspectFit" />
   </view>
 
   <view class="card attendance-filter">

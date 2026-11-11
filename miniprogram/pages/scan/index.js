@@ -8,7 +8,7 @@ const { choosePhoto, requestId } = require('../../utils/teaching');
 const stateNames = { QUEUED: '等待扫描', RECOGNIZING: '正在识别与分题', READY: '待校对选择', FAILED: '扫描未完成' };
 definePage({
   teacherOnly: true,
-  data: { students: [], subjects: ['语文', '数学', '英语'], subjectIndex: 1, service: null, mediaConsent: null, job: null, jobId: '', pageUrl: '', history: [], historyOpen: false, questions: [], activeQuestion: null, activeIndex: 0, selectedIndices: [], selectedCount: 0, dirty: false, adjusting: false, editRegion: 0, uploading: false, results: [], pendingPhoto: null, createRequestId: '' },
+  data: { students: [], subjects: ['语文', '数学', '英语'], subjectIndex: 1, service: null, mediaConsent: null, job: null, jobId: '', pageUrl: '', history: [], historyOpen: false, questions: [], activeQuestion: null, activeIndex: 0, selectedIndices: [], selectedCount: 0, dirty: false, adjusting: false, editRegion: 0, uploading: false, results: [], pendingPhoto: null, createRequestId: '', draftRequest: '', draftFingerprint: '' },
   onLoad(query) { this.setData({ jobId: query.jobId || '' }); },
   async loadData() {
     const selected = await selection(this, false), sid = selected.studentIds[0];
@@ -184,6 +184,17 @@ definePage({
     this.setData(this.jobPatch(job, selected)); return true;
   },
   async saveEdits() { await this.act(async () => { if (await this.persist()) toast('题目校对已保存'); }, '', false); },
+  async homeworkDraft() {
+    if (!this.data.selectedCount || this.data.busy) return;
+    const context = session.context();
+    await this.act(async () => {
+      if (!await this.persist()) return;
+      const ids = this.data.questions.filter(q => q.selected).map(q => q.id), fingerprint = JSON.stringify([this.data.jobId, ids, this.data.job.version]);
+      if (!this.data.draftRequest || this.data.draftFingerprint !== fingerprint) this.setData({ draftRequest: requestId(), draftFingerprint: fingerprint });
+      const draft = await api.request('POST', '/teaching-capture/jobs/' + this.data.jobId + '/homework-drafts', { expectedVersion: this.data.job.version, questionIds: ids, requestId: this.data.draftRequest });
+      if (session.isCurrentContext(context) && !this._unloaded) wx.navigateTo({ url: '/pages/homework-drafts/index?id=' + draft.id });
+    }, '', false);
+  },
   async importSelected() {
     if (!this.data.selectedCount || this.data.busy) return;
     const context = session.context();

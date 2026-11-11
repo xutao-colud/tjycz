@@ -1,6 +1,6 @@
 const api = require('../../utils/api');
 const format = require('../../utils/format');
-const { definePage } = require('../../utils/page');
+const { definePage, navigate } = require('../../utils/page');
 
 definePage({
   data: { students: [], classes: [], classNames: ['全部授权班级'], classIndex: 0, keyword: '' },
@@ -23,6 +23,6 @@ definePage({
     if (this.data.loading || this.data.error) return;
     const id = Number(event.currentTarget.dataset.id);
     if (!Number.isSafeInteger(id) || id <= 0 || !this.data.students.some(item => Number(item.id) === id)) return;
-    wx.navigateTo({ url: '/pages/student-detail/index?studentId=' + id + '&date=' + this.data.date });
+    navigate(this, '/pages/student-detail/index?studentId=' + id + '&date=' + this.data.date);
   }
 });

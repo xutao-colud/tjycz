@@ -2,7 +2,8 @@ const api = require('../../utils/api');
 const format = require('../../utils/format');
 const growth = require('../../utils/growth');
 const summaryReview = require('../../utils/summary-review');
-const { definePage } = require('../../utils/page');
+const childCharacter = require('../../utils/child-character');
+const { definePage, navigate } = require('../../utils/page');
 
 definePage({
   data: { student: null, homework: [], completed: 0, summary: null },
@@ -16,6 +17,7 @@ definePage({
     ]);
     if (!value.student || Number(value.student.id) !== studentId) throw new Error('该学生不存在或不在当前权限范围内，请返回学生名册');
     const student = Object.assign(format.decorate(value.student), {
+      characterSrc: childCharacter(value.student.gender),
       avatarUrl: value.student.avatar ? api.fileUrl(value.student.avatar) : '',
       avatarText: String(value.student.name || '学').slice(0, 1),
       arrival: value.student.checkInTime ? growth.clock(value.student.checkInTime) : '未签到',
@@ -30,11 +32,11 @@ definePage({
     const section = event.currentTarget.dataset.section;
     const page = { homework: 'homework', attendance: 'safety', summary: 'summaries' }[section];
     if (!page) return;
-    wx.navigateTo({ url: '/pages/' + page + '/index?studentId=' + this.data.student.id + '&date=' + this.data.date + (section === 'summary' && this.data.teacher ? '&quick=1' : '') });
+    navigate(this, '/pages/' + page + '/index?studentId=' + this.data.student.id + '&date=' + this.data.date + (section === 'summary' && this.data.teacher ? '&quick=1' : ''));
   },
   openHomework(event) {
     if (this.data.loading || this.data.error) return;
     const item = this.data.homework.find(row => String(row.id) === String(event.currentTarget.dataset.id));
-    if (item) wx.navigateTo({ url: '/pages/homework-detail/index?id=' + item.id });
+    if (item) navigate(this, '/pages/homework-detail/index?id=' + item.id);
   }
 });

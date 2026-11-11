@@ -1,0 +1,11 @@
+<view class="trend-card">
+  <view class="trend-head"><text class="trend-title">作业正确率与错题率</text><view class="trend-periods"><button class="{{days === 7 ? 'active' : ''}}" data-days="7" bindtap="period">7天</button><button class="{{days === 30 ? 'active' : ''}}" data-days="30" bindtap="period">30天</button></view></view>
+  <view class="trend-legend"><text class="correct">● 正确率</text><text class="incorrect">● 错题率</text></view>
+  <view wx:if="{{loading}}" class="trend-note">正在加载作业趋势…</view>
+  <button wx:elif="{{error}}" class="trend-note" bindtap="refresh">{{error}} · 点击重试</button>
+  <view wx:elif="{{!hasData}}" class="trend-note">这段时间暂无已批改作业</view>
+  <canvas wx:else class="trend-canvas" canvas-id="homework-trend" aria-label="每日作业正确率与错题率曲线" />
+  <view class="trend-note">按作业日期汇总已录入的正确率平均值；错题率 = 100% − 正确率。未批改日期留空。</view>
+  <button wx:if="{{points.length}}" class="trend-details-toggle" bindtap="toggleDetails">{{details ? '收起' : '查看'}}每日数值</button>
+  <view wx:if="{{details}}" wx:for="{{points}}" wx:key="date" class="trend-day"><text>{{item.date}}</text><text>{{item.accuracy === null ? '暂无批改' : '正确 ' + item.accuracy + '% · 错题 ' + item.errorRate + '%'}}</text></view>
+</view>

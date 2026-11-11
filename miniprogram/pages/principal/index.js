@@ -7,11 +7,12 @@ const affairs = [
   { title: '学生与班级', links: [['学生档案', 'students'], ['班级日报', 'class-reports']] },
   { title: '教师与安排', links: [['教师考勤', 'teacher-attendance'], ['班级工作台', 'workbench'], ['当日排课', 'principal', 'schedule']] },
   { title: '课时与费用', links: [['课时账户', 'lessons'], ['续费意向与订餐', 'family-services'], ['退款与审核', 'refunds']] },
-  { title: '统计与设置', links: [['校区总结', 'campus-reports'], ['校区设置', 'campuses'], ['运营统计', 'dashboard']] }
+  { title: '统计与设置', links: [['投诉与建议', 'complaints'], ['校区总结', 'campus-reports'], ['校区设置', 'campuses'], ['运营统计', 'dashboard']] }
 ];
 function todoUrl(row, date) {
   const student = 'date=' + (row.date || date) + '&studentId=' + row.studentId;
   return {
+    COMPLAINT: '/pages/complaints/index?id=' + row.id,
     SAFETY: '/pages/safety/index?view=pickups&' + student,
     FOLLOW_UP: '/pages/follow-ups/index?id=' + row.id,
     SUMMARY: '/pages/summaries/index?' + student,
@@ -31,7 +32,8 @@ definePage({
     const date = this.data.date;
     if (this.data.section === 'affairs') return {};
     if (this.data.section === 'schedule') return { schedules: await api.request('GET', '/schedules', { date }) };
-    const result = await api.principal({ date });
+    const [result, satisfaction] = await Promise.all([api.principal({ date }), date <= format.today() ? api.classSatisfaction({ date }) : Promise.resolve([])]);
+    result.classes = result.classes.map(row => Object.assign({}, row, { satisfaction: satisfaction.find(item => Number(item.classId) === Number(row.id)) || null }));
     const todos = result.todos.map(row => Object.assign({}, row, { key: row.kind + ':' + row.id, url: todoUrl(row, date) }));
     return { overview: Object.assign({}, result, {
       todos, attention: todos.filter(row => row.kind === 'SAFETY').concat(todos.filter(row => row.kind !== 'SAFETY').slice(0, 3)),

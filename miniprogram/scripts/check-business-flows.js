@@ -35,7 +35,7 @@ global.wx = {
   }
 };
 const definitions = {};
-for (const name of ['safety', 'pickup-authorization', 'workbench', 'attendance', 'class-reports', 'campus-reports', 'family-services', 'summaries', 'capture', 'rewards', 'lessons', 'mistakes', 'notifications', 'privacy']) {
+for (const name of ['safety', 'pickup-authorization', 'workbench', 'attendance', 'class-reports', 'campus-reports', 'family-services', 'summaries', 'capture', 'rewards', 'lessons', 'mistakes', 'notifications', 'privacy', 'scan', 'homework-drafts', 'complaints']) {
   require(path.join(root, 'pages', name, 'index.js'));
   definitions[name] = definition;
 }
@@ -66,6 +66,25 @@ function reset() {
   app.globalData.contextVersion++;
 }
 const cases = [
+  ['complaints preserve request identity after failure and block duplicate taps', async () => {
+    const p=mount('complaints',{teacher:false,studentId:101,title:'反馈',content:'具体情况',photos:[{id:7}]});let pending;
+    handler=(route,options)=>{pending=options;return null;};const first=p.submit();await flush();await p.submit();assert.equal(requests.length,1);const key=requests[0].body.requestId;
+    pending.fail({errMsg:'request:fail timeout'});await first;assert.equal(p.data.content,'具体情况');assert.equal(p.data.photos.length,1);
+    handler=()=>ok({id:54});await p.submit();assert.equal(requests[1].body.requestId,key);assert.equal(p.data.selectedId,54);assert.equal(p.data.photos.length,0);
+  }],
+  ['complaint supplement and internal note use separate actions and versions', async () => {
+    const p=mount('complaints',{teacher:false,detail:{id:54,version:2},reply:'补充反馈',actionNames:['补充反馈'],photos:[]});handler=()=>ok({id:54});await p.send();assert.equal(requests[0].body.action,'SUPPLEMENT');assert.equal(requests[0].body.expectedVersion,2);
+    const admin=mount('complaints',{detail:{id:54,version:3},reply:'内部处理',actionNames:['内部处理记录'],photos:[]});await admin.send();assert.equal(requests[1].body.action,'NOTE');assert.equal(requests[1].body.expectedVersion,3);
+  }],
+  ['scan creates a homework draft from selected questions without importing mistakes', async () => {
+    const p=mount('scan',{jobId:12,job:{id:12,version:4},selectedCount:1,questions:[{id:32,selected:true},{id:33,selected:false}],dirty:false});handler=()=>ok({id:7});await p.homeworkDraft();assert.equal(requests[0].route,'/teaching-capture/jobs/12/homework-drafts');assert.deepEqual(requests[0].body.questionIds,[32]);assert.equal(requests[0].body.expectedVersion,4);assert.match(navigation[0],/homework-drafts\/index\?id=7/);assert.equal(requests.some(r=>r.route.endsWith('/import')),false);
+  }],
+  ['homework draft assignment requires selection and explicit confirmation', async () => {
+    const p=mount('homework-drafts',{draft:{id:7,version:1,subject:'数学'},items:[{id:1,displayNumber:'3',title:'第三题',questionText:'题干'}],studentIds:[],taskDate:format.today()});await p.assign();assert.equal(requests.length,0);
+    p.setData({studentIds:[101]});modal=o=>o.success({confirm:false});await p.assign();assert.equal(requests.length,0);
+    modal=o=>o.success({confirm:true});handler=(route)=>route.endsWith('/assign')?ok({id:7,status:'ASSIGNED',taskIds:[9]}):ok({id:7,version:2,items:p.data.items});await p.assign();assert.equal(requests[0].method,'PATCH');assert.equal(requests[1].route,'/homework-drafts/7/assign');assert.deepEqual(requests[1].body,{expectedVersion:2,studentIds:[101],confirmed:true});
+  }],
+
   ['disabled guardian authorization cannot open a consent dialog or send a grant', async () => {
     const page = mount('privacy', { parent: true, studentId: 101, policy: { version: 'fixture', consentRequired: false } });
     await page.consent(event({ scope: 'MEDIA', grant: '1' }));
@@ -163,15 +182,16 @@ const cases = [
     await page.orderMeal(event({ ordered: 'no' })); assert.deepEqual(requests[0].body, { ordered: false, expectedVersion: 0 });
   }],
   ['dissatisfied daily feedback requires a reason and submits no numeric score', async () => {
-    const page = mount('summaries', { teacher: false, feedbackId: 81, satisfaction: 'DISSATISFIED', feedbackText: '  ' });
+    const page = mount('summaries', { teacher: false, feedbackStudentId: 101, satisfaction: 'DISSATISFIED', feedbackText: '  ' });
     await page.sendFeedback(); assert.equal(requests.length, 0); assert.ok(toasts.some(text => /原因/.test(text)));
     page.setData({ feedbackText: ' 希望补充学习进展 ' }); await page.sendFeedback();
-    assert.deepEqual(requests[0].body, { satisfaction: 'DISSATISFIED', text: '希望补充学习进展' });
+    assert.deepEqual(requests[0].body, { date: format.today(), satisfaction: 'DISSATISFIED', text: '希望补充学习进展' });
+    assert.equal(requests[0].route, '/students/101/daily-feedback'); assert.equal(requests[0].method, 'PUT');
     assert.ok(!('rating' in requests[0].body));
   }],
   ['satisfied daily feedback allows a blank reason', async () => {
-    const page = mount('summaries', { teacher: false, feedbackId: 81, satisfaction: 'SATISFIED', feedbackText: '' });
-    await page.sendFeedback(); assert.deepEqual(requests[0].body, { satisfaction: 'SATISFIED', text: '' });
+    const page = mount('summaries', { teacher: false, feedbackStudentId: 101, satisfaction: 'SATISFIED', feedbackText: '' });
+    await page.sendFeedback(); assert.deepEqual(requests[0].body, { date: format.today(), satisfaction: 'SATISFIED', text: '' });
   }],
 
   ['campus summaries save the selected campus and original version', async () => {
@@ -515,12 +535,33 @@ cases.push(
     handler = () => ok({ id: 10 }); await page.grant(); const body = requests.at(-1).body; assert.equal(body.requestId, first); assert.equal(body.courseId, 34); assert.equal(body.units, 2.5); assert.equal(body.studentId, 101); assert.equal(body.reason, '补充课时');
   }],
   ['preset awards post rule identity instead of a client amount', async () => {
-    const page = mount('rewards', { child: { id: 101, name: '虚构学生' }, presets: [{ id: 81, name: '主动思考', points: 3 }], presetIndex: 1 }); handler = () => ok({ id: 1 }); await page.award(); assert.equal(requests[0].route, '/point-awards'); assert.equal(requests[0].body.presetId, 81); assert.equal(requests[0].body.studentId, 101); assert.equal('amount' in requests[0].body, false);
+    const page = mount('rewards', { child: { id: 101, name: '虚构学生' }, presets: [{ id: 81, name: '主动思考', points: 3, experience: 12 }], presetIndex: 1 }); handler = () => ok({ id: 1 }); await page.award(); assert.equal(requests[0].route, '/point-awards'); assert.equal(requests[0].body.presetId, 81); assert.equal(requests[0].body.studentId, 101); assert.equal('amount' in requests[0].body, false); assert.equal('experience' in requests[0].body, false);
   }],
   ['prize redemption submits version and evidence, preserving both after failure', async () => {
-    const page = mount('rewards', { child: { id: 101, name: '虚构学生' }, prizes: [{ id: 82, name: '文具', pointsCost: 3, version: 4 }], receipt: { id: 903 } });
+    const page = mount('rewards', { child: { id: 101, name: '虚构学生' }, prizes: [{ id: 82, name: '文具', pointsCost: 3, version: 4, canRedeem: true, requiredLevel: 2 }], receipt: { id: 903 } });
     handler = () => ({ statusCode: 409, data: { message: '库存已变化' } }); await page.redeem(event({ id: 82 })); const first = requests[0].body; assert.equal(first.expectedVersion, 4); assert.deepEqual(first.attachmentIds, [903]); assert.equal(page.data.receipt.id, 903);
     handler = () => ok({ id: 2 }); await page.redeem(event({ id: 82 })); assert.equal(requests[1].body.requestId, first.requestId); assert.equal(page.data.receipt, null);
+  }],
+  ['locked gifts cannot open redemption or send a request despite sufficient local points', async () => {
+    const page = mount('rewards', { child: { id: 101, points: 1000 }, prizes: [{ id: 82, pointsCost: 3, canRedeem: false, redemptionHint: 'Lv.3 解锁' }] });
+    await page.redeem(event({ id: 82 })); assert.equal(requests.length, 0);
+  }],
+  ['reward editors submit independent experience and level requirements and reject invalid values', async () => {
+    handler = () => ok({ id: 1 });
+    const page = mount('rewards', { configCampusId: 1, presetName: '主动思考', presetPoints: '3', presetExperience: '12' });
+    await page.savePreset(); assert.equal(requests[0].body.points, 3); assert.equal(requests[0].body.experience, 12);
+    requests = []; page.data.presetExperience = ''; await page.savePreset(); assert.equal(requests.length, 0);
+    page.data.presetExperience = '0'; await page.savePreset(); assert.equal(requests[0].body.experience, 0);
+    requests = []; Object.assign(page.data, { prizeName: '礼品', pointsCost: '20', stock: '5', requiredLevel: '3' });
+    await page.savePrize(); assert.equal(requests[0].body.requiredLevel, 3); assert.equal(requests[0].body.pointsCost, 20);
+    for (const level of ['', '0', '2.5', '1001']) { requests = []; page.data.requiredLevel = level; await page.savePrize(); assert.equal(requests.length, 0); }
+  }],
+  ['only the super administrator submits automatic point and experience rules', async () => {
+    handler = () => ok({});
+    const page = mount('rewards', { superAdmin: false, automaticRules: [{ event: 'FITNESS', points: '5' }], learningExperience: '15', fitnessExperience: '8' });
+    await page.saveRules(); assert.equal(requests.length, 0);
+    page.data.superAdmin = true; await page.saveRules(); assert.deepEqual(requests[0].body, { pointsRules: [{ event: 'FITNESS', points: 5 }], experienceRules: [{ category: 'LEARNING', experience: 15 }, { category: 'FITNESS', experience: 8 }] });
+    requests = []; page.data.fitnessExperience = ''; await page.saveRules(); assert.equal(requests.length, 0);
   }],
   ['print books use the visible selected questions and refresh private access before opening PDF', async () => {
     const download = wx.downloadFile, open = wx.openDocument; let downloaded, opened;

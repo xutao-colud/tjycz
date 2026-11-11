@@ -1,12 +1,12 @@
 <app-nav />
-<view class="page">
+<view class="{{user.role === 'PARENT' ? 'parent-view' : ''}} {{reducedMotion ? 'reduce-motion' : ''}} {{!loading ? 'parent-ready' : ''}} page">
   <view class="hero mistakes-hero">
     <view>
       <view class="eyebrow">积累与掌握</view>
       <view class="title">错题成长本</view>
       <view class="subtitle">把每一道错题，变成下一次进步</view>
     </view>
-    <image class="hero-icon" src="/assets/icons/mistakes.png" mode="aspectFit" />
+    <image class="hero-icon" src="/assets/icons/mistakes.svg" mode="aspectFit" />
   </view>
 
   <view class="card mistakes-filter">
@@ -35,9 +35,9 @@
   <view hidden="{{loading || error}}">
     <student-picker students="{{students}}" selected="{{studentIds}}" title="{{teacher ? '选择学生' : '选择孩子'}}" bindchange="pickStudents" />
 
-    <view class="card create-entry" bindtap="toggleCreate">
+    <view class="card create-entry" bindtap="toggleCreate" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'none'}}" hover-stay-time="80">
       <view class="create-entry-main">
-        <view class="create-icon"><image src="/assets/icons/upload.png" mode="aspectFit" /></view>
+        <view class="create-icon"><image src="/assets/icons/upload.svg" mode="aspectFit" /></view>
         <view>
           <view class="create-entry-title">记录一道错题</view>
           <view class="create-entry-subtitle">拍照或文字，留住学习的重点</view>
@@ -73,15 +73,15 @@
       </view>
       <media-field bindchange="media" binduploading="uploadState" reset-key="{{mediaReset}}" disabled="{{busy}}" />
       <view wx:if="{{actionError}}" class="error">{{actionError}}</view>
-      <button class="primary gap" bindtap="create" loading="{{busy}}" disabled="{{busy || uploading || !studentIds.length}}">保存错题</button>
+      <button class="primary gap" bindtap="create" loading="{{busy}}" disabled="{{busy || uploading || !studentIds.length}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">保存错题</button>
     </view>
 
-    <view class="card"><view class="actions"><button wx:if="{{teacher}}" class="secondary" bindtap="capture" disabled="{{busy || !studentIds.length}}">拍照录题</button><button class="primary" bindtap="printBook" disabled="{{busy || !items.length}}">生成打印本</button></view><button wx:if="{{book}}" class="text-button gap" bindtap="openBook" disabled="{{busy}}">打开PDF，保存或打印 ›</button></view>
+    <view class="card"><view class="actions"><button wx:if="{{teacher}}" class="secondary" bindtap="capture" disabled="{{busy || !studentIds.length}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">拍照录题</button><button class="primary" bindtap="printBook" disabled="{{busy || !items.length}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">生成打印本</button></view><button wx:if="{{book}}" class="text-button gap" bindtap="openBook" disabled="{{busy}}" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'button-hover'}}" hover-stay-time="{{user.role === 'PARENT' ? 80 : 400}}">打开PDF，保存或打印 ›</button></view>
     <view class="section-head mistake-list-head">
       <text class="section-title">我的错题</text>
       <text class="hint">共 {{items.length}} 道</text>
     </view>
-    <view wx:for="{{items}}" wx:key="id" class="card mistake-card" data-id="{{item.id}}" bindtap="open">
+    <view wx:for="{{items}}" wx:key="id" class="card mistake-card" data-id="{{item.id}}" bindtap="open" hover-class="{{user.role === 'PARENT' ? 'parent-pressed' : 'none'}}" hover-stay-time="80">
       <view class="mistake-top">
         <view class="subject-icon subject-{{item.subjectTone}}">{{item.subjectIcon}}</view>
         <view class="mistake-subject">

@@ -23,7 +23,7 @@ for (const [name, route] of Object.entries(app.usingComponents)) {
   for (const ext of ['.js', '.wxml', '.wxss', '.json']) assert(fs.existsSync(path.join(root, local + ext)), name + ' 缺少 ' + ext);
   assert(JSON.parse(fs.readFileSync(path.join(root, local + '.json'), 'utf8')).component, name + ' 未声明component');
 }
-const knownTags = new Set(['view', 'text', 'button', 'input', 'textarea', 'picker', 'block', 'image', 'scroll-view', 'progress', 'slot', 'switch', 'checkbox'].concat(Object.keys(app.usingComponents)));
+const knownTags = new Set(['view', 'text', 'button', 'input', 'textarea', 'picker', 'block', 'image', 'scroll-view', 'progress', 'slot', 'switch', 'checkbox', 'canvas'].concat(Object.keys(app.usingComponents)));
 let templates = 0;
 for (const file of files.filter(name => name.endsWith('.wxml'))) {
   const content = fs.readFileSync(file, 'utf8');
